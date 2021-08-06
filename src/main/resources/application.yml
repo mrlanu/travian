@@ -1,0 +1,11 @@
+spring:
+  devtools:
+    restart:
+      enabled: true
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      username: mrlanu
+      password: mrlanu
+      database: travian
