@@ -5,10 +5,7 @@ import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.services.VillageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/villages")
@@ -18,6 +15,12 @@ public class VillageController {
     public VillageController(VillageService villageService) {
         this.villageService = villageService;
     }
+
+    @GetMapping("/{villageId}")
+    public VillageEntity getVillageById(@PathVariable String villageId){
+        return villageService.getVillageById(villageId);
+    }
+
 
     @PostMapping("/create-new-village")
     public ResponseEntity<String> newVillage(@RequestBody NewVillageRequest newVillageRequest){

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 
@@ -15,8 +16,8 @@ public class Field {
     private int position;
     private Resource fieldType;
     private int level;
-    private int production;
-    private Map<Resource, Integer> resourcesToNextLevel;
+    private BigDecimal production;
+    private Map<Resource, BigDecimal> resourcesToNextLevel;
     private boolean underUpgrade;
     private boolean ableToUpgrade;
 }

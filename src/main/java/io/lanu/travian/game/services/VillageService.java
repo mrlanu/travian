@@ -5,4 +5,6 @@ import io.lanu.travian.game.models.requests.NewVillageRequest;
 
 public interface VillageService {
     VillageEntity createVillage(NewVillageRequest newVillageRequest);
+
+    VillageEntity getVillageById(String villageId);
 }

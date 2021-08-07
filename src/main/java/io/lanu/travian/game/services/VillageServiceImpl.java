@@ -32,4 +32,13 @@ public class VillageServiceImpl implements VillageService{
         VillageEntity newVillage = modelMapper.map(villageTemplate, VillageEntity.class);
         return villageRepo.save(newVillage);
     }
+
+    @Override
+    public VillageEntity getVillageById(String villageId) {
+        VillageEntity village = villageRepo.findById(villageId).get();
+        VillageGeneratorFacade facade = new VillageGeneratorFacade(village);
+        facade.generateVillage();
+        return villageRepo.save(village);
+    }
+
 }
