@@ -41,10 +41,11 @@ public class VillageTemplate {
         sumProducePerHour();
     }
 
-    private void sumProducePerHour(){
+    public void sumProducePerHour(){
          producePerHour = fields.stream()
                 .collect(Collectors.groupingBy(Field::getFieldType,
                         Collectors.reducing(BigDecimal.ZERO, Field::getProduction, BigDecimal::add)));
+         String huy = null;
     }
 }
 

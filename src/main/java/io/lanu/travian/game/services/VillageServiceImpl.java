@@ -3,7 +3,7 @@ package io.lanu.travian.game.services;
 import io.lanu.travian.enums.VillageType;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
-import io.lanu.travian.game.repositories.VillageRepo;
+import io.lanu.travian.game.repositories.VillageRepository;
 import io.lanu.travian.templates.entities.VillageTemplate;
 import io.lanu.travian.templates.repositories.VillageTemplatesRepo;
 import org.modelmapper.ModelMapper;
@@ -11,13 +11,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class VillageServiceImpl implements VillageService{
-    private final VillageRepo villageRepo;
+    private final VillageRepository villageRepository;
     private final VillageTemplatesRepo villageTemplatesRepo;
+    private final VillageGeneratorFacade facade;
     private final ModelMapper modelMapper;
 
-    public VillageServiceImpl(VillageRepo villageRepo, VillageTemplatesRepo villageTemplatesRepo, ModelMapper modelMapper) {
-        this.villageRepo = villageRepo;
+    public VillageServiceImpl(VillageRepository villageRepository, VillageTemplatesRepo villageTemplatesRepo, VillageGeneratorFacade facade, ModelMapper modelMapper) {
+        this.villageRepository = villageRepository;
         this.villageTemplatesRepo = villageTemplatesRepo;
+        this.facade = facade;
         this.modelMapper = modelMapper;
     }
 
@@ -30,15 +32,14 @@ public class VillageServiceImpl implements VillageService{
         villageTemplate.setPopulation(100);
         villageTemplate.setCulture(0);
         VillageEntity newVillage = modelMapper.map(villageTemplate, VillageEntity.class);
-        return villageRepo.save(newVillage);
+        return villageRepository.save(newVillage);
     }
 
     @Override
     public VillageEntity getVillageById(String villageId) {
-        VillageEntity village = villageRepo.findById(villageId).get();
-        VillageGeneratorFacade facade = new VillageGeneratorFacade(village);
-        facade.generateVillage();
-        return villageRepo.save(village);
+        VillageEntity village = villageRepository.findById(villageId).get();
+        facade.generateVillage(village);
+        return villageRepository.save(village);
     }
 
 }

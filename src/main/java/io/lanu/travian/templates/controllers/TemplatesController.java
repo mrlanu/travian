@@ -25,6 +25,7 @@ public class TemplatesController {
 
     @PostMapping("/create-village")
     public ResponseEntity<String> createVillage(@RequestBody VillageTemplate villageTemplate){
+        villageTemplate.sumProducePerHour();
         villageTemplatesRepo.save(villageTemplate);
         return ResponseEntity.status(HttpStatus.OK).body("New Village template has been created");
     }

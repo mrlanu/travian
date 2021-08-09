@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 @Document("fields-templates")
@@ -17,7 +18,7 @@ public class FieldTemplate {
     private Resource fieldType;
     private int level;
     private int production;
-    private Map<Resource, Integer> resourcesToNextLevel;
+    private Map<Resource, BigDecimal> resourcesToNextLevel;
     private boolean underUpgrade;
     private boolean ableToUpgrade;
 }
