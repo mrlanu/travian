@@ -5,14 +5,13 @@ import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.Event;
 import io.lanu.travian.game.entities.events.FieldUpgradeEvent;
 import io.lanu.travian.game.models.Field;
-import io.lanu.travian.game.models.requests.FieldUpgradeRequest;
 import io.lanu.travian.game.repositories.EventRepository;
 import io.lanu.travian.game.repositories.VillageRepository;
 import io.lanu.travian.templates.entities.FieldTemplate;
 import io.lanu.travian.templates.repositories.FieldTemplatesRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.SerializationUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -37,9 +36,13 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public Event createFieldUpgradeEvent(FieldUpgradeRequest fieldUpgradeRequest) {
-        VillageEntity village = villageRepository.findById(fieldUpgradeRequest.getVillageId()).get();
-        Field oldField = village.getFields().get(fieldUpgradeRequest.getFieldPosition());
+    public Event createFieldUpgradeEvent(String villageId, Integer fieldPosition) {
+
+        VillageEntity village = villageRepository.findById(villageId)
+                .orElseThrow(() -> new IllegalStateException(String
+                        .format("Village with id - %s is not exist.", villageId)));
+
+        Field oldField = village.getFields().get(fieldPosition);
         oldField.setUnderUpgrade(true);
         FieldTemplate template = fieldTemplatesRepository
                 .findByFieldTypeAndLevel(oldField.getFieldType(), oldField.getLevel() + 1);

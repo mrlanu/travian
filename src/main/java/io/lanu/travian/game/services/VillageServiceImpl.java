@@ -9,6 +9,8 @@ import io.lanu.travian.templates.repositories.VillageTemplatesRepo;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class VillageServiceImpl implements VillageService{
     private final VillageRepository villageRepository;
@@ -37,7 +39,9 @@ public class VillageServiceImpl implements VillageService{
 
     @Override
     public VillageEntity getVillageById(String villageId) {
-        VillageEntity village = villageRepository.findById(villageId).get();
+        VillageEntity village = villageRepository.findById(villageId)
+                .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
+
         facade.generateVillage(village);
         return villageRepository.save(village);
     }
