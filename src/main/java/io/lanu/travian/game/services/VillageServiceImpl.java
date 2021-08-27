@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,6 +48,7 @@ public class VillageServiceImpl implements VillageService{
         villageTemplate.setPopulation(100);
         villageTemplate.setCulture(0);
         VillageEntity newVillage = modelMapper.map(villageTemplate, VillageEntity.class);
+        newVillage.setEventsList(new ArrayList<>());
         return villageRepository.save(newVillage);
     }
 
@@ -62,7 +64,7 @@ public class VillageServiceImpl implements VillageService{
 
         VillageEntityWrapper villageEntityWrapper = new VillageEntityWrapper(villageEntity);
 
-        List<Event> eventList = this.eventService.findAllByVillageId(villageEntity.getVillageId())
+        List<Event> completedEvents = this.eventService.findAllByVillageId(villageEntity.getVillageId())
                 .stream()
                 .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
                 .sorted(Comparator.comparing(Event::getExecutionTime))
@@ -71,7 +73,7 @@ public class VillageServiceImpl implements VillageService{
         LocalDateTime modified = villageEntity.getModified();
 
         // iterate over all events and execute them
-        for (Event event : eventList) {
+        for (Event event : completedEvents) {
             var cropPerHour = villageEntity.getProducePerHour().get(Resource.CROP);
 
             // if crop in the village is less than 0 keep create the death event & execute them until the crop will be positive
@@ -101,6 +103,9 @@ public class VillageServiceImpl implements VillageService{
 
         /*villageEntity.setProducePerHour(sumProducePerHour());*/
         villageEntityWrapper.calculateProducedGoods(villageEntity.getModified(), LocalDateTime.now());
+
+        List<Event> allEvents = eventService.findAllByVillageId(villageEntity.getVillageId());
+        villageEntityWrapper.addEventsView(allEvents);
     }
 
 }

@@ -3,13 +3,19 @@ package io.lanu.travian.game.models;
 import io.lanu.travian.enums.Manipulation;
 import io.lanu.travian.enums.Resource;
 import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.events.Event;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.springframework.boot.convert.DurationFormat;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class VillageEntityWrapper {
@@ -63,5 +69,14 @@ public class VillageEntityWrapper {
         } else {
             storage.forEach((k, v) -> storage.put(k, storage.get(k).subtract(goods.get(k))));
         }
+    }
+
+    public void addEventsView(List<Event> eventList){
+        List<EventView> events = eventList.stream()
+                .map(event -> new EventView(String.format("%s field upgrade", event.getType()), event.getExecutionTime(),
+                        DurationFormatUtils.formatDuration(Duration.between(LocalDateTime.now(),
+                                event.getExecutionTime()).toMillis(), "H:mm:ss", true)))
+                .collect(Collectors.toList());
+        this.villageEntity.setEventsList(events);
     }
 }

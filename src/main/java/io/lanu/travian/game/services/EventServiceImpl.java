@@ -5,6 +5,7 @@ import io.lanu.travian.enums.Resource;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.Event;
 import io.lanu.travian.game.entities.events.FieldUpgradeEvent;
+import io.lanu.travian.game.models.EventView;
 import io.lanu.travian.game.models.Field;
 import io.lanu.travian.game.models.VillageEntityWrapper;
 import io.lanu.travian.game.repositories.EventRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
