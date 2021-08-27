@@ -1,10 +1,12 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.enums.Manipulation;
 import io.lanu.travian.enums.Resource;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.Event;
 import io.lanu.travian.game.entities.events.FieldUpgradeEvent;
 import io.lanu.travian.game.models.Field;
+import io.lanu.travian.game.models.VillageEntityWrapper;
 import io.lanu.travian.game.repositories.EventRepository;
 import io.lanu.travian.game.repositories.VillageRepository;
 import io.lanu.travian.templates.entities.FieldTemplate;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -31,38 +34,43 @@ public class EventServiceImpl implements EventService{
         this.villageRepository = villageRepository;
         this.eventRepository = eventRepository;
         this.fieldTemplatesRepository = fieldTemplatesRepository;
-
         this.modelMapper = modelMapper;
     }
 
     @Override
     public Event createFieldUpgradeEvent(String villageId, Integer fieldPosition) {
 
-        VillageEntity village = villageRepository.findById(villageId)
+        VillageEntity villageEntity = villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String
                         .format("Village with id - %s is not exist.", villageId)));
 
-        Field oldField = village.getFields().get(fieldPosition);
+        VillageEntityWrapper villageEntityWrapper = new VillageEntityWrapper(villageEntity);
+
+        Field oldField = villageEntity.getFields().get(fieldPosition);
         oldField.setUnderUpgrade(true);
-        FieldTemplate template = fieldTemplatesRepository
+        FieldTemplate template = this.fieldTemplatesRepository
                 .findByFieldTypeAndLevel(oldField.getFieldType(), oldField.getLevel() + 1);
-        Field newField = modelMapper.map(template, Field.class);
+        Field newField = this.modelMapper.map(template, Field.class);
         newField.setPosition(oldField.getPosition());
         LocalDateTime executionTime = LocalDateTime.now()
                 .plusSeconds(oldField.getResourcesToNextLevel().get(Resource.TIME).longValue());
 
-        //here should be implemented functionality for payment for the field upgrade
+        villageEntityWrapper.manipulateGoods(Manipulation.SUBTRACT, oldField.getResourcesToNextLevel());
 
-        FieldUpgradeEvent event = new FieldUpgradeEvent(executionTime, village.getVillageId(), newField, oldField, false);
+        FieldUpgradeEvent event = new FieldUpgradeEvent(executionTime, villageEntity.getVillageId(), newField, oldField);
 
-        subtractGoods(village, oldField.getResourcesToNextLevel());
-        villageRepository.save(village);
+        this.villageRepository.save(villageEntity);
 
-        return eventRepository.save(event);
+        return this.eventRepository.save(event);
     }
 
-    private void subtractGoods(VillageEntity villageEntity, Map<Resource, BigDecimal> payedGoods){
-        var storage = villageEntity.getStorage();
-        storage.forEach((k, v) -> storage.put(k, storage.get(k).subtract(payedGoods.get(k))));
+    @Override
+    public List<Event> findAllByVillageId(String villageId) {
+        return eventRepository.findAllByVillageId(villageId);
+    }
+
+    @Override
+    public void deleteByEventId(String eventId) {
+        eventRepository.deleteByEventId(eventId);
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.lanu.travian.enums.EventsType;
 import io.lanu.travian.enums.Resource;
 import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.models.VillageEntityWrapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,7 @@ import java.util.function.Consumer;
 })
 @Document("events")
 @TypeAlias("events")
-public abstract class Event implements Consumer<VillageEntity> {
+public abstract class Event implements Consumer<VillageEntityWrapper> {
 
     @Id
     private String eventId;
@@ -42,10 +43,5 @@ public abstract class Event implements Consumer<VillageEntity> {
     public Event(EventsType type, LocalDateTime executionTime) {
         this.type = type;
         this.executionTime = executionTime;
-    }
-
-    void addGoodToProducePerHour(VillageEntity villageEntity, Resource resourceType, BigDecimal amount){
-        var producePerHour = villageEntity.getProducePerHour();
-        producePerHour.put(resourceType, producePerHour.get(resourceType).add(amount));
     }
 }
