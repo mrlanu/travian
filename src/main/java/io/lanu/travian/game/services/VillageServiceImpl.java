@@ -9,6 +9,8 @@ import io.lanu.travian.game.models.VillageEntityWrapper;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.repositories.VillageRepository;
 import io.lanu.travian.templates.entities.VillageTemplate;
+import io.lanu.travian.templates.entities.buildings.BuildingBase;
+import io.lanu.travian.templates.entities.buildings.MainBuilding;
 import io.lanu.travian.templates.repositories.VillageTemplatesRepo;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,7 +52,19 @@ public class VillageServiceImpl implements VillageService{
         villageTemplate.setCulture(0);
         VillageEntity newVillage = modelMapper.map(villageTemplate, VillageEntity.class);
         newVillage.setEventsList(new ArrayList<>());
+        var defaultBuildings = createDefaultBuildings();
+        newVillage.setBuildings(defaultBuildings);
         return villageRepository.save(newVillage);
+    }
+
+    private Map<Integer, BuildingBase> createDefaultBuildings(){
+        return Map.of(0, new MainBuilding(1, 0, Map.of(
+                        Resource.CROP, BigDecimal.valueOf(25),
+                        Resource.CLAY, BigDecimal.valueOf(50),
+                        Resource.IRON, BigDecimal.valueOf(75),
+                        Resource.WOOD, BigDecimal.valueOf(90),
+                        Resource.TIME, BigDecimal.valueOf(71440)),
+                100));
     }
 
     @Override

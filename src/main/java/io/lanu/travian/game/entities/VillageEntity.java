@@ -4,6 +4,7 @@ import io.lanu.travian.enums.Resource;
 import io.lanu.travian.enums.VillageType;
 import io.lanu.travian.game.models.EventView;
 import io.lanu.travian.game.models.Field;
+import io.lanu.travian.templates.entities.buildings.BuildingBase;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,7 @@ public class VillageEntity {
     private int population;
     private int culture;
     private List<Field> fields;
-    private Map<Integer, String> buildings;
+    private Map<Integer, BuildingBase> buildings;
     private Map<Resource, BigDecimal> storage;
     private Map<Resource, BigDecimal> producePerHour;
     private List<EventView> eventsList;

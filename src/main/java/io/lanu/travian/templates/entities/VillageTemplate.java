@@ -4,6 +4,7 @@ package io.lanu.travian.templates.entities;
 import io.lanu.travian.enums.Resource;
 import io.lanu.travian.game.models.Field;
 import io.lanu.travian.enums.VillageType;
+import io.lanu.travian.templates.entities.buildings.BuildingBase;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,24 +29,22 @@ public class VillageTemplate {
     private int population;
     private int culture;
     private List<Field> fields;
-    private Map<Integer, String> buildings;
+    private Map<Integer, BuildingBase> buildings;
     private Map<Resource, BigDecimal> storage;
     private Map<Resource, BigDecimal> producePerHour;
 
-    public VillageTemplate(VillageType villageType, List<Field> fields, Map<Integer, String> buildings,
+    public VillageTemplate(VillageType villageType, List<Field> fields, Map<Integer, BuildingBase> buildings,
                            Map<Resource, BigDecimal> storage) {
         this.villageType = villageType;
         this.fields = fields;
         this.buildings = buildings;
         this.storage = storage;
-        sumProducePerHour();
     }
 
     public void sumProducePerHour(){
          producePerHour = fields.stream()
                 .collect(Collectors.groupingBy(Field::getFieldType,
                         Collectors.reducing(BigDecimal.ZERO, Field::getProduction, BigDecimal::add)));
-         String huy = null;
     }
 }
 
