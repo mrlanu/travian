@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
@@ -17,8 +18,9 @@ public class BarrackBuilding extends BuildingBase {
 
     public BarrackBuilding(int level, int position,
                            Map<Resource, BigDecimal> resourcesToNextLevel,
+                           List<RequirementBuilding> requirementBuildings,
                            Integer timeReduction) {
-        super(BuildingType.BARRACK, level, position, resourcesToNextLevel);
+        super(BuildingType.BARRACK, level, position, resourcesToNextLevel, requirementBuildings);
         this.timeReduction = timeReduction;
     }
 }

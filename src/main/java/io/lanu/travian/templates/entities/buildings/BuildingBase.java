@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 @NoArgsConstructor
@@ -18,13 +19,16 @@ public class BuildingBase {
     protected int level;
     protected int position;
     protected Map<Resource, BigDecimal> resourcesToNextLevel;
+    protected List<RequirementBuilding> requirementBuildings;
 
     public BuildingBase(BuildingType buildingType,
                         int level, int position,
-                        Map<Resource, BigDecimal> resourcesToNextLevel) {
+                        Map<Resource, BigDecimal> resourcesToNextLevel,
+                        List<RequirementBuilding> requirementBuildings) {
         this.buildingType = buildingType;
         this.level = level;
         this.position = position;
         this.resourcesToNextLevel = resourcesToNextLevel;
+        this.requirementBuildings = requirementBuildings;
     }
 }

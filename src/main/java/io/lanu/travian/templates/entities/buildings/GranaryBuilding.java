@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
@@ -17,8 +18,9 @@ public class GranaryBuilding extends BuildingBase {
 
     public GranaryBuilding(int level, int position,
                            Map<Resource, BigDecimal> resourcesToNextLevel,
+                           List<RequirementBuilding> requirementBuildings,
                            Integer capacity) {
-        super(BuildingType.GRANARY, level, position, resourcesToNextLevel);
+        super(BuildingType.GRANARY, level, position, resourcesToNextLevel, requirementBuildings);
         this.capacity = capacity;
     }
 

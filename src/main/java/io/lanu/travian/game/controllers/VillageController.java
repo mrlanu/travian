@@ -2,6 +2,7 @@ package io.lanu.travian.game.controllers;
 
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.Event;
+import io.lanu.travian.game.models.requests.BuildingRequest;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.services.EventService;
 import io.lanu.travian.game.services.VillageService;
@@ -10,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/villages")
+@RequestMapping("/api/villages")
 public class VillageController {
     private final VillageService villageService;
     private final EventService eventService;
@@ -32,7 +33,15 @@ public class VillageController {
         return ResponseEntity.status(HttpStatus.OK).body("New Village ID : " + villageEntity.getVillageId());
     }
 
-    @GetMapping("/{villageId}/fields/{fieldPosition}/upgrade")
+    @PostMapping("/{villageId}/buildings/{buildingPosition}/new")
+    public ResponseEntity<String> bewBuilding(@PathVariable String villageId,
+                                              @PathVariable Integer buildingPosition,
+                                              @RequestBody BuildingRequest buildingRequest){
+        Event event = eventService.createBuildingNewEvent(villageId, buildingPosition, buildingRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(event.getEventId());
+    }
+
+    @PutMapping("/{villageId}/fields/{fieldPosition}/upgrade")
     public ResponseEntity<String> upgradeField(@PathVariable String villageId, @PathVariable Integer fieldPosition){
         Event event = eventService.createFieldUpgradeEvent(villageId, fieldPosition);
         return ResponseEntity.status(HttpStatus.OK).body("New Event ID : " + event.getEventId());

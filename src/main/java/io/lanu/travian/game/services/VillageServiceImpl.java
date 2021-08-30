@@ -64,6 +64,7 @@ public class VillageServiceImpl implements VillageService{
                         Resource.IRON, BigDecimal.valueOf(75),
                         Resource.WOOD, BigDecimal.valueOf(90),
                         Resource.TIME, BigDecimal.valueOf(71440)),
+                List.of(),
                 100));
     }
 
