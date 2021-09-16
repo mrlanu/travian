@@ -15,6 +15,7 @@ mongo-travian:
     - 27017:27017
   volumes:
     - ./mongo-init/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+    - ~/development/MyProjects/volumes/travian/mongo/data:/data/db
 
 mongo-express-oauth:
   image: mongo-express:0.49
