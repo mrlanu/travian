@@ -2,7 +2,7 @@ package io.lanu.travian.game.entities.events;
 
 import io.lanu.travian.enums.EventsType;
 import io.lanu.travian.game.models.VillageEntityWrapper;
-import io.lanu.travian.templates.entities.buildings.BuildingBase;
+import io.lanu.travian.templates.buildings.BuildingBase;
 
 import java.time.LocalDateTime;
 

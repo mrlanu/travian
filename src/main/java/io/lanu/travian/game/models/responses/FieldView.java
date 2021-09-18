@@ -1,24 +1,22 @@
-package io.lanu.travian.templates.entities;
+package io.lanu.travian.game.models.responses;
 
 import io.lanu.travian.enums.Resource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
-import java.util.Map;
+import java.util.List;
 
-@Document("fields-templates")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FieldTemplate {
-    private int position;
+@Data
+public class FieldView {
     private Resource fieldType;
     private int level;
-    private int production;
-    private Map<Resource, BigDecimal> resourcesToNextLevel;
+    private BigDecimal production;
+    private List<Long> resourcesToNextLevel;
+    private long timeToNextLevel;
     private boolean underUpgrade;
     private boolean ableToUpgrade;
 }

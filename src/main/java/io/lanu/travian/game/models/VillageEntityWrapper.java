@@ -4,9 +4,9 @@ import io.lanu.travian.enums.Manipulation;
 import io.lanu.travian.enums.Resource;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.Event;
+import io.lanu.travian.game.models.responses.EventView;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.springframework.boot.convert.DurationFormat;
 
 import java.math.BigDecimal;
 import java.math.MathContext;

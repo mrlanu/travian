@@ -1,4 +1,4 @@
-package io.lanu.travian.game.models;
+package io.lanu.travian.game.models.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

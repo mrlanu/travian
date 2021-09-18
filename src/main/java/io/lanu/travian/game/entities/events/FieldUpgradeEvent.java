@@ -31,7 +31,7 @@ public class FieldUpgradeEvent extends Event {
 
     @Override
     public void accept(VillageEntityWrapper villageEntityWrapper) {
-        villageEntityWrapper.getVillageEntity().getFields().set(fieldNew.getPosition(), fieldNew);
-        villageEntityWrapper.addGoodToProducePerHour(fieldNew.getFieldType(), fieldNew.getProduction().subtract(fieldOld.getProduction()));
+        //villageEntityWrapper.getVillageEntity().getFields().set(fieldNew.getPosition(), fieldNew);
+        //villageEntityWrapper.addGoodToProducePerHour(fieldNew.getFieldType(), fieldNew.getProduction().subtract(fieldOld.getProduction()));
     }
 }

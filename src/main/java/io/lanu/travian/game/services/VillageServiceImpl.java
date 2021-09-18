@@ -1,18 +1,16 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.enums.BuildingType;
 import io.lanu.travian.enums.Resource;
 import io.lanu.travian.enums.VillageType;
+import io.lanu.travian.game.entities.BuildingEntity;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.DeathEvent;
 import io.lanu.travian.game.entities.events.Event;
 import io.lanu.travian.game.models.VillageEntityWrapper;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.repositories.VillageRepository;
-import io.lanu.travian.templates.entities.VillageTemplate;
-import io.lanu.travian.templates.entities.buildings.BuildingBase;
-import io.lanu.travian.templates.entities.buildings.MainBuilding;
-import io.lanu.travian.templates.repositories.VillageTemplatesRepo;
-import org.modelmapper.ModelMapper;
+import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -28,44 +26,29 @@ import java.util.stream.Collectors;
 @Service
 public class VillageServiceImpl implements VillageService{
     private final VillageRepository villageRepository;
-    private final VillageTemplatesRepo villageTemplatesRepo;
     private final EventService eventService;
-    private final ModelMapper modelMapper;
     private static final MathContext mc = new MathContext(3);
 
     public VillageServiceImpl(VillageRepository villageRepository,
-                              VillageTemplatesRepo villageTemplatesRepo,
-                              EventService eventService, ModelMapper modelMapper) {
+                              EventService eventService) {
         this.villageRepository = villageRepository;
-        this.villageTemplatesRepo = villageTemplatesRepo;
         this.eventService = eventService;
-        this.modelMapper = modelMapper;
     }
 
     @Override
     public VillageEntity createVillage(NewVillageRequest newVillageRequest) {
-        VillageTemplate villageTemplate = villageTemplatesRepo.findByVillageType(VillageType.SIX);
-        villageTemplate.setAccountId(newVillageRequest.getAccountId());
-        villageTemplate.setX(100);
-        villageTemplate.setY(100);
-        villageTemplate.setPopulation(100);
-        villageTemplate.setCulture(0);
-        VillageEntity newVillage = modelMapper.map(villageTemplate, VillageEntity.class);
+        VillageEntity newVillage = VillageEntityFactory.get(VillageType.SIX);
+        newVillage.setAccountId(newVillageRequest.getAccountId());
+        newVillage.setX(100);
+        newVillage.setY(100);
         newVillage.setEventsList(new ArrayList<>());
-        var defaultBuildings = createDefaultBuildings();
+        var defaultBuildings = setDefaultBuildings();
         newVillage.setBuildings(defaultBuildings);
         return villageRepository.save(newVillage);
     }
 
-    private Map<Integer, BuildingBase> createDefaultBuildings(){
-        return Map.of(0, new MainBuilding(1, 0, Map.of(
-                        Resource.CROP, BigDecimal.valueOf(25),
-                        Resource.CLAY, BigDecimal.valueOf(50),
-                        Resource.IRON, BigDecimal.valueOf(75),
-                        Resource.WOOD, BigDecimal.valueOf(90),
-                        Resource.TIME, BigDecimal.valueOf(71440)),
-                List.of(),
-                100));
+    private Map<Integer, BuildingEntity> setDefaultBuildings(){
+        return Map.of(0, new BuildingEntity(BuildingType.MAIN, 1));
     }
 
     @Override
@@ -117,7 +100,8 @@ public class VillageServiceImpl implements VillageService{
             modified = event.getExecutionTime();
         }
 
-        /*villageEntity.setProducePerHour(sumProducePerHour());*/
+        //villageEntity.setProducePerHour(sumProducePerHour());
+
         villageEntityWrapper.calculateProducedGoods(villageEntity.getModified(), LocalDateTime.now());
 
         List<Event> allEvents = eventService.findAllByVillageId(villageEntity.getVillageId());

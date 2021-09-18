@@ -1,50 +1,32 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.Manipulation;
-import io.lanu.travian.enums.Resource;
-import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.Event;
-import io.lanu.travian.game.entities.events.FieldUpgradeEvent;
-import io.lanu.travian.game.entities.events.NewBuildingEvent;
-import io.lanu.travian.game.models.Field;
-import io.lanu.travian.game.models.VillageEntityWrapper;
 import io.lanu.travian.game.models.requests.BuildingRequest;
 import io.lanu.travian.game.repositories.EventRepository;
 import io.lanu.travian.game.repositories.VillageRepository;
-import io.lanu.travian.templates.entities.FieldTemplate;
-import io.lanu.travian.templates.entities.buildings.BuildingBase;
-import io.lanu.travian.templates.repositories.BuildingsRepository;
-import io.lanu.travian.templates.repositories.FieldTemplatesRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class EventServiceImpl implements EventService{
     private final VillageRepository villageRepository;
     private final EventRepository eventRepository;
-    private final FieldTemplatesRepository fieldTemplatesRepository;
-    private final BuildingsRepository buildingsRepository;
     private final ModelMapper modelMapper;
 
     public EventServiceImpl(VillageRepository villageRepository,
                             EventRepository eventRepository,
-                            FieldTemplatesRepository fieldTemplatesRepository,
-                            BuildingsRepository buildingsRepository,
                             ModelMapper modelMapper) {
         this.villageRepository = villageRepository;
         this.eventRepository = eventRepository;
-        this.fieldTemplatesRepository = fieldTemplatesRepository;
-        this.buildingsRepository = buildingsRepository;
         this.modelMapper = modelMapper;
     }
 
     @Override
     public Event createFieldUpgradeEvent(String villageId, Integer fieldPosition) {
 
-        VillageEntity villageEntity = villageRepository.findById(villageId)
+        /*VillageEntity villageEntity = villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String
                         .format("Village with id - %s is not exist.", villageId)));
 
@@ -65,12 +47,13 @@ public class EventServiceImpl implements EventService{
 
         this.villageRepository.save(villageEntity);
 
-        return this.eventRepository.save(event);
+        return this.eventRepository.save(event);*/
+        return null;
     }
 
     @Override
     public Event createBuildingNewEvent(String villageId, Integer buildingPosition, BuildingRequest buildingRequest) {
-        VillageEntity villageEntity = villageRepository.findById(villageId)
+        /*VillageEntity villageEntity = villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String
                         .format("Village with id - %s is not exist.", villageId)));
 
@@ -87,7 +70,8 @@ public class EventServiceImpl implements EventService{
 
         Event event = new NewBuildingEvent(villageId, executionTime, building);
         this.villageRepository.save(villageEntity);
-        return this.eventRepository.save(event);
+        return this.eventRepository.save(event);*/
+        return null;
     }
 
     @Override

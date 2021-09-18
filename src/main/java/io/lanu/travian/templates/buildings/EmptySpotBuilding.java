@@ -1,4 +1,4 @@
-package io.lanu.travian.templates.entities.buildings;
+package io.lanu.travian.templates.buildings;
 
 import io.lanu.travian.enums.BuildingType;
 import io.lanu.travian.enums.Resource;
