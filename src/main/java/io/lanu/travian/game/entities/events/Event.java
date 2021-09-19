@@ -3,17 +3,13 @@ package io.lanu.travian.game.entities.events;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.lanu.travian.enums.EventsType;
-import io.lanu.travian.enums.Resource;
-import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.models.VillageEntityWrapper;
-import lombok.AllArgsConstructor;
+import io.lanu.travian.game.models.VillageManager;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.function.Consumer;
 
@@ -26,7 +22,7 @@ import java.util.function.Consumer;
 })
 @Document("events")
 @TypeAlias("events")
-public abstract class Event implements Consumer<VillageEntityWrapper> {
+public abstract class Event implements Consumer<VillageManager> {
 
     @Id
     private String eventId;

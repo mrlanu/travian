@@ -1,9 +1,8 @@
 package io.lanu.travian.game.entities.events;
 
 import io.lanu.travian.enums.EventsType;
-import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.Field;
-import io.lanu.travian.game.models.VillageEntityWrapper;
+import io.lanu.travian.game.models.VillageManager;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -30,7 +29,7 @@ public class FieldUpgradeEvent extends Event {
     }
 
     @Override
-    public void accept(VillageEntityWrapper villageEntityWrapper) {
+    public void accept(VillageManager villageManager) {
         //villageEntityWrapper.getVillageEntity().getFields().set(fieldNew.getPosition(), fieldNew);
         //villageEntityWrapper.addGoodToProducePerHour(fieldNew.getFieldType(), fieldNew.getProduction().subtract(fieldOld.getProduction()));
     }

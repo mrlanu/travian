@@ -5,6 +5,9 @@ import io.lanu.travian.enums.Resource;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.Event;
 import io.lanu.travian.game.models.responses.EventView;
+import io.lanu.travian.game.models.responses.FieldView;
+import io.lanu.travian.game.models.responses.VillageView;
+import io.lanu.travian.templates.fields.FieldViewFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
@@ -18,13 +21,55 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class VillageEntityWrapper {
+public class VillageManager {
 
     private final VillageEntity villageEntity;
+    private final VillageView villageView;
     private static final MathContext mc = new MathContext(3);
 
-    public VillageEntityWrapper(VillageEntity villageEntity) {
+    public VillageManager(VillageEntity villageEntity) {
         this.villageEntity = villageEntity;
+        this.villageView = new VillageView();
+        this.mapVillage();
+
+    }
+
+    private void mapVillage(){
+
+        villageView.setVillageId(villageEntity.getVillageId());
+        villageView.setAccountId(villageEntity.getAccountId());
+        villageView.setX(villageEntity.getX());
+        villageView.setY(villageEntity.getY());
+        villageView.setVillageType(villageEntity.getVillageType());
+        villageView.setPopulation(villageEntity.getPopulation());
+        villageView.setCulture(villageEntity.getCulture());
+        villageView.setStorage(villageEntity.getStorage());
+
+        villageView.setFields(mapFields());
+        //villageView.setBuildings(mapBuildings());
+        villageView.setStorage(mapStorage());
+        villageView.setProducePerHour(mapProducePerHour());
+        //villageView.setEventsList(mapEvents());
+
+    }
+
+    private List<FieldView> mapFields(){
+        return this.villageEntity.getFields().stream()
+                .map(fieldEntity -> FieldViewFactory.get(fieldEntity.getType(), fieldEntity.getLevel())).collect(Collectors.toList());
+    }
+
+    private Map<Resource, BigDecimal> mapStorage(){
+        return this.villageEntity.getStorage();
+    }
+
+    private Map<Resource, BigDecimal> mapProducePerHour(){
+        return sumProducePerHour();
+    }
+
+    private Map<Resource, BigDecimal> sumProducePerHour(){
+        return this.villageView.getFields().stream()
+                .collect(Collectors.groupingBy(FieldView::getFieldType,
+                        Collectors.reducing(BigDecimal.ZERO, FieldView::getProduction, BigDecimal::add)));
     }
 
     public VillageEntity getVillageEntity() {
@@ -41,16 +86,16 @@ public class VillageEntityWrapper {
                 .divide(BigDecimal.valueOf(3600000L), mc);
 
         BigDecimal woodProduced =
-                this.villageEntity.getProducePerHour().get(Resource.WOOD)
+                this.villageView.getProducePerHour().get(Resource.WOOD)
                         .multiply(divide);
         BigDecimal clayProduced =
-                this.villageEntity.getProducePerHour().get(Resource.CLAY)
+                this.villageView.getProducePerHour().get(Resource.CLAY)
                         .multiply(divide);
         BigDecimal ironProduced =
-                this.villageEntity.getProducePerHour().get(Resource.IRON)
+                this.villageView.getProducePerHour().get(Resource.IRON)
                         .multiply(divide);
         BigDecimal cropProduced =
-                this.villageEntity.getProducePerHour().get(Resource.CROP)
+                this.villageView.getProducePerHour().get(Resource.CROP)
                         .multiply(divide);
 
         manipulateGoods(Manipulation.ADD, Map.of(Resource.WOOD, woodProduced, Resource.CLAY, clayProduced,
@@ -63,7 +108,7 @@ public class VillageEntityWrapper {
     }
 
     public void manipulateGoods(Manipulation kindOfManipulation, Map<Resource, BigDecimal> goods){
-        var storage = this.villageEntity.getStorage();
+        var storage = this.villageView.getStorage();
         if (kindOfManipulation.equals(Manipulation.ADD)){
             storage.forEach((k, v) -> storage.put(k, storage.get(k).add(goods.get(k))));
         } else {
@@ -78,5 +123,9 @@ public class VillageEntityWrapper {
                                 event.getExecutionTime()).toMillis(), "H:mm:ss", true)))
                 .collect(Collectors.toList());
         this.villageEntity.setEventsList(events);
+    }
+
+    public VillageView getVillageView() {
+        return this.villageView;
     }
 }

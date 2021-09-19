@@ -4,6 +4,7 @@ import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.Event;
 import io.lanu.travian.game.models.requests.BuildingRequest;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
+import io.lanu.travian.game.models.responses.VillageView;
 import io.lanu.travian.game.services.EventService;
 import io.lanu.travian.game.services.VillageService;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class VillageController {
     }
 
     @GetMapping("/{villageId}")
-    public VillageEntity getVillageById(@PathVariable String villageId){
+    public VillageView getVillageById(@PathVariable String villageId){
         return villageService.getVillageById(villageId);
     }
 

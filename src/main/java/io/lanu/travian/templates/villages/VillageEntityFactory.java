@@ -14,10 +14,10 @@ public class VillageEntityFactory {
     private static final Map<VillageType, VillageEntity> villages = Map.of(
             VillageType.SIX, new VillageEntity(null, null, 100, 100, VillageType.SIX, 100, 100,
                     Arrays.asList(
+                            new FieldEntity(Resource.CROP, 1),
+                            new FieldEntity(Resource.WOOD, 1),
                             new FieldEntity(Resource.CROP, 0),
-                            new FieldEntity(Resource.WOOD, 0),
-                            new FieldEntity(Resource.CROP, 0),
-                            new FieldEntity(Resource.CLAY, 0),
+                            new FieldEntity(Resource.CLAY, 1),
                             new FieldEntity(Resource.IRON, 0)), null,
                     Map.of(Resource.CROP, BigDecimal.valueOf(500),
                             Resource.CLAY, BigDecimal.valueOf(500),

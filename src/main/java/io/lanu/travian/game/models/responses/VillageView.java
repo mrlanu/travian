@@ -6,10 +6,8 @@ import io.lanu.travian.templates.buildings.BuildingBase;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +27,4 @@ public class VillageView {
     private Map<Resource, BigDecimal> storage;
     private Map<Resource, BigDecimal> producePerHour;
     private List<EventView> eventsList;
-    @LastModifiedDate
-    private LocalDateTime modified;
 }

@@ -21,16 +21,18 @@ public class FieldViewFactory {
                     1.67, 2, 1, 2310, 22, "Clay field")
     );
 
+    private static final Integer[] productions = {0, 7, 13, 21, 31, 46, 70, 98, 140, 203, 280};
+
     public static FieldView get(Resource name, int level){
         final FieldTemplate template = fields.get(name);
         FieldView result = new FieldView();
         result.setFieldType(name);
         result.setLevel(level);
-        result.setProduction(BigDecimal.TEN);
+        result.setProduction(BigDecimal.valueOf(productions[level]));
         var resToNext = template.getCost().stream()
                 .map(integer -> round(Math.pow(template.getK(), level) * integer, 5))
                 .collect(Collectors.toList());
-        var time = round((template.getTime() / 3) * Math.pow(1.6, level - 1) - (1000d + level * 10) /3, 10);
+        var time = round((template.getTime() / 3) * Math.pow(1.6, level) - (1000d + level * 10) /3, 10);
         result.setResourcesToNextLevel(resToNext);
         result.setTimeToNextLevel(time);
         return result;
