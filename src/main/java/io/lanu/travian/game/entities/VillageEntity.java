@@ -25,7 +25,7 @@ import java.util.Map;
 @Slf4j
 public class VillageEntity {
     @Id
-    private String villageId;
+    protected String villageId;
     private String accountId;
     private int x;
     private int y;

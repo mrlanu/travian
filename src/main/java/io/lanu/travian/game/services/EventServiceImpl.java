@@ -1,12 +1,20 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.enums.Manipulation;
+import io.lanu.travian.game.entities.FieldEntity;
+import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.Event;
+import io.lanu.travian.game.entities.events.FieldUpgradeEvent;
+import io.lanu.travian.game.models.VillageManager;
 import io.lanu.travian.game.models.requests.BuildingRequest;
+import io.lanu.travian.game.models.responses.FieldView;
 import io.lanu.travian.game.repositories.EventRepository;
 import io.lanu.travian.game.repositories.VillageRepository;
+import io.lanu.travian.templates.fields.FieldViewFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -26,29 +34,23 @@ public class EventServiceImpl implements EventService{
     @Override
     public Event createFieldUpgradeEvent(String villageId, Integer fieldPosition) {
 
-        /*VillageEntity villageEntity = villageRepository.findById(villageId)
+        VillageEntity villageEntity = villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String
                         .format("Village with id - %s is not exist.", villageId)));
 
-        VillageEntityWrapper villageEntityWrapper = new VillageEntityWrapper(villageEntity);
+        VillageManager villageManager = new VillageManager(villageEntity);
+        FieldEntity fieldEntity = villageEntity.getFields().get(fieldPosition);
+        FieldView fieldView = FieldViewFactory.get(fieldEntity.getType(), fieldEntity.getLevel());
 
-        Field oldField = villageEntity.getFields().get(fieldPosition);
-        oldField.setUnderUpgrade(true);
-        FieldTemplate template = this.fieldTemplatesRepository
-                .findByFieldTypeAndLevel(oldField.getFieldType(), oldField.getLevel() + 1);
-        Field newField = this.modelMapper.map(template, Field.class);
-        newField.setPosition(oldField.getPosition());
         LocalDateTime executionTime = LocalDateTime.now()
-                .plusSeconds(oldField.getResourcesToNextLevel().get(Resource.TIME).longValue());
+                .plusSeconds(fieldView.getTimeToNextLevel());
 
-        villageEntityWrapper.manipulateGoods(Manipulation.SUBTRACT, oldField.getResourcesToNextLevel());
+        villageManager.manipulateGoods(Manipulation.SUBTRACT, fieldView.getResourcesToNextLevel());
 
-        Event event = new FieldUpgradeEvent(executionTime, villageEntity.getVillageId(), newField, oldField);
+        Event event = new FieldUpgradeEvent(executionTime, villageEntity.getVillageId(), fieldPosition);
 
         this.villageRepository.save(villageEntity);
-
-        return this.eventRepository.save(event);*/
-        return null;
+        return this.eventRepository.save(event);
     }
 
     @Override

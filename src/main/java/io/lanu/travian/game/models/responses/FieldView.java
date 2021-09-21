@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,7 +15,7 @@ public class FieldView {
     private Resource fieldType;
     private int level;
     private BigDecimal production;
-    private List<Long> resourcesToNextLevel;
+    private Map<Resource, BigDecimal> resourcesToNextLevel;
     private long timeToNextLevel;
     private boolean underUpgrade;
     private boolean ableToUpgrade;

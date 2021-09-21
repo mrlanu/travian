@@ -75,7 +75,7 @@ public class VillageServiceImpl implements VillageService{
 
         // iterate over all events and execute them
         for (Event event : completedEvents) {
-            var cropPerHour = villageEntity.getProducePerHour().get(Resource.CROP);
+            var cropPerHour = villageManager.calculateProducePerHour().get(Resource.CROP);
 
             // if crop in the village is less than 0 keep create the death event & execute them until the crop will be positive
             while (cropPerHour.longValue() < 0) {
@@ -92,7 +92,7 @@ public class VillageServiceImpl implements VillageService{
                 } else {
                     break;
                 }
-                cropPerHour = villageEntity.getProducePerHour().get(Resource.CROP);
+                cropPerHour = villageManager.calculateProducePerHour().get(Resource.CROP);
             }
 
             // recalculate storage leftovers

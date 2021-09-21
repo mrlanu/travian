@@ -5,6 +5,7 @@ import io.lanu.travian.game.models.responses.FieldView;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -29,11 +30,15 @@ public class FieldViewFactory {
         result.setFieldType(name);
         result.setLevel(level);
         result.setProduction(BigDecimal.valueOf(productions[level]));
-        var resToNext = template.getCost().stream()
-                .map(integer -> round(Math.pow(template.getK(), level) * integer, 5))
-                .collect(Collectors.toList());
+
+        Map<Resource, BigDecimal> resToNextLevel = new HashMap<>();
+        resToNextLevel.put(Resource.WOOD, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(0), 5)));
+        resToNextLevel.put(Resource.CLAY, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(1), 5)));
+        resToNextLevel.put(Resource.IRON, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(2), 5)));
+        resToNextLevel.put(Resource.CROP, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(3), 5)));
+
         var time = round((template.getTime() / 3) * Math.pow(1.6, level) - (1000d + level * 10) /3, 10);
-        result.setResourcesToNextLevel(resToNext);
+        result.setResourcesToNextLevel(resToNextLevel);
         result.setTimeToNextLevel(time);
         return result;
     }

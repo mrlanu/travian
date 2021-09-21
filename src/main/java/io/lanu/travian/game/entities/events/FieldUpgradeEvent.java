@@ -19,17 +19,18 @@ import java.time.LocalDateTime;
 @TypeAlias("fieldUpgradeEvent")
 public class FieldUpgradeEvent extends Event {
 
-    private Field fieldOld;
-    private Field fieldNew;
+    private int fieldPosition;
 
-    public FieldUpgradeEvent(LocalDateTime executionTime, String villageId, Field fieldNew, Field fieldOld) {
+    public FieldUpgradeEvent(LocalDateTime executionTime, String villageId, int fieldPosition) {
         super(EventsType.UPGRADE_FIELD, villageId, executionTime);
-        this.fieldNew = fieldNew;
-        this.fieldOld = fieldOld;
+        this.fieldPosition = fieldPosition;
     }
 
     @Override
     public void accept(VillageManager villageManager) {
+        var field = villageManager.getVillageEntity().getFields().get(fieldPosition);
+        field.setLevel(field.getLevel() + 1);
+
         //villageEntityWrapper.getVillageEntity().getFields().set(fieldNew.getPosition(), fieldNew);
         //villageEntityWrapper.addGoodToProducePerHour(fieldNew.getFieldType(), fieldNew.getProduction().subtract(fieldOld.getProduction()));
     }
