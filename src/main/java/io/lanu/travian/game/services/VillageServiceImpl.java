@@ -7,7 +7,6 @@ import io.lanu.travian.game.entities.BuildingEntity;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.DeathEvent;
 import io.lanu.travian.game.entities.events.Event;
-import io.lanu.travian.game.models.VillageManager;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.VillageView;
 import io.lanu.travian.game.repositories.VillageRepository;
@@ -63,8 +62,6 @@ public class VillageServiceImpl implements VillageService{
 
     private VillageView build(VillageEntity villageEntity){
 
-        VillageManager villageManager = new VillageManager(villageEntity);
-
         List<Event> completedEvents = this.eventService.findAllByVillageId(villageEntity.getVillageId())
                 .stream()
                 .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
@@ -75,7 +72,7 @@ public class VillageServiceImpl implements VillageService{
 
         // iterate over all events and execute them
         for (Event event : completedEvents) {
-            var cropPerHour = villageManager.calculateProducePerHour().get(Resource.CROP);
+            var cropPerHour = villageEntity.calculateProducePerHour().get(Resource.CROP);
 
             // if crop in the village is less than 0 keep create the death event & execute them until the crop will be positive
             while (cropPerHour.longValue() < 0) {
@@ -86,30 +83,30 @@ public class VillageServiceImpl implements VillageService{
 
                 if (deathTime.isBefore(event.getExecutionTime())) {
                     Event deathEvent = new DeathEvent(deathTime);
-                    villageManager.calculateProducedGoods(modified, deathEvent.getExecutionTime());
-                    deathEvent.accept(villageManager);
+                    villageEntity.calculateProducedGoods(modified, deathEvent.getExecutionTime());
+                    deathEvent.accept(villageEntity);
                     modified = deathEvent.getExecutionTime();
                 } else {
                     break;
                 }
-                cropPerHour = villageManager.calculateProducePerHour().get(Resource.CROP);
+                cropPerHour = villageEntity.calculateProducePerHour().get(Resource.CROP);
             }
 
             // recalculate storage leftovers
-            villageManager.calculateProducedGoods(modified, event.getExecutionTime());
-            event.accept(villageManager);
+            villageEntity.calculateProducedGoods(modified, event.getExecutionTime());
+            event.accept(villageEntity);
             this.eventService.deleteByEventId(event.getEventId());
             modified = event.getExecutionTime();
         }
 
         //villageEntity.setProducePerHour(sumProducePerHour());
 
-        villageManager.calculateProducedGoods(villageEntity.getModified(), LocalDateTime.now());
+        villageEntity.calculateProducedGoods(villageEntity.getModified(), LocalDateTime.now());
 
         List<Event> allEvents = eventService.findAllByVillageId(villageEntity.getVillageId());
-        villageManager.addEventsView(allEvents);
+        villageEntity.addEventsView(allEvents);
 
-        return villageManager.getVillageView();
+        return villageEntity.getVillageView();
     }
 
 }

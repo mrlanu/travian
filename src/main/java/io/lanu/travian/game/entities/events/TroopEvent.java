@@ -1,7 +1,7 @@
 package io.lanu.travian.game.entities.events;
 
 import io.lanu.travian.enums.EventsType;
-import io.lanu.travian.game.models.VillageManager;
+import io.lanu.travian.game.entities.VillageEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -26,7 +26,7 @@ public class TroopEvent extends Event {
     }
 
     @Override
-    public void accept(VillageManager villageManager) {
+    public void accept(VillageEntity villageEntity) {
         /*Map<UnitType, Integer> army = villageEntity.getArmy().getHomeLegion();
         army.put(unitType, army.getOrDefault(unitType, 0) + 1);
         villageEntity.getProducePerHour().addGood(FieldType.CROP, -eatHour);*/

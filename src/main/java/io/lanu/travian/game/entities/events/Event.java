@@ -3,7 +3,7 @@ package io.lanu.travian.game.entities.events;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.lanu.travian.enums.EventsType;
-import io.lanu.travian.game.models.VillageManager;
+import io.lanu.travian.game.entities.VillageEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 })
 @Document("events")
 @TypeAlias("events")
-public abstract class Event implements Consumer<VillageManager> {
+public abstract class Event implements Consumer<VillageEntity> {
 
     @Id
     private String eventId;

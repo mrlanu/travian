@@ -1,7 +1,7 @@
 package io.lanu.travian.game.entities.events;
 
 import io.lanu.travian.enums.EventsType;
-import io.lanu.travian.game.models.VillageManager;
+import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.templates.buildings.BuildingBase;
 
 import java.time.LocalDateTime;
@@ -16,7 +16,7 @@ public class NewBuildingEvent extends Event{
     }
 
     @Override
-    public void accept(VillageManager villageManager) {
+    public void accept(VillageEntity villageEntity) {
         //villageManager.getVillageEntity().getBuildings().put(building.getPosition(), this.building);
     }
 }

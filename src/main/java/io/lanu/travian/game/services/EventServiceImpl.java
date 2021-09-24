@@ -5,7 +5,6 @@ import io.lanu.travian.game.entities.FieldEntity;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.Event;
 import io.lanu.travian.game.entities.events.FieldUpgradeEvent;
-import io.lanu.travian.game.models.VillageManager;
 import io.lanu.travian.game.models.requests.BuildingRequest;
 import io.lanu.travian.game.models.responses.FieldView;
 import io.lanu.travian.game.repositories.EventRepository;
@@ -38,14 +37,13 @@ public class EventServiceImpl implements EventService{
                 .orElseThrow(() -> new IllegalStateException(String
                         .format("Village with id - %s is not exist.", villageId)));
 
-        VillageManager villageManager = new VillageManager(villageEntity);
         FieldEntity fieldEntity = villageEntity.getFields().get(fieldPosition);
         FieldView fieldView = FieldViewFactory.get(fieldEntity.getType(), fieldEntity.getLevel());
 
         LocalDateTime executionTime = LocalDateTime.now()
                 .plusSeconds(fieldView.getTimeToNextLevel());
 
-        villageManager.manipulateGoods(Manipulation.SUBTRACT, fieldView.getResourcesToNextLevel());
+        villageEntity.manipulateGoods(Manipulation.SUBTRACT, fieldView.getResourcesToNextLevel());
 
         Event event = new FieldUpgradeEvent(executionTime, villageEntity.getVillageId(), fieldPosition);
 

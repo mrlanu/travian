@@ -3,7 +3,6 @@ package io.lanu.travian.game.models.responses;
 import io.lanu.travian.enums.Resource;
 import io.lanu.travian.enums.VillageType;
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.models.VillageManager;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,8 +29,7 @@ public class VillageView {
     private Map<Resource, BigDecimal> producePerHour;
     private List<EventView> eventsList;
 
-    public VillageView(VillageManager villageManager) {
-        VillageEntity villageEntity = villageManager.getVillageEntity();
+    public VillageView(VillageEntity villageEntity) {
         this.villageId = villageEntity.getVillageId();
         this.accountId = villageEntity.getAccountId();
         this.x = villageEntity.getX();
@@ -39,8 +37,8 @@ public class VillageView {
         this.villageType = villageEntity.getVillageType();
         this.population = villageEntity.getPopulation();
         this.culture = villageEntity.getCulture();
-        this.fields = villageManager.mapFields();
-        this.buildings = villageManager.mapBuildings();
+        this.fields = villageEntity.mapFields();
+        this.buildings = villageEntity.mapBuildings();
         this.storage = villageEntity.getStorage();
         this.producePerHour = villageEntity.getProducePerHour();
         this.eventsList = villageEntity.getEventsList();

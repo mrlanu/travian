@@ -1,8 +1,7 @@
 package io.lanu.travian.game.entities.events;
 
 import io.lanu.travian.enums.EventsType;
-import io.lanu.travian.game.models.Field;
-import io.lanu.travian.game.models.VillageManager;
+import io.lanu.travian.game.entities.VillageEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -27,8 +26,8 @@ public class FieldUpgradeEvent extends Event {
     }
 
     @Override
-    public void accept(VillageManager villageManager) {
-        var field = villageManager.getVillageEntity().getFields().get(fieldPosition);
+    public void accept(VillageEntity villageEntity) {
+        var field = villageEntity.getFields().get(fieldPosition);
         field.setLevel(field.getLevel() + 1);
 
         //villageEntityWrapper.getVillageEntity().getFields().set(fieldNew.getPosition(), fieldNew);
