@@ -1,6 +1,6 @@
 package io.lanu.travian.templates.buildings;
 
-import io.lanu.travian.enums.BuildingType;
+import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.enums.Resource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,6 +17,6 @@ public class EmptySpotBuilding extends BuildingBase {
     public EmptySpotBuilding(int level, int position,
                              Map<Resource, BigDecimal> resourcesToNextLevel,
                              List<RequirementBuilding> requirementBuildings) {
-        super(BuildingType.EMPTY, level, position, resourcesToNextLevel, requirementBuildings);
+        super(EBuildings.EMPTY, level, position, resourcesToNextLevel, requirementBuildings);
     }
 }

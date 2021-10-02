@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class FieldTemplate {
-    private Resource name;
+    private Resource resource;
     private List<Integer> cost;
     private double k;
     private int cu;

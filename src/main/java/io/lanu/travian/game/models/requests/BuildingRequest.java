@@ -1,12 +1,12 @@
 package io.lanu.travian.game.models.requests;
 
-import io.lanu.travian.enums.BuildingType;
+import io.lanu.travian.enums.EBuildings;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 public class BuildingRequest {
-    private BuildingType buildingType;
+    private EBuildings buildingType;
     private Integer level;
 }

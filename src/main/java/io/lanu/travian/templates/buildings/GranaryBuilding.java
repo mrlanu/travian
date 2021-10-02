@@ -1,6 +1,6 @@
 package io.lanu.travian.templates.buildings;
 
-import io.lanu.travian.enums.BuildingType;
+import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.enums.Resource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,7 +20,7 @@ public class GranaryBuilding extends BuildingBase {
                            Map<Resource, BigDecimal> resourcesToNextLevel,
                            List<RequirementBuilding> requirementBuildings,
                            Integer capacity) {
-        super(BuildingType.GRANARY, level, position, resourcesToNextLevel, requirementBuildings);
+        super(EBuildings.GRANARY, level, position, resourcesToNextLevel, requirementBuildings);
         this.capacity = capacity;
     }
 

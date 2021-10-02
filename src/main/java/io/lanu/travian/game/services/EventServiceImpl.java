@@ -1,15 +1,15 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.enums.EventsType;
 import io.lanu.travian.enums.Manipulation;
-import io.lanu.travian.game.entities.FieldEntity;
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.entities.events.Event;
-import io.lanu.travian.game.entities.events.FieldUpgradeEvent;
+import io.lanu.travian.game.entities.events.BuildIEvent;
+import io.lanu.travian.game.models.BuildModel;
 import io.lanu.travian.game.models.requests.BuildingRequest;
-import io.lanu.travian.game.models.responses.FieldView;
+import io.lanu.travian.game.models.responses.Field;
 import io.lanu.travian.game.repositories.EventRepository;
 import io.lanu.travian.game.repositories.VillageRepository;
-import io.lanu.travian.templates.fields.FieldViewFactory;
+import io.lanu.travian.templates.fields.FieldsFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -31,28 +31,28 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public Event createFieldUpgradeEvent(String villageId, Integer fieldPosition) {
+    public BuildIEvent createBuildEvent(String villageId, Integer buildPosition) {
 
         VillageEntity villageEntity = villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String
                         .format("Village with id - %s is not exist.", villageId)));
 
-        FieldEntity fieldEntity = villageEntity.getFields().get(fieldPosition);
-        FieldView fieldView = FieldViewFactory.get(fieldEntity.getType(), fieldEntity.getLevel());
+        BuildModel buildModel = villageEntity.getBuildings().get(buildPosition);
+        Field fieldView = FieldsFactory.get(buildModel.getBuildingName(), buildModel.getLevel());
 
         LocalDateTime executionTime = LocalDateTime.now()
                 .plusSeconds(fieldView.getTimeToNextLevel());
 
         villageEntity.manipulateGoods(Manipulation.SUBTRACT, fieldView.getResourcesToNextLevel());
 
-        Event event = new FieldUpgradeEvent(executionTime, villageEntity.getVillageId(), fieldPosition);
+        BuildIEvent buildEvent = new BuildIEvent(buildPosition, buildModel.getBuildingName(), EventsType.NEW_BUILDING, villageId, executionTime);
 
         this.villageRepository.save(villageEntity);
-        return this.eventRepository.save(event);
+        return this.eventRepository.save(buildEvent);
     }
 
     @Override
-    public Event createBuildingNewEvent(String villageId, Integer buildingPosition, BuildingRequest buildingRequest) {
+    public BuildIEvent createBuildingNewEvent(String villageId, Integer buildingPosition, BuildingRequest buildingRequest) {
         /*VillageEntity villageEntity = villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String
                         .format("Village with id - %s is not exist.", villageId)));
@@ -75,12 +75,17 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public List<Event> findAllByVillageId(String villageId) {
+    public List<BuildIEvent> findAllByVillageId(String villageId) {
         return eventRepository.findAllByVillageId(villageId);
     }
 
     @Override
     public void deleteByEventId(String eventId) {
         eventRepository.deleteByEventId(eventId);
+    }
+
+    @Override
+    public void deleteAllByVillageIdAndExecutionTimeBefore(String villageId, LocalDateTime time) {
+        eventRepository.deleteAllByVillageIdAndExecutionTimeBefore(villageId, time);
     }
 }

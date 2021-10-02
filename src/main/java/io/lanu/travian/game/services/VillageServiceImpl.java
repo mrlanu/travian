@@ -1,12 +1,11 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.BuildingType;
 import io.lanu.travian.enums.Resource;
 import io.lanu.travian.enums.VillageType;
-import io.lanu.travian.game.entities.BuildingEntity;
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.entities.events.DeathEvent;
-import io.lanu.travian.game.entities.events.Event;
+import io.lanu.travian.game.entities.events.BuildIEvent;
+import io.lanu.travian.game.entities.events.DeathIEvent;
+import io.lanu.travian.game.entities.events.IEvent;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.VillageView;
 import io.lanu.travian.game.repositories.VillageRepository;
@@ -17,10 +16,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,39 +36,32 @@ public class VillageServiceImpl implements VillageService{
     public VillageEntity createVillage(NewVillageRequest newVillageRequest) {
         VillageEntity newVillage = VillageEntityFactory.get(VillageType.SIX);
         newVillage.setAccountId(newVillageRequest.getAccountId());
-        newVillage.setX(100);
-        newVillage.setY(100);
-        newVillage.setEventsList(new ArrayList<>());
-        var defaultBuildings = setDefaultBuildings();
-        newVillage.setBuildings(defaultBuildings);
         return villageRepository.save(newVillage);
-    }
-
-    private Map<Integer, BuildingEntity> setDefaultBuildings(){
-        return Map.of(0, new BuildingEntity(BuildingType.MAIN, 1));
     }
 
     @Override
     public VillageView getVillageById(String villageId) {
         VillageEntity villageEntity = this.villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
-        VillageView result = build(villageEntity);
+        recalculateVillage(villageEntity);
         this.villageRepository.save(villageEntity);
-        return result;
+        eventService.deleteAllByVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
+        List<BuildIEvent> currentBuildingEvents = eventService.findAllByVillageId(villageId);
+        return new VillageView(villageEntity, currentBuildingEvents);
     }
 
-    private VillageView build(VillageEntity villageEntity){
+    private void recalculateVillage(VillageEntity villageEntity){
 
-        List<Event> completedEvents = this.eventService.findAllByVillageId(villageEntity.getVillageId())
+        List<IEvent> completedBuildEvents = this.eventService.findAllByVillageId(villageEntity.getVillageId())
                 .stream()
                 .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
-                .sorted(Comparator.comparing(Event::getExecutionTime))
+                .sorted(Comparator.comparing(BuildIEvent::getExecutionTime))
                 .collect(Collectors.toList());
 
         LocalDateTime modified = villageEntity.getModified();
 
         // iterate over all events and execute them
-        for (Event event : completedEvents) {
+        for (IEvent buildEvent : completedBuildEvents) {
             var cropPerHour = villageEntity.calculateProducePerHour().get(Resource.CROP);
 
             // if crop in the village is less than 0 keep create the death event & execute them until the crop will be positive
@@ -81,32 +71,22 @@ public class VillageServiceImpl implements VillageService{
 
                 LocalDateTime deathTime = modified.plus(durationToDeath.longValue(), ChronoUnit.MILLIS);
 
-                if (deathTime.isBefore(event.getExecutionTime())) {
-                    Event deathEvent = new DeathEvent(deathTime);
-                    villageEntity.calculateProducedGoods(modified, deathEvent.getExecutionTime());
-                    deathEvent.accept(villageEntity);
-                    modified = deathEvent.getExecutionTime();
+                if (deathTime.isBefore(buildEvent.getExecutionTime())) {
+                    IEvent deathBuildEvent = new DeathIEvent(deathTime);
+                    villageEntity.calculateProducedGoods(modified, deathBuildEvent.getExecutionTime());
+                    deathBuildEvent.execute(villageEntity);
+                    modified = deathBuildEvent.getExecutionTime();
                 } else {
                     break;
                 }
                 cropPerHour = villageEntity.calculateProducePerHour().get(Resource.CROP);
             }
-
             // recalculate storage leftovers
-            villageEntity.calculateProducedGoods(modified, event.getExecutionTime());
-            event.accept(villageEntity);
-            this.eventService.deleteByEventId(event.getEventId());
-            modified = event.getExecutionTime();
+            villageEntity.calculateProducedGoods(modified, buildEvent.getExecutionTime());
+            buildEvent.execute(villageEntity);
+            modified = buildEvent.getExecutionTime();
         }
-
-        //villageEntity.setProducePerHour(sumProducePerHour());
-
         villageEntity.calculateProducedGoods(villageEntity.getModified(), LocalDateTime.now());
-
-        List<Event> allEvents = eventService.findAllByVillageId(villageEntity.getVillageId());
-        villageEntity.addEventsView(allEvents);
-
-        return villageEntity.getVillageView();
     }
 
 }

@@ -1,4 +1,4 @@
-package io.lanu.travian.game.entities;
+package io.lanu.travian.game.models;
 
 import io.lanu.travian.enums.EBuildings;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class BuildingEntity {
-    private EBuildings buildingType;
+public class BuildModel {
+    private EBuildings buildingName;
     private int level;
 }

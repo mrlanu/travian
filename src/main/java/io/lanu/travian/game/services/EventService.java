@@ -1,17 +1,20 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.game.entities.events.Event;
+import io.lanu.travian.game.entities.events.BuildIEvent;
 import io.lanu.travian.game.models.requests.BuildingRequest;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventService {
 
-    Event createFieldUpgradeEvent(String villageId, Integer fieldPosition);
+    BuildIEvent createBuildEvent(String villageId, Integer fieldPosition);
 
-    List<Event> findAllByVillageId(String villageId);
+    List<BuildIEvent> findAllByVillageId(String villageId);
 
     void deleteByEventId(String eventId);
 
-    Event createBuildingNewEvent(String villageId, Integer buildingPosition, BuildingRequest buildingRequest);
+    BuildIEvent createBuildingNewEvent(String villageId, Integer buildingPosition, BuildingRequest buildingRequest);
+
+    void deleteAllByVillageIdAndExecutionTimeBefore(String villageId, LocalDateTime time);
 }

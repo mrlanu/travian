@@ -1,24 +1,23 @@
 package io.lanu.travian.game.entities.events;
 
-import io.lanu.travian.enums.EventsType;
 import io.lanu.travian.game.entities.VillageEntity;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class DeathEvent extends Event {
+public class DeathIEvent implements IEvent {
 
-    public DeathEvent(LocalDateTime executionTime) {
-        super(EventsType.DEATH, executionTime);
+    private LocalDateTime executionTime;
+
+    public DeathIEvent(LocalDateTime executionTime) {
+        this.executionTime = executionTime;
     }
 
     @Override
-    public void accept(VillageEntity villageEntity) {
+    public void execute(VillageEntity villageEntity) {
         /*Map<UnitType, Integer> army = villageEntity.getArmy().getHomeLegion();
         army.put(UnitType.LEGIONNAIRE, army.getOrDefault(UnitType.LEGIONNAIRE, 0) - 1);
         villageEntity.getWarehouse().addGood(FieldType.CROP, BigDecimal.valueOf(50));

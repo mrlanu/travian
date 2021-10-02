@@ -1,6 +1,6 @@
 package io.lanu.travian.templates.buildings;
 
-import io.lanu.travian.enums.BuildingType;
+import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.enums.Resource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,7 +20,7 @@ public class MainBuilding extends BuildingBase {
                         Map<Resource, BigDecimal> resourcesToNextLevel,
                         List<RequirementBuilding> requirementBuildings,
                         Integer buildSpeed) {
-        super(BuildingType.MAIN, level, position, resourcesToNextLevel, requirementBuildings);
+        super(EBuildings.MAIN, level, position, resourcesToNextLevel, requirementBuildings);
         this.buildSpeed = buildSpeed;
     }
 
