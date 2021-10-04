@@ -36,9 +36,8 @@ public class VillageController {
 
     @PostMapping("/{villageId}/buildings/{buildingPosition}/new")
     public ResponseEntity<String> bewBuilding(@PathVariable String villageId,
-                                              @PathVariable Integer buildingPosition,
-                                              @RequestBody BuildingRequest buildingRequest){
-        BuildIEvent buildEvent = eventService.createBuildingNewEvent(villageId, buildingPosition, buildingRequest);
+                                              @PathVariable Integer buildingPosition){
+        BuildIEvent buildEvent = eventService.createBuildEvent(villageId, buildingPosition);
         return ResponseEntity.status(HttpStatus.CREATED).body(buildEvent.getEventId());
     }
 

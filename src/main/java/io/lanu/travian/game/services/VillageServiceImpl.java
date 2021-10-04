@@ -34,7 +34,7 @@ public class VillageServiceImpl implements VillageService{
 
     @Override
     public VillageEntity createVillage(NewVillageRequest newVillageRequest) {
-        VillageEntity newVillage = VillageEntityFactory.get(VillageType.SIX);
+        VillageEntity newVillage = VillageEntityFactory.getVillageByType(VillageType.SIX);
         newVillage.setAccountId(newVillageRequest.getAccountId());
         return villageRepository.save(newVillage);
     }

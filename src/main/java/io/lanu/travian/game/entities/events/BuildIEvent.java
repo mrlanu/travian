@@ -1,7 +1,6 @@
 package io.lanu.travian.game.entities.events;
 
 import io.lanu.travian.enums.EBuildings;
-import io.lanu.travian.enums.EventsType;
 import io.lanu.travian.game.entities.VillageEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,24 +25,19 @@ public class BuildIEvent implements IEvent {
     private String eventId;
     private int buildingPosition;
     private EBuildings buildingName;
-    private EventsType type;
     private String villageId;
     private LocalDateTime executionTime;
 
-    public BuildIEvent(int buildingPosition, EBuildings buildingName, EventsType type, String villageId, LocalDateTime executionTime) {
+    public BuildIEvent(int buildingPosition, EBuildings buildingName, String villageId, LocalDateTime executionTime) {
         this.buildingPosition = buildingPosition;
         this.buildingName = buildingName;
-        this.type = type;
         this.villageId = villageId;
         this.executionTime = executionTime;
     }
 
     @Override
     public void execute(VillageEntity villageEntity) {
-        //var field = villageEntity.getFields().get(fieldPosition);
-        //field.setLevel(field.getLevel() + 1);
-
-        //villageEntityWrapper.getVillageEntity().getFields().set(fieldNew.getPosition(), fieldNew);
-        //villageEntityWrapper.addGoodToProducePerHour(fieldNew.getFieldType(), fieldNew.getProduction().subtract(fieldOld.getProduction()));
+        var build = villageEntity.getBuildings().get(buildingPosition);
+        build.setLevel(build.getLevel() + 1);
     }
 }
