@@ -1,10 +1,12 @@
 package io.lanu.travian.game.controllers;
 
+import io.lanu.travian.game.entities.ArmyOrderEntity;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.BuildIEvent;
-import io.lanu.travian.game.models.requests.BuildingRequest;
+import io.lanu.travian.game.models.requests.ArmyOrderRequest;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.VillageView;
+import io.lanu.travian.game.services.ArmiesService;
 import io.lanu.travian.game.services.EventService;
 import io.lanu.travian.game.services.VillageService;
 import org.springframework.http.HttpStatus;
@@ -16,10 +18,12 @@ import org.springframework.web.bind.annotation.*;
 public class VillageController {
     private final VillageService villageService;
     private final EventService eventService;
+    private final ArmiesService armiesService;
 
-    public VillageController(VillageService villageService, EventService eventService) {
+    public VillageController(VillageService villageService, EventService eventService, ArmiesService armiesService) {
         this.villageService = villageService;
         this.eventService = eventService;
+        this.armiesService = armiesService;
     }
 
     @GetMapping("/{villageId}")
@@ -45,6 +49,11 @@ public class VillageController {
     public ResponseEntity<String> upgradeField(@PathVariable String villageId, @PathVariable Integer fieldPosition){
         BuildIEvent buildEvent = eventService.createBuildEvent(villageId, fieldPosition);
         return ResponseEntity.status(HttpStatus.OK).body("New Event ID : " + buildEvent.getEventId());
+    }
+
+    @PostMapping("/armies")
+    public ArmyOrderEntity orderArmyUnits(@RequestBody ArmyOrderRequest armyOrderRequest) {
+        return armiesService.orderUnits(armyOrderRequest);
     }
 
 }

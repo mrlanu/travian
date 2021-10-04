@@ -1,6 +1,8 @@
 package io.lanu.travian.game.entities.events;
 
+import io.lanu.travian.enums.EUnits;
 import io.lanu.travian.game.entities.VillageEntity;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.TypeAlias;
@@ -10,18 +12,14 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Document("events")
 @TypeAlias("troopEvent")
-public class TroopBuildIEvent implements IEvent {
+public class TroopBuildEvent implements IEvent {
 
-   /* private UnitType unitType;*/
     private LocalDateTime executionTime;
+    private EUnits unitType;
     private int eatHour;
-
-    public TroopBuildIEvent(LocalDateTime executionTime, int eatHour) {
-        this.executionTime = executionTime;
-        this.eatHour = eatHour;
-    }
 
     @Override
     public void execute(VillageEntity villageEntity) {
