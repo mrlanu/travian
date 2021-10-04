@@ -11,8 +11,9 @@ import java.util.Map;
 
 public class VillageEntityFactory {
 
-    private static final Map<VillageType, VillageEntity> villages = Map.of(
-            VillageType.SIX, new VillageEntity(null, null, "New Village", 100, 100,
+    public static VillageEntity getVillageByType(VillageType villageType){
+        switch (villageType){
+            case SIX: return new VillageEntity(null, null, "New Village", 100, 100,
                     VillageType.SIX, 100, 100,
                     Map.of(
                             1, new BuildModel(EBuildings.CROPLAND, 1),
@@ -27,11 +28,9 @@ public class VillageEntityFactory {
                             Resource.CLAY, BigDecimal.valueOf(500),
                             Resource.WOOD, BigDecimal.valueOf(500),
                             Resource.IRON, BigDecimal.valueOf(500)),
-                    null)
-    );
-
-    public static VillageEntity get(VillageType villageType){
-        return villages.get(villageType);
+                    null);
+            default: return null;
+        }
     }
 
 }
