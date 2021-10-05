@@ -1,5 +1,6 @@
 package io.lanu.travian.game.models.responses;
 
+import io.lanu.travian.enums.EUnits;
 import io.lanu.travian.enums.Resource;
 import io.lanu.travian.enums.VillageType;
 import io.lanu.travian.game.entities.VillageEntity;
@@ -34,6 +35,7 @@ public class VillageView {
     private List<FieldView> fields;
     private Map<Integer, BuildingBase> buildings;
     private Map<Resource, BigDecimal> storage;
+    private Map<EUnits, Integer> homeLegion;
     private Map<Resource, BigDecimal> producePerHour;
     private List<EventView> eventsList;
 
@@ -48,6 +50,7 @@ public class VillageView {
         this.fields = this.buildFieldsView(villageEntity.getBuildings());
         this.buildings = villageEntity.mapBuildings();
         this.storage = villageEntity.getStorage();
+        this.homeLegion = villageEntity.getHomeLegion();
         this.producePerHour = villageEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(eventList);
     }

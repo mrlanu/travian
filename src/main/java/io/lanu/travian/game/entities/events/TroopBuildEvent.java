@@ -9,6 +9,7 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -23,8 +24,7 @@ public class TroopBuildEvent implements IEvent {
 
     @Override
     public void execute(VillageEntity villageEntity) {
-        /*Map<UnitType, Integer> army = villageEntity.getArmy().getHomeLegion();
-        army.put(unitType, army.getOrDefault(unitType, 0) + 1);
-        villageEntity.getProducePerHour().addGood(FieldType.CROP, -eatHour);*/
+        var homeLeg = villageEntity.getHomeLegion();
+        homeLeg.put(unitType, homeLeg.getOrDefault(unitType, 0) + 1);
     }
 }

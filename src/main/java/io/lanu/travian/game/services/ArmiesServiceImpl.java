@@ -37,7 +37,7 @@ public class ArmiesServiceImpl implements ArmiesService {
                     Resource.CLAY, BigDecimal.valueOf(100),
                     Resource.IRON, BigDecimal.valueOf(150),
                     Resource.CROP, BigDecimal.valueOf(30)),
-                40, 35, 60, 6, 50, 1, 1166);
+                40, 35, 60, 6, 50, 1, 10);
 
         List<ArmyOrderEntity> ordersList = getAllOrdersByVillageId(armyOrderRequest.getVillageId());
 

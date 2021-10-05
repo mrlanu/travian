@@ -1,5 +1,6 @@
 package io.lanu.travian.game.entities;
 
+import io.lanu.travian.enums.EUnits;
 import io.lanu.travian.enums.Manipulation;
 import io.lanu.travian.enums.Resource;
 import io.lanu.travian.enums.VillageType;
@@ -40,6 +41,7 @@ public class VillageEntity {
     private int culture;
     private Map<Integer, BuildModel> buildings;
     private Map<Resource, BigDecimal> storage;
+    private Map<EUnits, Integer> homeLegion;
     @LastModifiedDate
     private LocalDateTime modified;
 

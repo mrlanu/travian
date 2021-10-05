@@ -1,12 +1,14 @@
 package io.lanu.travian.templates.villages;
 
 import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EUnits;
 import io.lanu.travian.enums.Resource;
 import io.lanu.travian.enums.VillageType;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.BuildModel;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 public class VillageEntityFactory {
@@ -28,6 +30,7 @@ public class VillageEntityFactory {
                             Resource.CLAY, BigDecimal.valueOf(500),
                             Resource.WOOD, BigDecimal.valueOf(500),
                             Resource.IRON, BigDecimal.valueOf(500)),
+                    new HashMap<>(),
                     null);
             default: return null;
         }
