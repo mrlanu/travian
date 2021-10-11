@@ -46,10 +46,18 @@ public class VillageEntity {
     private LocalDateTime modified;
 
     public Map<Resource, BigDecimal> calculateProducePerHour(){
-        return IntStream.range(1, 6)
+        var result = IntStream.range(1, 6)
                 .mapToObj(i -> FieldsFactory.get(buildings.get(i).getBuildingName(), buildings.get(i).getLevel()))
                 .collect(Collectors.groupingBy(Field::getResource,
                         Collectors.reducing(BigDecimal.ZERO, Field::getProduction, BigDecimal::add)));
+        result.put(Resource.CROP, result.get(Resource.CROP).subtract(calculateEatPerHour()));
+        return result;
+    }
+
+    //dummy implementation
+    private BigDecimal calculateEatPerHour() {
+        BigDecimal result = BigDecimal.ZERO;
+        return result.add(BigDecimal.valueOf(homeLegion.getOrDefault(EUnits.LEGIONNAIRE, 0)));
     }
 
     public Map<Integer, BuildingBase> mapBuildings(){
