@@ -13,7 +13,7 @@ public class FieldsFactory {
 
     private static final Map<EBuildings, FieldTemplate> fields = Map.of(
             EBuildings.CROPLAND, new FieldTemplate(Resource.CROP, Arrays.asList(70, 90, 70, 20),
-                    1.67, 0, 1, 710, 22, "Crop field"), // should be changed to 1420
+                    1.67, 0, 1, 1420, 22, "Crop field"), // should be changed to 1420
             EBuildings.CLAY_PIT, new FieldTemplate(Resource.CLAY, Arrays.asList(80, 40, 80, 50),
                     1.67, 2, 1, 1630, 22, "Clay field"),
             EBuildings.WOODCUTTER, new FieldTemplate(Resource.WOOD, Arrays.asList(40, 100, 50, 60),

@@ -47,9 +47,9 @@ public class VillageView {
         this.villageType = villageEntity.getVillageType();
         this.population = villageEntity.getPopulation();
         this.culture = villageEntity.getCulture();
-        this.fields = this.buildFieldsView(villageEntity.getBuildings());
-        this.buildings = villageEntity.mapBuildings();
         this.storage = villageEntity.getStorage();
+        this.fields = this.buildFieldsView(villageEntity.getBuildings(), eventList);
+        this.buildings = villageEntity.mapBuildings();
         this.homeLegion = villageEntity.getHomeLegion();
         this.producePerHour = villageEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(eventList);
@@ -62,9 +62,17 @@ public class VillageView {
                         event.getExecutionTime()).toMillis(), "H:mm:ss", true))).collect(Collectors.toList());
     }
 
-    private List<FieldView> buildFieldsView(Map<Integer, BuildModel> buildings) {
+    private List<FieldView> buildFieldsView(Map<Integer, BuildModel> buildings, List<BuildIEvent> eventList) {
         return IntStream.range(1, 6)
-                .mapToObj(i -> FieldsFactory.get(buildings.get(i).getBuildingName(), buildings.get(i).getLevel()))
+                .mapToObj(i -> {
+                    Field field = FieldsFactory.get(buildings.get(i).getBuildingName(), buildings.get(i).getLevel());
+                    field.setPosition(i);
+                    return field;
+                })
+                .peek(field -> {
+                    field.setAbleToUpgrade(this.storage);
+                    field.setUnderUpgrade(eventList);
+                })
                 .collect(Collectors.toList());
     }
 

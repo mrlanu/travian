@@ -26,10 +26,10 @@ public class VillageEntityFactory {
 
                             6, new BuildModel(EBuildings.MAIN, 1),
                             7, new BuildModel(EBuildings.BARRACK, 1)),
-                    Map.of(Resource.CROP, BigDecimal.valueOf(500),
-                            Resource.CLAY, BigDecimal.valueOf(500),
-                            Resource.WOOD, BigDecimal.valueOf(500),
-                            Resource.IRON, BigDecimal.valueOf(500)),
+                    Map.of(Resource.CROP, BigDecimal.valueOf(100),
+                            Resource.CLAY, BigDecimal.valueOf(100),
+                            Resource.WOOD, BigDecimal.valueOf(100),
+                            Resource.IRON, BigDecimal.valueOf(100)),
                     new HashMap<>(),
                     null);
             default: return null;
