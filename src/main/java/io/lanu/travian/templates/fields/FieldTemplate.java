@@ -1,6 +1,6 @@
 package io.lanu.travian.templates.fields;
 
-import io.lanu.travian.enums.Resource;
+import io.lanu.travian.enums.EResource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class FieldTemplate {
-    private Resource resource;
+    private EResource resource;
     private List<Integer> cost;
     private double k;
     private int cu;

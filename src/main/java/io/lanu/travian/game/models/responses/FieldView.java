@@ -1,6 +1,6 @@
 package io.lanu.travian.game.models.responses;
 
-import io.lanu.travian.enums.Resource;
+import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.events.BuildIEvent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +19,7 @@ public abstract class FieldView {
     protected boolean underUpgrade;
     protected boolean ableToUpgrade;
 
-    public abstract void setAbleToUpgrade(Map<Resource, BigDecimal> storage);
+    public abstract void setAbleToUpgrade(Map<EResource, BigDecimal> storage);
 
     public abstract void setUnderUpgrade(List<BuildIEvent> eventList);
 }

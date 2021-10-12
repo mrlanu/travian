@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class BuildingEntity {
-    private EBuildings buildingType;
+public class BuildModel {
+    private EBuildings buildingName;
     private int level;
 }

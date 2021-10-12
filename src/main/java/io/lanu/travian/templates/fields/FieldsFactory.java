@@ -1,7 +1,7 @@
 package io.lanu.travian.templates.fields;
 
 import io.lanu.travian.enums.EBuildings;
-import io.lanu.travian.enums.Resource;
+import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.models.responses.Field;
 
 import java.math.BigDecimal;
@@ -12,13 +12,13 @@ import java.util.Map;
 public class FieldsFactory {
 
     private static final Map<EBuildings, FieldTemplate> fields = Map.of(
-            EBuildings.CROPLAND, new FieldTemplate(Resource.CROP, Arrays.asList(70, 90, 70, 20),
+            EBuildings.CROPLAND, new FieldTemplate(EResource.CROP, Arrays.asList(70, 90, 70, 20),
                     1.67, 0, 1, 1420, 22, "Crop field"), // should be changed to 1420
-            EBuildings.CLAY_PIT, new FieldTemplate(Resource.CLAY, Arrays.asList(80, 40, 80, 50),
+            EBuildings.CLAY_PIT, new FieldTemplate(EResource.CLAY, Arrays.asList(80, 40, 80, 50),
                     1.67, 2, 1, 1630, 22, "Clay field"),
-            EBuildings.WOODCUTTER, new FieldTemplate(Resource.WOOD, Arrays.asList(40, 100, 50, 60),
+            EBuildings.WOODCUTTER, new FieldTemplate(EResource.WOOD, Arrays.asList(40, 100, 50, 60),
                     1.67, 2, 1, 1750, 22, "Clay field"),
-            EBuildings.IRON_MINE, new FieldTemplate(Resource.IRON, Arrays.asList(100, 80, 30, 60),
+            EBuildings.IRON_MINE, new FieldTemplate(EResource.IRON, Arrays.asList(100, 80, 30, 60),
                     1.67, 2, 1, 2310, 22, "Clay field")
     );
 
@@ -31,11 +31,11 @@ public class FieldsFactory {
         result.setLevel(level);
         result.setProduction(BigDecimal.valueOf(productions[level]));
 
-        Map<Resource, BigDecimal> resToNextLevel = new HashMap<>();
-        resToNextLevel.put(Resource.WOOD, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(0), 5)));
-        resToNextLevel.put(Resource.CLAY, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(1), 5)));
-        resToNextLevel.put(Resource.IRON, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(2), 5)));
-        resToNextLevel.put(Resource.CROP, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(3), 5)));
+        Map<EResource, BigDecimal> resToNextLevel = new HashMap<>();
+        resToNextLevel.put(EResource.WOOD, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(0), 5)));
+        resToNextLevel.put(EResource.CLAY, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(1), 5)));
+        resToNextLevel.put(EResource.IRON, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(2), 5)));
+        resToNextLevel.put(EResource.CROP, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(3), 5)));
 
         var time = round((template.getTime() / 3) * Math.pow(1.6, level) - (1000d + level * 10) /3, 10);
         result.setResourcesToNextLevel(resToNextLevel);

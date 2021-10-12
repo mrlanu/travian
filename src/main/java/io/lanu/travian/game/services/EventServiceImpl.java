@@ -1,14 +1,13 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.Manipulation;
+import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.BuildIEvent;
-import io.lanu.travian.game.models.BuildModel;
+import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.models.responses.Field;
 import io.lanu.travian.game.repositories.EventRepository;
 import io.lanu.travian.game.repositories.VillageRepository;
 import io.lanu.travian.templates.fields.FieldsFactory;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,7 +37,7 @@ public class EventServiceImpl implements EventService{
         LocalDateTime executionTime = LocalDateTime.now()
                 .plusSeconds(field.getTimeToNextLevel());
 
-        villageEntity.manipulateGoods(Manipulation.SUBTRACT, field.getResourcesToNextLevel());
+        villageEntity.manipulateGoods(EManipulation.SUBTRACT, field.getResourcesToNextLevel());
 
         BuildIEvent buildEvent = new BuildIEvent(buildPosition, buildModel.getBuildingName(), villageId, executionTime);
 

@@ -1,11 +1,11 @@
 package io.lanu.travian.game.models.responses;
 
 import io.lanu.travian.enums.EUnits;
-import io.lanu.travian.enums.Resource;
-import io.lanu.travian.enums.VillageType;
+import io.lanu.travian.enums.EResource;
+import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.BuildIEvent;
-import io.lanu.travian.game.models.BuildModel;
+import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.fields.FieldsFactory;
 import lombok.AllArgsConstructor;
@@ -27,21 +27,23 @@ import java.util.stream.IntStream;
 public class VillageView {
     private String villageId;
     private String accountId;
+    private String name;
     private int x;
     private int y;
-    private VillageType villageType;
+    private EVillageType villageType;
     private int population;
     private int culture;
     private List<FieldView> fields;
     private Map<Integer, BuildingBase> buildings;
-    private Map<Resource, BigDecimal> storage;
+    private Map<EResource, BigDecimal> storage;
     private Map<EUnits, Integer> homeLegion;
-    private Map<Resource, BigDecimal> producePerHour;
+    private Map<EResource, BigDecimal> producePerHour;
     private List<EventView> eventsList;
 
     public VillageView(VillageEntity villageEntity, List<BuildIEvent> eventList) {
         this.villageId = villageEntity.getVillageId();
         this.accountId = villageEntity.getAccountId();
+        this.name = villageEntity.getName();
         this.x = villageEntity.getX();
         this.y = villageEntity.getY();
         this.villageType = villageEntity.getVillageType();
@@ -65,7 +67,7 @@ public class VillageView {
     private List<FieldView> buildFieldsView(Map<Integer, BuildModel> buildings, List<BuildIEvent> eventList) {
         return IntStream.range(1, 6)
                 .mapToObj(i -> {
-                    Field field = FieldsFactory.get(buildings.get(i).getBuildingName(), buildings.get(i).getLevel());
+                    FieldView field = FieldsFactory.get(buildings.get(i).getBuildingName(), buildings.get(i).getLevel());
                     field.setPosition(i);
                     return field;
                 })

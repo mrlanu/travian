@@ -1,12 +1,12 @@
 package io.lanu.travian.game.models.requests;
 
-import io.lanu.travian.enums.VillageType;
+import io.lanu.travian.enums.EVillageType;
 import lombok.Data;
 
 @Data
 public class NewVillageRequest {
     private String accountId;
-    private VillageType villageType;
+    private EVillageType villageType;
     private Integer x;
     private Integer y;
 }

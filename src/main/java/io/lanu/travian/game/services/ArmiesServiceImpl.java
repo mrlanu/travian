@@ -2,7 +2,7 @@ package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.ENations;
 import io.lanu.travian.enums.EUnits;
-import io.lanu.travian.enums.Resource;
+import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.ArmyOrderEntity;
 import io.lanu.travian.game.entities.events.TroopBuildEvent;
 import io.lanu.travian.game.models.TroopUnit;
@@ -33,10 +33,10 @@ public class ArmiesServiceImpl implements ArmiesService {
     public ArmyOrderEntity orderUnits(ArmyOrderRequest armyOrderRequest) {
         TroopUnit troop = new TroopUnit(EUnits.LEGIONNAIRE, ENations.ROME,
                 Map.of(
-                    Resource.WOOD, BigDecimal.valueOf(120),
-                    Resource.CLAY, BigDecimal.valueOf(100),
-                    Resource.IRON, BigDecimal.valueOf(150),
-                    Resource.CROP, BigDecimal.valueOf(30)),
+                    EResource.WOOD, BigDecimal.valueOf(120),
+                    EResource.CLAY, BigDecimal.valueOf(100),
+                    EResource.IRON, BigDecimal.valueOf(150),
+                    EResource.CROP, BigDecimal.valueOf(30)),
                 40, 35, 60, 6, 50, 1, 10);
 
         List<ArmyOrderEntity> ordersList = getAllOrdersByVillageId(armyOrderRequest.getVillageId());

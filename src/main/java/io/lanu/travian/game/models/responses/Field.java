@@ -1,6 +1,6 @@
 package io.lanu.travian.game.models.responses;
 
-import io.lanu.travian.enums.Resource;
+import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.events.BuildIEvent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,13 +16,13 @@ import java.util.Map;
 @AllArgsConstructor
 @Data
 public class Field extends FieldView{
-    private Resource resource;
+    private EResource resource;
     private BigDecimal production;
-    private Map<Resource, BigDecimal> resourcesToNextLevel;
+    private Map<EResource, BigDecimal> resourcesToNextLevel;
     private long timeToNextLevel;
 
     @Override
-    public void setAbleToUpgrade(Map<Resource, BigDecimal> storage) {
+    public void setAbleToUpgrade(Map<EResource, BigDecimal> storage) {
         this.ableToUpgrade = resourcesToNextLevel.entrySet().stream()
                 .noneMatch(x -> storage.get(x.getKey()).compareTo(x.getValue()) < 0);
 

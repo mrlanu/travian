@@ -1,7 +1,7 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.Resource;
-import io.lanu.travian.enums.VillageType;
+import io.lanu.travian.enums.EResource;
+import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.BuildIEvent;
 import io.lanu.travian.game.entities.events.DeathIEvent;
@@ -38,7 +38,7 @@ public class VillageServiceImpl implements VillageService{
 
     @Override
     public VillageEntity createVillage(NewVillageRequest newVillageRequest) {
-        VillageEntity newVillage = VillageEntityFactory.getVillageByType(VillageType.SIX);
+        VillageEntity newVillage = VillageEntityFactory.getVillageByType(EVillageType.SIX);
         newVillage.setAccountId(newVillageRequest.getAccountId());
         return villageRepository.save(newVillage);
     }
@@ -61,11 +61,11 @@ public class VillageServiceImpl implements VillageService{
 
         // iterate over all events and execute them
         for (IEvent event : allEvents) {
-            var cropPerHour = villageEntity.calculateProducePerHour().get(Resource.CROP);
+            var cropPerHour = villageEntity.calculateProducePerHour().get(EResource.CROP);
 
             // if crop in the village is less than 0 keep create the death event & execute them until the crop will be positive
             while (cropPerHour.longValue() < 0) {
-                var leftCrop = villageEntity.getStorage().get(Resource.CROP);
+                var leftCrop = villageEntity.getStorage().get(EResource.CROP);
                 var durationToDeath = leftCrop.divide(cropPerHour.negate(), mc).multiply(BigDecimal.valueOf(3_600_000), mc);
 
                 LocalDateTime deathTime = modified.plus(durationToDeath.longValue(), ChronoUnit.MILLIS);
@@ -78,7 +78,7 @@ public class VillageServiceImpl implements VillageService{
                 } else {
                     break;
                 }
-                cropPerHour = villageEntity.calculateProducePerHour().get(Resource.CROP);
+                cropPerHour = villageEntity.calculateProducePerHour().get(EResource.CROP);
             }
             // recalculate storage leftovers
             villageEntity.calculateProducedGoods(modified, event.getExecutionTime());

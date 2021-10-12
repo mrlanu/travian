@@ -1,7 +1,7 @@
 package io.lanu.travian.templates.buildings;
 
 import io.lanu.travian.enums.EBuildings;
-import io.lanu.travian.enums.Resource;
+import io.lanu.travian.enums.EResource;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,12 +18,12 @@ public class BuildingBase {
     protected EBuildings buildingType;
     protected int level;
     protected int position;
-    protected Map<Resource, BigDecimal> resourcesToNextLevel;
+    protected Map<EResource, BigDecimal> resourcesToNextLevel;
     protected List<RequirementBuilding> requirementBuildings;
 
     public BuildingBase(EBuildings buildingType,
                         int level, int position,
-                        Map<Resource, BigDecimal> resourcesToNextLevel,
+                        Map<EResource, BigDecimal> resourcesToNextLevel,
                         List<RequirementBuilding> requirementBuildings) {
         this.buildingType = buildingType;
         this.level = level;

@@ -1,10 +1,9 @@
 package io.lanu.travian.game.entities;
 
 import io.lanu.travian.enums.EUnits;
-import io.lanu.travian.enums.Manipulation;
-import io.lanu.travian.enums.Resource;
-import io.lanu.travian.enums.VillageType;
-import io.lanu.travian.game.models.BuildModel;
+import io.lanu.travian.enums.EManipulation;
+import io.lanu.travian.enums.EResource;
+import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.models.responses.Field;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.fields.FieldsFactory;
@@ -36,21 +35,21 @@ public class VillageEntity {
     private String name;
     private int x;
     private int y;
-    private VillageType villageType;
+    private EVillageType villageType;
     private int population;
     private int culture;
     private Map<Integer, BuildModel> buildings;
-    private Map<Resource, BigDecimal> storage;
+    private Map<EResource, BigDecimal> storage;
     private Map<EUnits, Integer> homeLegion;
     @LastModifiedDate
     private LocalDateTime modified;
 
-    public Map<Resource, BigDecimal> calculateProducePerHour(){
+    public Map<EResource, BigDecimal> calculateProducePerHour(){
         var result = IntStream.range(1, 6)
                 .mapToObj(i -> FieldsFactory.get(buildings.get(i).getBuildingName(), buildings.get(i).getLevel()))
                 .collect(Collectors.groupingBy(Field::getResource,
                         Collectors.reducing(BigDecimal.ZERO, Field::getProduction, BigDecimal::add)));
-        result.put(Resource.CROP, result.get(Resource.CROP).subtract(calculateEatPerHour()));
+        result.put(EResource.CROP, result.get(EResource.CROP).subtract(calculateEatPerHour()));
         return result;
     }
 
@@ -66,7 +65,7 @@ public class VillageEntity {
 
     public void calculateProducedGoods(LocalDateTime lastModified, LocalDateTime untilTime){
         final MathContext mc = new MathContext(3);
-        Map<Resource, BigDecimal> producePerHour = calculateProducePerHour();
+        Map<EResource, BigDecimal> producePerHour = calculateProducePerHour();
 
         long durationFromLastModified = ChronoUnit.MILLIS.between(lastModified, untilTime);
 
@@ -76,25 +75,25 @@ public class VillageEntity {
                 .divide(BigDecimal.valueOf(3600000L), mc);
 
         BigDecimal woodProduced =
-                producePerHour.get(Resource.WOOD)
+                producePerHour.get(EResource.WOOD)
                         .multiply(divide);
         BigDecimal clayProduced =
-                producePerHour.get(Resource.CLAY)
+                producePerHour.get(EResource.CLAY)
                         .multiply(divide);
         BigDecimal ironProduced =
-                producePerHour.get(Resource.IRON)
+                producePerHour.get(EResource.IRON)
                         .multiply(divide);
         BigDecimal cropProduced =
-                producePerHour.get(Resource.CROP)
+                producePerHour.get(EResource.CROP)
                         .multiply(divide);
 
-        manipulateGoods(Manipulation.ADD, Map.of(Resource.WOOD, woodProduced, Resource.CLAY, clayProduced,
-                Resource.IRON, ironProduced, Resource.CROP, cropProduced));
+        manipulateGoods(EManipulation.ADD, Map.of(EResource.WOOD, woodProduced, EResource.CLAY, clayProduced,
+                EResource.IRON, ironProduced, EResource.CROP, cropProduced));
     }
 
 
-    public void manipulateGoods(Manipulation kindOfManipulation, Map<Resource, BigDecimal> goods){
-        if (kindOfManipulation.equals(Manipulation.ADD)){
+    public void manipulateGoods(EManipulation kindOfManipulation, Map<EResource, BigDecimal> goods){
+        if (kindOfManipulation.equals(EManipulation.ADD)){
             storage.forEach((k, v) -> storage.put(k, storage.get(k).add(goods.get(k))));
         } else {
             storage.forEach((k, v) -> storage.put(k, storage.get(k).subtract(goods.get(k))));

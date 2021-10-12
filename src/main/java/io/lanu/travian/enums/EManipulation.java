@@ -1,6 +1,6 @@
 package io.lanu.travian.enums;
 
-public enum Manipulation {
+public enum EManipulation {
     ADD, SUBTRACT
 }
 

@@ -3,6 +3,6 @@ package io.lanu.travian.enums;
 import lombok.Getter;
 
 @Getter
-public enum Resource {
+public enum EResource {
     WOOD, CLAY, IRON, CROP
 }
