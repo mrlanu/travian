@@ -1,9 +1,8 @@
 package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.EManipulation;
-import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.entities.events.BuildIEvent;
 import io.lanu.travian.game.entities.BuildModel;
+import io.lanu.travian.game.entities.events.BuildIEvent;
 import io.lanu.travian.game.models.responses.Field;
 import io.lanu.travian.game.repositories.EventRepository;
 import io.lanu.travian.game.repositories.VillageRepository;
@@ -27,15 +26,18 @@ public class EventServiceImpl implements EventService{
     @Override
     public BuildIEvent createBuildEvent(String villageId, Integer buildPosition) {
 
-        VillageEntity villageEntity = villageRepository.findById(villageId)
+        var villageEntity = villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String
                         .format("Village with id - %s is not exist.", villageId)));
+
+        var events = eventRepository.findAllByVillageId(villageId);
 
         BuildModel buildModel = villageEntity.getBuildings().get(buildPosition);
         Field field = FieldsFactory.get(buildModel.getBuildingName(), buildModel.getLevel());
 
-        LocalDateTime executionTime = LocalDateTime.now()
-                .plusSeconds(field.getTimeToNextLevel());
+        LocalDateTime executionTime = events.size() > 0 ?
+                events.get(events.size() - 1).getExecutionTime().plusSeconds(field.getTimeToNextLevel()) :
+                LocalDateTime.now().plusSeconds(field.getTimeToNextLevel());
 
         villageEntity.manipulateGoods(EManipulation.SUBTRACT, field.getResourcesToNextLevel());
 

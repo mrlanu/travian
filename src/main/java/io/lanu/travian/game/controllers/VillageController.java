@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/villages")
 public class VillageController {
@@ -48,7 +49,7 @@ public class VillageController {
     @PutMapping("/{villageId}/fields/{fieldPosition}/upgrade")
     public ResponseEntity<String> upgradeField(@PathVariable String villageId, @PathVariable Integer fieldPosition){
         BuildIEvent buildEvent = eventService.createBuildEvent(villageId, fieldPosition);
-        return ResponseEntity.status(HttpStatus.OK).body("New Event ID : " + buildEvent.getEventId());
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping("/armies")

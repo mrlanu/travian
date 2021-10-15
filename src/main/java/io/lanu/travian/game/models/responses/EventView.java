@@ -12,5 +12,5 @@ import java.time.LocalDateTime;
 public class EventView {
     private String name;
     private LocalDateTime completeTime;
-    private String timeLeft;
+    private long timeLeft;
 }
