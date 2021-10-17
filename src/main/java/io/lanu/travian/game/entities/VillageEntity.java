@@ -100,6 +100,28 @@ public class VillageEntity {
         }
     }
 
+    public BigDecimal getWarehouseCapacity() {
+        return BigDecimal.valueOf(400);
+    }
+
+    public BigDecimal getGranaryCapacity() {
+        return BigDecimal.valueOf(450);
+    }
+
+    public void castStorage() {
+        for (Map.Entry<EResource, BigDecimal> entry : this.storage.entrySet()) {
+            if (entry.getKey().equals(EResource.CROP)){
+                if (entry.getValue().compareTo(getGranaryCapacity()) > 0){
+                    this.storage.put(entry.getKey(), getGranaryCapacity());
+                }
+                continue;
+            }
+            if (entry.getValue().compareTo(getWarehouseCapacity()) > 0){
+                this.storage.put(entry.getKey(), getWarehouseCapacity());
+            }
+        }
+    }
+
     /*public void addGoodToProducePerHour(Resource resourceType, BigDecimal amount){
         var producePerHour = villageEntity.getProducePerHour();
         producePerHour.put(resourceType, producePerHour.get(resourceType).add(amount));

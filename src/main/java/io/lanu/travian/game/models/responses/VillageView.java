@@ -35,6 +35,8 @@ public class VillageView {
     private List<FieldView> fields;
     private Map<Integer, BuildingBase> buildings;
     private Map<EResource, BigDecimal> storage;
+    private BigDecimal warehouseCapacity;
+    private BigDecimal granaryCapacity;
     private Map<EUnits, Integer> homeLegion;
     private Map<EResource, BigDecimal> producePerHour;
     private List<EventView> eventsList;
@@ -49,6 +51,8 @@ public class VillageView {
         this.population = villageEntity.getPopulation();
         this.culture = villageEntity.getCulture();
         this.storage = villageEntity.getStorage();
+        this.warehouseCapacity = villageEntity.getWarehouseCapacity();
+        this.granaryCapacity = villageEntity.getGranaryCapacity();
         this.fields = this.buildFieldsView(villageEntity.getBuildings(), eventList);
         this.buildings = villageEntity.mapBuildings();
         this.homeLegion = villageEntity.getHomeLegion();

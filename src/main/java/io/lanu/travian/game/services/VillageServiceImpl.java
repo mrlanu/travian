@@ -86,6 +86,7 @@ public class VillageServiceImpl implements VillageService{
             modified = event.getExecutionTime();
         }
         villageEntity.calculateProducedGoods(villageEntity.getModified(), LocalDateTime.now());
+        villageEntity.castStorage();
     }
 
     private List<IEvent> combineAllEvents(VillageEntity villageEntity) {
