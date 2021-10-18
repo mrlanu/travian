@@ -72,7 +72,7 @@ public class VillageEntity {
         // here is a formula for the productions counting
         // new BigDecimal((durationFromLastModified * (double) producePerHour.get(FieldType.WOOD)) / 3600000L, mc)
         BigDecimal divide = BigDecimal.valueOf(durationFromLastModified)
-                .divide(BigDecimal.valueOf(3600000L), mc);
+                .divide(BigDecimal.valueOf(3_600_000L), mc);
 
         BigDecimal woodProduced =
                 producePerHour.get(EResource.WOOD)
@@ -101,11 +101,11 @@ public class VillageEntity {
     }
 
     public BigDecimal getWarehouseCapacity() {
-        return BigDecimal.valueOf(400);
+        return BigDecimal.valueOf(800);
     }
 
     public BigDecimal getGranaryCapacity() {
-        return BigDecimal.valueOf(450);
+        return BigDecimal.valueOf(800);
     }
 
     public void castStorage() {
