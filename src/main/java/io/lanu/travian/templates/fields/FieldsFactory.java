@@ -2,7 +2,7 @@ package io.lanu.travian.templates.fields;
 
 import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.enums.EResource;
-import io.lanu.travian.game.models.responses.Field;
+import io.lanu.travian.game.models.responses.FieldView;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -13,23 +13,25 @@ public class FieldsFactory {
 
     private static final Map<EBuildings, FieldTemplate> fields = Map.of(
             EBuildings.CROPLAND, new FieldTemplate(EResource.CROP, Arrays.asList(70, 90, 70, 20),
-                    1.67, 0, 1, 1420, 22, "Crop field"), // should be changed to 1420
+                    1.67, 0, 1, 1420, 22, "Crop field description"), // should be changed to 1420
             EBuildings.CLAY_PIT, new FieldTemplate(EResource.CLAY, Arrays.asList(80, 40, 80, 50),
-                    1.67, 2, 1, 1630, 22, "Clay field"),
+                    1.67, 2, 1, 1630, 22, "Clay field description"),
             EBuildings.WOODCUTTER, new FieldTemplate(EResource.WOOD, Arrays.asList(40, 100, 50, 60),
-                    1.67, 2, 1, 1750, 22, "Clay field"),
+                    1.67, 2, 1, 1750, 22, "Clay field description"),
             EBuildings.IRON_MINE, new FieldTemplate(EResource.IRON, Arrays.asList(100, 80, 30, 60),
-                    1.67, 2, 1, 2310, 22, "Clay field")
+                    1.67, 2, 1, 2310, 22, "Clay field description")
     );
 
     private static final Integer[] productions = {3, 7, 13, 21, 31, 46, 70, 98, 140, 203, 280};
 
-    public static Field get(EBuildings name, int level){
+    public static FieldView get(EBuildings name, int level){
         final FieldTemplate template = fields.get(name);
-        Field result = new Field();
+        FieldView result = new FieldView();
         result.setResource(template.getResource());
         result.setLevel(level);
         result.setProduction(BigDecimal.valueOf(productions[level]));
+        result.setName(name.getName());
+        result.setDescription(template.getDescription());
 
         Map<EResource, BigDecimal> resToNextLevel = new HashMap<>();
         resToNextLevel.put(EResource.WOOD, BigDecimal.valueOf(round(Math.pow(template.getK(), level) * template.getCost().get(0), 5)));

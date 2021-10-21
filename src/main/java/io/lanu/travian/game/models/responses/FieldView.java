@@ -13,13 +13,25 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public abstract class FieldView {
-    protected int position;
-    protected int level;
-    protected boolean underUpgrade;
-    protected boolean ableToUpgrade;
+public class FieldView {
+    private int position;
+    private int level;
+    private String name;
+    private boolean underUpgrade;
+    private boolean ableToUpgrade;
+    protected String description;
+    private EResource resource;
+    private BigDecimal production;
+    private Map<EResource, BigDecimal> resourcesToNextLevel;
+    private long timeToNextLevel;
 
-    public abstract void setAbleToUpgrade(Map<EResource, BigDecimal> storage);
+    public void setAbleToUpgrade(Map<EResource, BigDecimal> storage) {
+        this.ableToUpgrade = resourcesToNextLevel.entrySet().stream()
+                .noneMatch(x -> storage.get(x.getKey()).compareTo(x.getValue()) < 0);
+    }
 
-    public abstract void setUnderUpgrade(List<BuildIEvent> eventList);
+    public void setUnderUpgrade(List<BuildIEvent> eventList) {
+        this.underUpgrade =
+                eventList.stream().anyMatch(e -> this.position == e.getBuildingPosition());
+    }
 }

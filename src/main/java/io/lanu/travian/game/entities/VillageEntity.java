@@ -4,7 +4,7 @@ import io.lanu.travian.enums.EUnits;
 import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.EVillageType;
-import io.lanu.travian.game.models.responses.Field;
+import io.lanu.travian.game.models.responses.FieldView;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.fields.FieldsFactory;
 import lombok.AllArgsConstructor;
@@ -47,8 +47,8 @@ public class VillageEntity {
     public Map<EResource, BigDecimal> calculateProducePerHour(){
         var result = IntStream.range(1, 6)
                 .mapToObj(i -> FieldsFactory.get(buildings.get(i).getBuildingName(), buildings.get(i).getLevel()))
-                .collect(Collectors.groupingBy(Field::getResource,
-                        Collectors.reducing(BigDecimal.ZERO, Field::getProduction, BigDecimal::add)));
+                .collect(Collectors.groupingBy(FieldView::getResource,
+                        Collectors.reducing(BigDecimal.ZERO, FieldView::getProduction, BigDecimal::add)));
         result.put(EResource.CROP, result.get(EResource.CROP).subtract(calculateEatPerHour()));
         return result;
     }
