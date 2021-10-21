@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 public class EventView {
+    private String id;
     private String name;
     private LocalDateTime completeTime;
     private long timeLeft;

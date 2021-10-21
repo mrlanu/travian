@@ -17,10 +17,10 @@ public class VillageEntityFactory {
             case SIX: return new VillageEntity(null, null, "New Village", 100, 100,
                     EVillageType.SIX, 100, 100,
                     Map.of(
-                            1, new BuildModel(EBuildings.CROPLAND, 4),
-                            2, new BuildModel(EBuildings.WOODCUTTER, 4),
+                            1, new BuildModel(EBuildings.CROPLAND, 1),
+                            2, new BuildModel(EBuildings.WOODCUTTER, 1),
                             3, new BuildModel(EBuildings.IRON_MINE, 0),
-                            4, new BuildModel(EBuildings.CROPLAND, 4),
+                            4, new BuildModel(EBuildings.CROPLAND, 0),
                             5, new BuildModel(EBuildings.CLAY_PIT, 1),
 
                             6, new BuildModel(EBuildings.MAIN, 1),
