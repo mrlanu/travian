@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface EventRepository extends MongoRepository<BuildIEvent, String> {
     List<BuildIEvent> findAllByVillageId(String villageId);
+    BuildIEvent findBuildIEventByEventId(String eventId);
     void deleteByEventId(String eventId);
     void deleteAllByVillageIdAndExecutionTimeBefore(String villageId, LocalDateTime time);
 }

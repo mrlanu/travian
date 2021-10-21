@@ -10,7 +10,9 @@ import io.lanu.travian.templates.fields.FieldsFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EventServiceImpl implements EventService{
@@ -30,7 +32,10 @@ public class EventServiceImpl implements EventService{
                 .orElseThrow(() -> new IllegalStateException(String
                         .format("Village with id - %s is not exist.", villageId)));
 
-        var events = eventRepository.findAllByVillageId(villageId);
+        var events = eventRepository.findAllByVillageId(villageId)
+                .stream()
+                .sorted(Comparator.comparing(BuildIEvent::getExecutionTime))
+                .collect(Collectors.toList());
 
         BuildModel buildModel = villageEntity.getBuildings().get(buildPosition);
         Field field = FieldsFactory.get(buildModel.getBuildingName(), buildModel.getLevel());
@@ -54,7 +59,22 @@ public class EventServiceImpl implements EventService{
 
     @Override
     public void deleteByEventId(String eventId) {
+        var event = eventRepository.findBuildIEventByEventId(eventId);
+        var villageEntity = villageRepository.findById(event.getVillageId())
+                .orElseThrow(() -> new IllegalStateException(String
+                .format("Village with id - %s is not exist.", event.getVillageId())));
+        BuildModel buildModel = villageEntity.getBuildings().get(event.getBuildingPosition());
+        Field field = FieldsFactory.get(buildModel.getBuildingName(), buildModel.getLevel());
+        var events = eventRepository.findAllByVillageId(villageEntity.getVillageId())
+                .stream()
+                .sorted(Comparator.comparing(BuildIEvent::getExecutionTime))
+                .filter(e -> e.getExecutionTime().isAfter(event.getExecutionTime()))
+                .collect(Collectors.toList());
+        events.forEach(e -> e.setExecutionTime(e.getExecutionTime().minusSeconds(field.getTimeToNextLevel())));
+        villageEntity.manipulateGoods(EManipulation.ADD, field.getResourcesToNextLevel());
+        this.villageRepository.save(villageEntity);
         eventRepository.deleteByEventId(eventId);
+        eventRepository.saveAll(events);
     }
 
     @Override

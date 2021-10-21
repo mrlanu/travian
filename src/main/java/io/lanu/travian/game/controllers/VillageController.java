@@ -52,6 +52,12 @@ public class VillageController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/events/{eventId}")
+    public ResponseEntity<String> deleteEventById(@PathVariable String eventId){
+        this.eventService.deleteByEventId(eventId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping("/armies")
     public ArmyOrderEntity orderArmyUnits(@RequestBody ArmyOrderRequest armyOrderRequest) {
         return armiesService.orderUnits(armyOrderRequest);
