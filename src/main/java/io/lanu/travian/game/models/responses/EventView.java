@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class EventView {
     private String id;
     private String name;
+    private int toLevel;
     private LocalDateTime completeTime;
     private long timeLeft;
 }

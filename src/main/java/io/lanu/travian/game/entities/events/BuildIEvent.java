@@ -25,12 +25,14 @@ public class BuildIEvent implements IEvent {
     private String eventId;
     private int buildingPosition;
     private EBuildings buildingName;
+    private int toLevel;
     private String villageId;
     private LocalDateTime executionTime;
 
-    public BuildIEvent(int buildingPosition, EBuildings buildingName, String villageId, LocalDateTime executionTime) {
+    public BuildIEvent(int buildingPosition, EBuildings buildingName, int toLevel, String villageId, LocalDateTime executionTime) {
         this.buildingPosition = buildingPosition;
         this.buildingName = buildingName;
+        this.toLevel = toLevel;
         this.villageId = villageId;
         this.executionTime = executionTime;
     }

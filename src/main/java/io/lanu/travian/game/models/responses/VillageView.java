@@ -64,7 +64,7 @@ public class VillageView {
         /*DurationFormatUtils.formatDuration(Duration.between(LocalDateTime.now(),
                 event.getExecutionTime()).toMillis(), "H:mm:ss", true)*/
         return buildEventList.stream()
-                .map(event -> new EventView(event.getEventId(), event.getBuildingName().getName(), event.getExecutionTime(),
+                .map(event -> new EventView(event.getEventId(), event.getBuildingName().getName(), event.getToLevel(), event.getExecutionTime(),
                         ChronoUnit.SECONDS.between(LocalDateTime.now(), event.getExecutionTime()))).collect(Collectors.toList());
     }
 

@@ -46,7 +46,7 @@ public class EventServiceImpl implements EventService{
 
         villageEntity.manipulateGoods(EManipulation.SUBTRACT, field.getResourcesToNextLevel());
 
-        BuildIEvent buildEvent = new BuildIEvent(buildPosition, buildModel.getBuildingName(), villageId, executionTime);
+        BuildIEvent buildEvent = new BuildIEvent(buildPosition, buildModel.getBuildingName(), field.getLevel() + 1, villageId, executionTime);
 
         this.villageRepository.save(villageEntity);
         return this.eventRepository.save(buildEvent);
