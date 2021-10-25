@@ -7,6 +7,8 @@ import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.BuildIEvent;
 import io.lanu.travian.templates.buildings.BuildingBase;
+import io.lanu.travian.templates.buildings.BuildingsFactory;
+import io.lanu.travian.templates.buildings.MainBuilding;
 import io.lanu.travian.templates.fields.FieldsFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,6 +17,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,7 +36,7 @@ public class VillageView {
     private int population;
     private int culture;
     private List<FieldView> fields;
-    private Map<Integer, BuildingBase> buildings;
+    private List<BuildingBase> buildings;
     private Map<EResource, BigDecimal> storage;
     private BigDecimal warehouseCapacity;
     private BigDecimal granaryCapacity;
@@ -54,7 +57,7 @@ public class VillageView {
         this.warehouseCapacity = villageEntity.getWarehouseCapacity();
         this.granaryCapacity = villageEntity.getGranaryCapacity();
         this.fields = this.buildFieldsView(villageEntity.getBuildings(), eventList);
-        this.buildings = villageEntity.mapBuildings();
+        this.buildings = this.buildBuildingsView(villageEntity.getBuildings(), eventList);
         this.homeLegion = villageEntity.getHomeLegion();
         this.producePerHour = villageEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(eventList);
@@ -81,5 +84,18 @@ public class VillageView {
                 })
                 .collect(Collectors.toList());
     }
-
+    
+    private List<BuildingBase> buildBuildingsView(Map<Integer, BuildModel> buildings, List<BuildIEvent> eventList) {
+        return IntStream.range(6, 11)
+                .mapToObj(i -> {
+                    BuildingBase building = BuildingsFactory.get(buildings.get(i).getBuildingName(), buildings.get(i).getLevel());
+                    building.setPosition(i);
+                    return building;
+                })
+                .peek(building -> {
+                    /*building.setAbleToUpgrade(this.storage);
+                    building.setUnderUpgrade(eventList);*/
+                })
+                .collect(Collectors.toList());
+    }
 }

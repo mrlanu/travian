@@ -1,6 +1,5 @@
 package io.lanu.travian.templates.buildings;
 
-import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.enums.EResource;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,17 +14,17 @@ import java.util.Map;
 @Document("buildings")
 public class BuildingBase {
 
-    protected EBuildings buildingType;
+    protected String name;
     protected int level;
     protected int position;
     protected Map<EResource, BigDecimal> resourcesToNextLevel;
     protected List<RequirementBuilding> requirementBuildings;
 
-    public BuildingBase(EBuildings buildingType,
+    public BuildingBase(String name,
                         int level, int position,
                         Map<EResource, BigDecimal> resourcesToNextLevel,
                         List<RequirementBuilding> requirementBuildings) {
-        this.buildingType = buildingType;
+        this.name = name;
         this.level = level;
         this.position = position;
         this.resourcesToNextLevel = resourcesToNextLevel;

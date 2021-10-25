@@ -20,7 +20,7 @@ public class WarehouseBuilding extends BuildingBase{
                              Map<EResource, BigDecimal> resourcesToNextLevel,
                              List<RequirementBuilding> requirementBuildings,
                              Integer capacity) {
-        super(EBuildings.WAREHOUSE, level, position, resourcesToNextLevel, requirementBuildings);
+        super(EBuildings.WAREHOUSE.getName(), level, position, resourcesToNextLevel, requirementBuildings);
         this.capacity = capacity;
     }
 }

@@ -14,9 +14,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class EmptySpotBuilding extends BuildingBase {
-    public EmptySpotBuilding(int level, int position,
-                             Map<EResource, BigDecimal> resourcesToNextLevel,
-                             List<RequirementBuilding> requirementBuildings) {
-        super(EBuildings.EMPTY, level, position, resourcesToNextLevel, requirementBuildings);
+    public EmptySpotBuilding(int position) {
+        super(EBuildings.EMPTY.getName(), 0, position, null, null);
     }
 }

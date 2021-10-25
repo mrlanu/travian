@@ -20,7 +20,7 @@ public class MainBuilding extends BuildingBase {
                         Map<EResource, BigDecimal> resourcesToNextLevel,
                         List<RequirementBuilding> requirementBuildings,
                         Integer buildSpeed) {
-        super(EBuildings.MAIN, level, position, resourcesToNextLevel, requirementBuildings);
+        super(EBuildings.MAIN.getName(), level, position, resourcesToNextLevel, requirementBuildings);
         this.buildSpeed = buildSpeed;
     }
 

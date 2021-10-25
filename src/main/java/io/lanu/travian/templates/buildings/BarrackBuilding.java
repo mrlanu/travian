@@ -20,7 +20,7 @@ public class BarrackBuilding extends BuildingBase {
                            Map<EResource, BigDecimal> resourcesToNextLevel,
                            List<RequirementBuilding> requirementBuildings,
                            Integer timeReduction) {
-        super(EBuildings.BARRACK, level, position, resourcesToNextLevel, requirementBuildings);
+        super(EBuildings.BARRACK.getName(), level, position, resourcesToNextLevel, requirementBuildings);
         this.timeReduction = timeReduction;
     }
 }

@@ -20,7 +20,7 @@ public class GranaryBuilding extends BuildingBase {
                            Map<EResource, BigDecimal> resourcesToNextLevel,
                            List<RequirementBuilding> requirementBuildings,
                            Integer capacity) {
-        super(EBuildings.GRANARY, level, position, resourcesToNextLevel, requirementBuildings);
+        super(EBuildings.GRANARY.getName(), level, position, resourcesToNextLevel, requirementBuildings);
         this.capacity = capacity;
     }
 

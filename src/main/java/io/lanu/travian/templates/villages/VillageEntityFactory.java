@@ -23,8 +23,11 @@ public class VillageEntityFactory {
                             4, new BuildModel(EBuildings.CROPLAND, 0),
                             5, new BuildModel(EBuildings.CLAY_PIT, 1),
 
-                            6, new BuildModel(EBuildings.MAIN, 1),
-                            7, new BuildModel(EBuildings.BARRACK, 1)),
+                            6, new BuildModel(EBuildings.MAIN, 0),
+                            7, new BuildModel(EBuildings.WAREHOUSE, 1),
+                            8, new BuildModel(EBuildings.MAIN, 0),
+                            9, new BuildModel(EBuildings.MAIN, 0),
+                            10, new BuildModel(EBuildings.WAREHOUSE, 1)),
                     Map.of(EResource.CROP, BigDecimal.valueOf(500),
                             EResource.CLAY, BigDecimal.valueOf(500),
                             EResource.WOOD, BigDecimal.valueOf(500),

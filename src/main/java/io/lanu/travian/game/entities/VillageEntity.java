@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -57,10 +58,6 @@ public class VillageEntity {
     private BigDecimal calculateEatPerHour() {
         BigDecimal result = BigDecimal.ZERO;
         return result.add(BigDecimal.valueOf(homeLegion.getOrDefault(EUnits.LEGIONNAIRE, 0)));
-    }
-
-    public Map<Integer, BuildingBase> mapBuildings(){
-        return null;
     }
 
     public void calculateProducedGoods(LocalDateTime lastModified, LocalDateTime untilTime){
