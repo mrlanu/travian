@@ -5,8 +5,7 @@ import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.models.responses.FieldView;
-import io.lanu.travian.templates.buildings.BuildingBase;
-import io.lanu.travian.templates.fields.FieldsFactory;
+import io.lanu.travian.templates.buildings.BuildingsFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +18,6 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -46,8 +44,8 @@ public class VillageEntity {
     private LocalDateTime modified;
 
     public Map<EResource, BigDecimal> calculateProducePerHour(){
-        var result = IntStream.range(1, 6)
-                .mapToObj(i -> FieldsFactory.get(buildings.get(i).getBuildingName(), buildings.get(i).getLevel()))
+        var result = IntStream.range(1, 19)
+                .mapToObj(i -> BuildingsFactory.getField(buildings.get(i).getBuildingName(), buildings.get(i).getLevel()))
                 .collect(Collectors.groupingBy(FieldView::getResource,
                         Collectors.reducing(BigDecimal.ZERO, FieldView::getProduction, BigDecimal::add)));
         result.put(EResource.CROP, result.get(EResource.CROP).subtract(calculateEatPerHour()));

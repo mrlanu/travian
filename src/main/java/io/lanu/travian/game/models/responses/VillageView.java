@@ -8,8 +8,6 @@ import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.BuildIEvent;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
-import io.lanu.travian.templates.buildings.MainBuilding;
-import io.lanu.travian.templates.fields.FieldsFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +15,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -72,9 +69,9 @@ public class VillageView {
     }
 
     private List<FieldView> buildFieldsView(Map<Integer, BuildModel> buildings, List<BuildIEvent> eventList) {
-        return IntStream.range(1, 6)
+        return IntStream.range(1, 19)
                 .mapToObj(i -> {
-                    FieldView field = FieldsFactory.get(buildings.get(i).getBuildingName(), buildings.get(i).getLevel());
+                    FieldView field = BuildingsFactory.getField(buildings.get(i).getBuildingName(), buildings.get(i).getLevel());
                     field.setPosition(i);
                     return field;
                 })
@@ -86,9 +83,9 @@ public class VillageView {
     }
     
     private List<BuildingBase> buildBuildingsView(Map<Integer, BuildModel> buildings, List<BuildIEvent> eventList) {
-        return IntStream.range(6, 11)
+        return IntStream.range(19, 40)
                 .mapToObj(i -> {
-                    BuildingBase building = BuildingsFactory.get(buildings.get(i).getBuildingName(), buildings.get(i).getLevel());
+                    BuildingBase building = BuildingsFactory.getBuilding(buildings.get(i).getBuildingName(), buildings.get(i).getLevel());
                     building.setPosition(i);
                     return building;
                 })
