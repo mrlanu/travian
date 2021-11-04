@@ -19,6 +19,7 @@ public class FieldView {
     private String name;
     private boolean underUpgrade;
     private boolean ableToUpgrade;
+    private int maxLevel;
     protected String description;
     private EResource resource;
     private BigDecimal production;

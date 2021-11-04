@@ -13,13 +13,13 @@ public class BuildingsFactory {
 
     private static final Map<EBuildings, BuildTemplate> buildings = Map.of(
             EBuildings.CROPLAND, new BuildTemplate(EResource.CROP, Arrays.asList(70, 90, 70, 20),
-                    1.67, 0, 1, new Time(1450/3,1.6, 1000/3), 22, "Crop field description"), // should be changed to 1420
+                    1.67, 0, 1, new Time(1450/3,1.6, 1000/3), 10, "Crop field description"), // should be changed to 1420
             EBuildings.CLAY_PIT, new BuildTemplate(EResource.CLAY, Arrays.asList(80, 40, 80, 50),
-                    1.67, 2, 1, new Time(1660/3,1.6, 1000/3), 22, "Clay field description"),
+                    1.67, 2, 1, new Time(1660/3,1.6, 1000/3), 10, "Clay field description"),
             EBuildings.WOODCUTTER, new BuildTemplate(EResource.WOOD, Arrays.asList(40, 100, 50, 60),
-                    1.67, 2, 1, new Time(1780/3,1.6, 1000/3), 22, "Wood field description"),
+                    1.67, 2, 1, new Time(1780/3,1.6, 1000/3), 10, "Wood field description"),
             EBuildings.IRON_MINE, new BuildTemplate(EResource.IRON, Arrays.asList(100, 80, 30, 60),
-                    1.67, 2, 1, new Time(2350/3,1.6, 1000/3), 22, "Iron field description"),
+                    1.67, 2, 1, new Time(2350/3,1.6, 1000/3), 10, "Iron field description"),
             EBuildings.MAIN, new BuildTemplate(null, Arrays.asList(70, 40, 60, 20),
                     1.28, 2, 2, new Time(3875), 20, "Affects construction speed of other buildings. Building speed is 5x slower on 0th level (destroyed) comparing to 1st level."), // should be changed to 1420
             EBuildings.WAREHOUSE, new BuildTemplate(null, Arrays.asList(130, 160, 90, 40),
@@ -38,6 +38,7 @@ public class BuildingsFactory {
         FieldView result = new FieldView();
         result.setResource(template.getResource());
         result.setLevel(level);
+        result.setMaxLevel(template.getMaxLevel());
         result.setProduction(BigDecimal.valueOf(productions[level]));
         result.setName(name.getName());
         result.setDescription(template.getDescription());
