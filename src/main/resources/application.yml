@@ -9,3 +9,11 @@ spring:
       username: mrlanu
       password: mrlanu
       database: travian
+
+authorization:
+  token:
+    header:
+      name: Authorization
+      prefix: Bearer
+    secret: hfgry463hf746hf573ydh475fhy5739
+    expiration_time: 864000000
