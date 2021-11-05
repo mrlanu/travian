@@ -40,6 +40,8 @@ public class VillageServiceImpl implements VillageService{
     public VillageEntity createVillage(NewVillageRequest newVillageRequest) {
         VillageEntity newVillage = VillageEntityFactory.getVillageByType(EVillageType.SIX);
         newVillage.setAccountId(newVillageRequest.getAccountId());
+        newVillage.setX(newVillageRequest.getX());
+        newVillage.setY(newVillageRequest.getY());
         return villageRepository.save(newVillage);
     }
 
@@ -52,6 +54,14 @@ public class VillageServiceImpl implements VillageService{
         eventService.deleteAllByVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
         List<BuildIEvent> currentBuildingEvents = eventService.findAllByVillageId(villageId);
         return new VillageView(villageEntity, currentBuildingEvents);
+    }
+
+    @Override
+    public List<String> getAllVillagesIdByUserId(String userId) {
+        return villageRepository.findAllByAccountId(userId)
+                .stream()
+                .map(VillageEntity::getVillageId)
+                .collect(Collectors.toList());
     }
 
     private void recalculateVillage(VillageEntity villageEntity){

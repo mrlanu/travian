@@ -4,7 +4,10 @@ import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.VillageView;
 
+import java.util.List;
+
 public interface VillageService {
     VillageEntity createVillage(NewVillageRequest newVillageRequest);
     VillageView getVillageById(String villageId);
+    List<String> getAllVillagesIdByUserId(String userId);
 }
