@@ -39,8 +39,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");
 
 
-        //http.authorizeRequests().anyRequest().authenticated();  // should be uncommented for security
-        http.authorizeRequests().anyRequest().permitAll(); // should be deleted
+        http.authorizeRequests().anyRequest().authenticated();  // should be uncommented for security
+        //http.authorizeRequests().anyRequest().permitAll(); // should be deleted
 
         http.addFilter(getAuthenticationFilter());
         http.addFilterBefore(new CustomAuthorizationFilter(environment), UsernamePasswordAuthenticationFilter.class);
