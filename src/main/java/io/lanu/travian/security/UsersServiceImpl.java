@@ -29,7 +29,7 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public UserEntity registerUser(UserRegisterRequest request) {
+    public UserEntity registerUser(AuthRequest request) {
         request.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
         var user = usersRepository
                 .save(new UserEntity(null, request.getEmail(), request.getUsername(), request.getPassword()));

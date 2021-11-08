@@ -16,4 +16,4 @@ authorization:
       name: Authorization
       prefix: Bearer
     secret: hfgry463hf746hf573ydh475fhy5739
-    expiration_time: 86400000
+    expiration_time: 3600000

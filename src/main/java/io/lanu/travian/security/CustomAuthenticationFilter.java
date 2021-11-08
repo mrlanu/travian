@@ -1,14 +1,8 @@
 package io.lanu.travian.security;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,10 +10,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -39,8 +37,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
                                                 HttpServletResponse res) throws AuthenticationException {
         try {
 
-            LoginRequest creds = new ObjectMapper()
-                    .readValue(req.getInputStream(), LoginRequest.class);
+            AuthRequest creds = new ObjectMapper()
+                    .readValue(req.getInputStream(), AuthRequest.class);
 
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -59,16 +57,26 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
                                             HttpServletResponse res,
                                             FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
-        String userName = ((User) auth.getPrincipal()).getUsername();
-        UserEntity userDetails = usersService.getUserByEmail(userName);
+        String email = ((User) auth.getPrincipal()).getUsername();
+        UserEntity userDetails = usersService.getUserByEmail(email);
+
+        Date expDate = new Date(System.currentTimeMillis() +
+                Long.parseLong(environment.getProperty("authorization.token.expiration_time")));
 
         String token = Jwts.builder()
                 .setSubject(userDetails.getUserId())
-                .setExpiration(new Date(System.currentTimeMillis() + Long.parseLong(environment.getProperty("authorization.token.expiration_time"))))
+                .setExpiration(expDate)
                 .signWith(SignatureAlgorithm.HS512, environment.getProperty("authorization.token.secret") )
                 .compact();
 
-        res.addHeader("token", token);
-        res.addHeader("user-id", userDetails.getUserId());
+        new ObjectMapper()
+                .writeValue(res.getOutputStream(),
+                        AuthResponse.builder()
+                                .token(token)
+                                .expirationDate(expDate)
+                                .email(email)
+                                .userId(userDetails.getUserId())
+                                .build()
+                );
     }
 }
