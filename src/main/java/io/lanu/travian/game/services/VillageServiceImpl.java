@@ -8,6 +8,7 @@ import io.lanu.travian.game.entities.events.DeathIEvent;
 import io.lanu.travian.game.entities.events.IEvent;
 import io.lanu.travian.game.entities.events.LastEvent;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
+import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.models.responses.VillageView;
 import io.lanu.travian.game.repositories.VillageRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
@@ -57,10 +58,10 @@ public class VillageServiceImpl implements VillageService{
     }
 
     @Override
-    public List<String> getAllVillagesIdByUserId(String userId) {
+    public List<ShortVillageInfo> getAllVillagesByUserId(String userId) {
         return villageRepository.findAllByAccountId(userId)
                 .stream()
-                .map(VillageEntity::getVillageId)
+                .map(village -> new ShortVillageInfo(village.getVillageId(), village.getName(), village.getX(), village.getY()))
                 .collect(Collectors.toList());
     }
 

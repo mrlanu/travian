@@ -2,6 +2,7 @@ package io.lanu.travian.security;
 
 import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.errors.UserErrorResponse;
+import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.services.VillageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,7 +30,7 @@ public class UsersController {
     }
 
     @GetMapping("/users/{userId}/villages")
-    public ResponseEntity<List<String>> getAllVillagesIdByUserId(@PathVariable String userId){
-        return ResponseEntity.status(HttpStatus.OK).body(villageService.getAllVillagesIdByUserId(userId));
+    public ResponseEntity<List<ShortVillageInfo>> getAllVillagesIdByUserId(@PathVariable String userId){
+        return ResponseEntity.status(HttpStatus.OK).body(villageService.getAllVillagesByUserId(userId));
     }
 }
