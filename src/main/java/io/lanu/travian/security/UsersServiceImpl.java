@@ -1,6 +1,7 @@
 package io.lanu.travian.security;
 
 import io.lanu.travian.enums.EVillageType;
+import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.services.VillageService;
 import org.springframework.core.env.Environment;
@@ -30,6 +31,9 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public UserEntity registerUser(AuthRequest request) {
+        if (usersRepository.findByEmail(request.getEmail()).isPresent()){
+            throw new UserErrorException(String.format("Email %s already exists", request.getEmail()));
+        }
         request.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
         var user = usersRepository
                 .save(new UserEntity(null, request.getEmail(), request.getUsername(), request.getPassword()));

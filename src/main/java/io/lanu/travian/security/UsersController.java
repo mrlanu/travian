@@ -1,7 +1,10 @@
 package io.lanu.travian.security;
 
+import io.lanu.travian.errors.UserErrorException;
+import io.lanu.travian.errors.UserErrorResponse;
 import io.lanu.travian.game.services.VillageService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
