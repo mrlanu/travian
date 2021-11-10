@@ -37,6 +37,7 @@ public class VillageEntity {
     private EVillageType villageType;
     private int population;
     private int culture;
+    private int approval;
     private Map<Integer, BuildModel> buildings;
     private Map<EResource, BigDecimal> storage;
     private Map<EUnits, Integer> homeLegion;

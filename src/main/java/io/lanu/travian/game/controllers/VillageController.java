@@ -52,6 +52,11 @@ public class VillageController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @PutMapping("/{villageId}/update-name/{newName}")
+    public ResponseEntity<String> updateName(@PathVariable String villageId, @PathVariable String newName){
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.villageService.updateName(villageId, newName));
+    }
+
     @DeleteMapping("/events/{eventId}")
     public ResponseEntity<String> deleteEventById(@PathVariable String eventId){
         this.eventService.deleteByEventId(eventId);

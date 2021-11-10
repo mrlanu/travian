@@ -15,7 +15,7 @@ public class VillageEntityFactory {
     public static VillageEntity getVillageByType(EVillageType villageType){
         switch (villageType){
             case SIX: return new VillageEntity(null, null, "New Village", 0, 0,
-                    EVillageType.SIX, 100, 100,
+                    EVillageType.SIX, 100, 100, 100,
                     Map.ofEntries(
                             Map.entry(1, new BuildModel(EBuildings.WOODCUTTER, 1)),
                             Map.entry(2, new BuildModel(EBuildings.CROPLAND, 1)),

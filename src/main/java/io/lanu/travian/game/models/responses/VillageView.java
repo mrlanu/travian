@@ -32,6 +32,7 @@ public class VillageView {
     private EVillageType villageType;
     private int population;
     private int culture;
+    private int approval;
     private List<FieldView> fields;
     private List<BuildingBase> buildings;
     private Map<EResource, BigDecimal> storage;
@@ -50,6 +51,7 @@ public class VillageView {
         this.villageType = villageEntity.getVillageType();
         this.population = villageEntity.getPopulation();
         this.culture = villageEntity.getCulture();
+        this.approval = villageEntity.getApproval();
         this.storage = villageEntity.getStorage();
         this.warehouseCapacity = villageEntity.getWarehouseCapacity();
         this.granaryCapacity = villageEntity.getGranaryCapacity();

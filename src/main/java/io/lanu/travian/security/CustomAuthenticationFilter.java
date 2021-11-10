@@ -75,6 +75,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
                                 .token(token)
                                 .expirationDate(expDate)
                                 .email(email)
+                                .username(userDetails.getUsername())
                                 .userId(userDetails.getUserId())
                                 .build()
                 );

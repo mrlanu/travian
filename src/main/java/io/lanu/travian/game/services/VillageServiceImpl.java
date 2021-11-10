@@ -47,6 +47,15 @@ public class VillageServiceImpl implements VillageService{
     }
 
     @Override
+    public String updateName(String villageId, String newName) {
+        VillageEntity villageEntity = this.villageRepository.findById(villageId)
+                .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
+        villageEntity.setName(newName);
+        villageRepository.save(villageEntity);
+        return newName;
+    }
+
+    @Override
     public VillageView getVillageById(String villageId) {
         VillageEntity villageEntity = this.villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));

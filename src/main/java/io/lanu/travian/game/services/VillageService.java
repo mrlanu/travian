@@ -11,4 +11,5 @@ public interface VillageService {
     VillageEntity createVillage(NewVillageRequest newVillageRequest);
     VillageView getVillageById(String villageId);
     List<ShortVillageInfo> getAllVillagesByUserId(String userId);
+    String updateName(String villageId, String newName);
 }
