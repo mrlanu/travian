@@ -52,9 +52,9 @@ public class VillageController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PutMapping("/{villageId}/update-name/{newName}")
-    public ResponseEntity<String> updateName(@PathVariable String villageId, @PathVariable String newName){
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.villageService.updateName(villageId, newName));
+    @PutMapping("/{villageId}/update-name")
+    public ResponseEntity<String> updateName(@PathVariable String villageId, @RequestParam String name){
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.villageService.updateName(villageId, name));
     }
 
     @DeleteMapping("/events/{eventId}")
