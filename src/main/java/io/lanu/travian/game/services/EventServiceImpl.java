@@ -3,9 +3,9 @@ package io.lanu.travian.game.services;
 import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.events.BuildIEvent;
-import io.lanu.travian.game.models.responses.FieldView;
 import io.lanu.travian.game.repositories.EventRepository;
 import io.lanu.travian.game.repositories.VillageRepository;
+import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +38,7 @@ public class EventServiceImpl implements EventService{
                 .collect(Collectors.toList());
 
         BuildModel buildModel = villageEntity.getBuildings().get(buildPosition);
-        FieldView field = BuildingsFactory.getField(buildModel.getBuildingName(), buildModel.getLevel());
+        BuildingBase field = BuildingsFactory.getBuilding(buildModel.getBuildingName(), buildModel.getLevel());
 
         LocalDateTime executionTime = events.size() > 0 ?
                 events.get(events.size() - 1).getExecutionTime().plusSeconds(field.getTimeToNextLevel()) :
@@ -64,7 +64,7 @@ public class EventServiceImpl implements EventService{
                 .orElseThrow(() -> new IllegalStateException(String
                 .format("Village with id - %s is not exist.", event.getVillageId())));
         BuildModel buildModel = villageEntity.getBuildings().get(event.getBuildingPosition());
-        FieldView field = BuildingsFactory.getField(buildModel.getBuildingName(), buildModel.getLevel());
+        BuildingBase field = BuildingsFactory.getBuilding(buildModel.getBuildingName(), buildModel.getLevel());
         var events = eventRepository.findAllByVillageId(villageEntity.getVillageId())
                 .stream()
                 .sorted(Comparator.comparing(BuildIEvent::getExecutionTime))

@@ -1,5 +1,6 @@
 package io.lanu.travian.game.models.responses;
 
+import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.EUnits;
 import io.lanu.travian.enums.EVillageType;
@@ -33,7 +34,7 @@ public class VillageView {
     private int population;
     private int culture;
     private int approval;
-    private List<FieldView> fields;
+    private List<BuildingBase> fields;
     private List<BuildingBase> buildings;
     private Map<EResource, BigDecimal> storage;
     private BigDecimal warehouseCapacity;
@@ -55,7 +56,6 @@ public class VillageView {
         this.storage = villageEntity.getStorage();
         this.warehouseCapacity = villageEntity.getWarehouseCapacity();
         this.granaryCapacity = villageEntity.getGranaryCapacity();
-        this.fields = this.buildFieldsView(villageEntity.getBuildings(), eventList);
         this.buildings = this.buildBuildingsView(villageEntity.getBuildings(), eventList);
         this.homeLegion = villageEntity.getHomeLegion();
         this.producePerHour = villageEntity.calculateProducePerHour();
@@ -69,31 +69,19 @@ public class VillageView {
                 .map(event -> new EventView(event.getEventId(), event.getBuildingName().getName(), event.getToLevel(), event.getExecutionTime(),
                         ChronoUnit.SECONDS.between(LocalDateTime.now(), event.getExecutionTime()))).collect(Collectors.toList());
     }
-
-    private List<FieldView> buildFieldsView(Map<Integer, BuildModel> buildings, List<BuildIEvent> eventList) {
-        return IntStream.range(1, 19)
-                .mapToObj(i -> {
-                    FieldView field = BuildingsFactory.getField(buildings.get(i).getBuildingName(), buildings.get(i).getLevel());
-                    field.setPosition(i);
-                    return field;
-                })
-                .peek(field -> {
-                    field.setAbleToUpgrade(this.storage);
-                    field.setUnderUpgrade(eventList);
-                })
-                .collect(Collectors.toList());
-    }
     
     private List<BuildingBase> buildBuildingsView(Map<Integer, BuildModel> buildings, List<BuildIEvent> eventList) {
-        return IntStream.range(19, 40)
+        return IntStream.range(1, 40)
                 .mapToObj(i -> {
                     BuildingBase building = BuildingsFactory.getBuilding(buildings.get(i).getBuildingName(), buildings.get(i).getLevel());
                     building.setPosition(i);
                     return building;
                 })
                 .peek(building -> {
-                    /*building.setAbleToUpgrade(this.storage);
-                    building.setUnderUpgrade(eventList);*/
+                    if (!building.getName().equals(EBuildings.EMPTY.getName())){
+                        building.setAbleToUpgrade(this.storage);
+                        building.setUnderUpgrade(eventList);
+                    }
                 })
                 .collect(Collectors.toList());
     }

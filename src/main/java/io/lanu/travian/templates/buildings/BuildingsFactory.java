@@ -2,10 +2,10 @@ package io.lanu.travian.templates.buildings;
 
 import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.enums.EResource;
-import io.lanu.travian.game.models.responses.FieldView;
 import io.lanu.travian.templates.Time;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -32,31 +32,41 @@ public class BuildingsFactory {
 
     private static final Integer[] productions = {3, 7, 13, 21, 31, 46, 70, 98, 140, 203, 280};
 
-
-    public static FieldView getField(EBuildings name, int level){
-        var template = buildings.get(name);
-        FieldView result = new FieldView();
-        result.setResource(template.getResource());
-        result.setLevel(level);
-        result.setMaxLevel(template.getMaxLevel());
-        result.setProduction(BigDecimal.valueOf(productions[level]));
-        result.setName(name.getName());
-        result.setDescription(template.getDescription());
-        result.setResourcesToNextLevel(getResourcesToNextLevel(level, template));
-        result.setTimeToNextLevel(template.getTime().valueOf(level + 1));
-        return result;
-    }
-
     public static BuildingBase getBuilding(EBuildings name, int level){
+        BuildingBase result;
         var template = buildings.get(name);
-        Map<EResource, BigDecimal> resToNextLevel = (template != null)? getResourcesToNextLevel(level, template) : null;
         switch (name){
-            case MAIN: return new MainBuilding(level, 0, resToNextLevel, null, 100);
-            case EMPTY: return new EmptySpotBuilding(0);
-            case WAREHOUSE: return new WarehouseBuilding(level, 0, resToNextLevel, null, 800);
-            case GRANARY: return new GranaryBuilding(level, 0, resToNextLevel, null, 800);
+            case CROPLAND: result = new ResourceField(EResource.CROP, BigDecimal.valueOf(productions[level]));
+                break;
+            case CLAY_PIT: result = new ResourceField(EResource.CLAY, BigDecimal.valueOf(productions[level]));
+                break;
+            case WOODCUTTER: result = new ResourceField(EResource.WOOD, BigDecimal.valueOf(productions[level]));
+                break;
+            case IRON_MINE: result = new ResourceField(EResource.IRON, BigDecimal.valueOf(productions[level]));
+                break;
+            case EMPTY: result = new EmptySpotBuilding();
+                break;
+            case MAIN: result = new MainBuilding(100);
+                break;
+            case WAREHOUSE: result = new WarehouseBuilding(750);
+                break;
+            case GRANARY: result = new GranaryBuilding(750);
+                break;
+            case BARRACK: result = new BarrackBuilding(0);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + name);
         }
-        return null;
+
+        if (template != null) {
+            result.setLevel(level);
+            result.setMaxLevel(template.getMaxLevel());
+            result.setDescription(template.getDescription());
+            result.setTimeToNextLevel(template.getTime().valueOf(level + 1));
+            result.setResourcesToNextLevel(getResourcesToNextLevel(level, template));
+            result.setRequirementBuildings(new ArrayList<>());
+        }
+        return result;
     }
 
     private static Map<EResource, BigDecimal> getResourcesToNextLevel(int level, BuildTemplate template) {
