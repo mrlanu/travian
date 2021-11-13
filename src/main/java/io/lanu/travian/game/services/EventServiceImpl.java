@@ -26,7 +26,7 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public BuildIEvent createBuildEvent(String villageId, Integer buildPosition) {
+    public BuildIEvent createBuildEvent(String villageId, Integer buildingPosition) {
 
         var villageEntity = villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String
@@ -37,16 +37,16 @@ public class EventServiceImpl implements EventService{
                 .sorted(Comparator.comparing(BuildIEvent::getExecutionTime))
                 .collect(Collectors.toList());
 
-        BuildModel buildModel = villageEntity.getBuildings().get(buildPosition);
-        BuildingBase field = BuildingsFactory.getBuilding(buildModel.getBuildingName(), buildModel.getLevel());
+        BuildModel buildModel = villageEntity.getBuildings().get(buildingPosition);
+        BuildingBase building = BuildingsFactory.getBuilding(buildModel.getBuildingName(), buildModel.getLevel());
 
         LocalDateTime executionTime = events.size() > 0 ?
-                events.get(events.size() - 1).getExecutionTime().plusSeconds(field.getTimeToNextLevel()) :
-                LocalDateTime.now().plusSeconds(field.getTimeToNextLevel());
+                events.get(events.size() - 1).getExecutionTime().plusSeconds(building.getTimeToNextLevel()) :
+                LocalDateTime.now().plusSeconds(building.getTimeToNextLevel());
 
-        villageEntity.manipulateGoods(EManipulation.SUBTRACT, field.getResourcesToNextLevel());
+        villageEntity.manipulateGoods(EManipulation.SUBTRACT, building.getResourcesToNextLevel());
 
-        BuildIEvent buildEvent = new BuildIEvent(buildPosition, buildModel.getBuildingName(), field.getLevel() + 1, villageId, executionTime);
+        BuildIEvent buildEvent = new BuildIEvent(buildingPosition, buildModel.getBuildingName(), building.getLevel() + 1, villageId, executionTime);
 
         this.villageRepository.save(villageEntity);
         return this.eventRepository.save(buildEvent);

@@ -46,9 +46,9 @@ public class VillageController {
         return ResponseEntity.status(HttpStatus.CREATED).body(buildEvent.getEventId());
     }
 
-    @PutMapping("/{villageId}/fields/{fieldPosition}/upgrade")
-    public ResponseEntity<String> upgradeField(@PathVariable String villageId, @PathVariable Integer fieldPosition){
-        BuildIEvent buildEvent = eventService.createBuildEvent(villageId, fieldPosition);
+    @PutMapping("/{villageId}/buildings/{position}/upgrade")
+    public ResponseEntity<String> upgradeBuilding(@PathVariable String villageId, @PathVariable Integer position){
+        BuildIEvent buildEvent = eventService.createBuildEvent(villageId, position);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

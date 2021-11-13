@@ -34,7 +34,6 @@ public class VillageView {
     private int population;
     private int culture;
     private int approval;
-    private List<BuildingBase> fields;
     private List<BuildingBase> buildings;
     private Map<EResource, BigDecimal> storage;
     private BigDecimal warehouseCapacity;
