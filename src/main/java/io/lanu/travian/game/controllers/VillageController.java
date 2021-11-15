@@ -5,6 +5,7 @@ import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.BuildIEvent;
 import io.lanu.travian.game.models.requests.ArmyOrderRequest;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
+import io.lanu.travian.game.models.responses.NewBuilding;
 import io.lanu.travian.game.models.responses.VillageView;
 import io.lanu.travian.game.services.ArmiesService;
 import io.lanu.travian.game.services.EventService;
@@ -12,6 +13,8 @@ import io.lanu.travian.game.services.VillageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -37,6 +40,11 @@ public class VillageController {
     public ResponseEntity<String> newVillage(@RequestBody NewVillageRequest newVillageRequest){
         VillageEntity villageEntity = villageService.createVillage(newVillageRequest);
         return ResponseEntity.status(HttpStatus.OK).body("New Village ID : " + villageEntity.getVillageId());
+    }
+
+    @GetMapping("/{villageId}/buildings")
+    public List<NewBuilding> getListOfAllNewBuildings(@PathVariable String villageId){
+        return villageService.getListOfAllNewBuildings(villageId);
     }
 
     @PostMapping("/{villageId}/buildings/{buildingPosition}/new")

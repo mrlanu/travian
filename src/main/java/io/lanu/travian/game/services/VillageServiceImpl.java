@@ -8,9 +8,11 @@ import io.lanu.travian.game.entities.events.DeathIEvent;
 import io.lanu.travian.game.entities.events.IEvent;
 import io.lanu.travian.game.entities.events.LastEvent;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
+import io.lanu.travian.game.models.responses.NewBuilding;
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.models.responses.VillageView;
 import io.lanu.travian.game.repositories.VillageRepository;
+import io.lanu.travian.templates.buildings.BuildingsFactory;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
@@ -71,6 +73,16 @@ public class VillageServiceImpl implements VillageService{
         return villageRepository.findAllByAccountId(userId)
                 .stream()
                 .map(village -> new ShortVillageInfo(village.getVillageId(), village.getName(), village.getX(), village.getY()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<NewBuilding> getListOfAllNewBuildings(String villageId) {
+        var villageEntity = this.villageRepository.findById(villageId)
+                .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
+        var all = BuildingsFactory.getListOfNewBuildings();
+        return all.stream()
+                .peek(newBuilding -> newBuilding.checkAvailability(villageEntity.getBuildings().values(), villageEntity.getStorage()))
                 .collect(Collectors.toList());
     }
 

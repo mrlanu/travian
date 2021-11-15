@@ -1,16 +1,16 @@
 package io.lanu.travian.enums;
 
 public enum EBuildings {
-    WOODCUTTER("woodcutter"),
-    CLAY_PIT("clay-pit"),
-    IRON_MINE("iron-mine"),
-    CROPLAND("cropland"),
-    BARRACK("barrack"),
-    GRANARY("granary"),
-    MAIN("main-building"),
-    WAREHOUSE("warehouse"),
-    EMPTY("empty-spot");
-
+    WOODCUTTER("Woodcutter"),
+    CLAY_PIT("Clay-pit"),
+    IRON_MINE("Iron-mine"),
+    CROPLAND("Cropland"),
+    BARRACK("Barrack"),
+    GRANARY("Granary"),
+    MAIN("Main building"),
+    WAREHOUSE("Warehouse"),
+    EMPTY("empty-spot"),
+    MARKETPLACE("Marketplace");
     private String name;
 
     EBuildings(String name){

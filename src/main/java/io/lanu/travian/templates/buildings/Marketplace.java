@@ -1,19 +1,20 @@
 package io.lanu.travian.templates.buildings;
 
+
 import io.lanu.travian.enums.EBuildings;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
 @NoArgsConstructor
-public class WarehouseBuilding extends BuildingBase{
-    private Integer capacity;
+@Data
+public class Marketplace extends BuildingBase{
+    private Integer traders;
 
-    public WarehouseBuilding(Integer capacity) {
+    public Marketplace(Integer traders) {
         super();
-        this.name = EBuildings.WAREHOUSE.getName();
-        this.capacity = capacity;
+        this.name = EBuildings.MARKETPLACE.getName();
+        this.traders = traders;
     }
 }

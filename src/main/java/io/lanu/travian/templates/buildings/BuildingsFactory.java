@@ -1,36 +1,116 @@
 package io.lanu.travian.templates.buildings;
 
+import io.lanu.travian.enums.EBuildingType;
 import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.enums.EResource;
+import io.lanu.travian.game.models.responses.NewBuilding;
 import io.lanu.travian.templates.Time;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class BuildingsFactory {
 
-    private static final Map<EBuildings, BuildTemplate> buildings = Map.of(
-            EBuildings.CROPLAND, new BuildTemplate(EResource.CROP, Arrays.asList(70, 90, 70, 20),
-                    1.67, 0, 1, new Time(1450/3,1.6, 1000/3), 10, "Crop field description"), // should be changed to 1420
-            EBuildings.CLAY_PIT, new BuildTemplate(EResource.CLAY, Arrays.asList(80, 40, 80, 50),
-                    1.67, 2, 1, new Time(1660/3,1.6, 1000/3), 10, "Clay field description"),
-            EBuildings.WOODCUTTER, new BuildTemplate(EResource.WOOD, Arrays.asList(40, 100, 50, 60),
-                    1.67, 2, 1, new Time(1780/3,1.6, 1000/3), 10, "Wood field description"),
-            EBuildings.IRON_MINE, new BuildTemplate(EResource.IRON, Arrays.asList(100, 80, 30, 60),
-                    1.67, 2, 1, new Time(2350/3,1.6, 1000/3), 10, "Iron field description"),
-            EBuildings.MAIN, new BuildTemplate(null, Arrays.asList(70, 40, 60, 20),
-                    1.28, 2, 2, new Time(3875), 20, "Affects construction speed of other buildings. Building speed is 5x slower on 0th level (destroyed) comparing to 1st level."), // should be changed to 1420
-            EBuildings.WAREHOUSE, new BuildTemplate(null, Arrays.asList(130, 160, 90, 40),
-                    1.28, 1, 1, new Time(3875), 20, "Limits maximum amount of resources available in village. When no it, capacity is 800."),
-            EBuildings.GRANARY, new BuildTemplate(null, Arrays.asList(80, 100, 70, 20),
-                    1.28, 1, 1, new Time(3475), 20, "Limits maximum amount of crop available in village. When no it, capacity is 800."),
-            EBuildings.BARRACK, new BuildTemplate(EResource.IRON, Arrays.asList(210, 140, 260, 120),
-                    1.28, 4, 1, new Time(3875), 20, "Once troops queued for training, their training time won't be changed disregarding of further changes in barracks level, effect from artifacts or items(T4). Even if barracks would be demolished, troops training will be continued.")
+    private static final Map<EBuildings, BuildTemplate> buildings = Map.ofEntries(// should be changed to 1420
+            Map.entry(EBuildings.CROPLAND, BuildTemplate.builder()
+                    .type(EBuildingType.RESOURCE)
+                    .resource(EResource.CROP)
+                    .cost(Arrays.asList(70, 90, 70, 20))
+                    .k(1.67).cu(0).cp(1).time(new Time(1450/3,1.6, 1000/3)).maxLevel(22)
+                    .description("Maximum level is 10, except capital — limited by stockyards there.")
+                    .isMulti(true)
+                    .build()),
+            Map.entry(EBuildings.CLAY_PIT, BuildTemplate.builder()
+                    .type(EBuildingType.RESOURCE)
+                    .resource(EResource.CLAY)
+                    .cost(Arrays.asList(80, 40, 80, 50))
+                    .k(1.67).cu(2).cp(1).time(new Time(1660/3,1.6, 1000/3)).maxLevel(22)
+                    .description("Maximum level is 10, except capital — limited by stockyards there.")
+                    .isMulti(true)
+                    .build()),
+            Map.entry(EBuildings.WOODCUTTER, BuildTemplate.builder()
+                    .type(EBuildingType.RESOURCE)
+                    .resource(EResource.WOOD)
+                    .cost(Arrays.asList(40, 100, 50, 60))
+                    .k(1.67).cu(2).cp(1).time(new Time(1780/3,1.6, 1000/3)).maxLevel(22)
+                    .description("Maximum level is 10, except capital — limited by stockyards there.")
+                    .isMulti(true)
+                    .build()),
+            Map.entry(EBuildings.IRON_MINE, BuildTemplate.builder()
+                    .type(EBuildingType.RESOURCE)
+                    .resource(EResource.IRON)
+                    .cost(Arrays.asList(100, 80, 30, 60))
+                    .k(1.67).cu(2).cp(1).time(new Time(2350/3,1.6, 1000/3)).maxLevel(22)
+                    .description("Maximum level is 10, except capital — limited by stockyards there.")
+                    .isMulti(true)
+                    .build()),
+
+            Map.entry(EBuildings.MAIN, BuildTemplate.builder()
+                    .type(EBuildingType.INFRASTRUCTURE)
+                    .cost(Arrays.asList(70, 40, 60, 20))
+                    .k(1.28).cu(2).cp(2).time(new Time(3875)).maxLevel(20)
+                    .description("Affects construction speed of other buildings. Building speed is 5x slower on 0th level (destroyed) " +
+                            "comparing to 1st level.")
+                    .requirementBuildings(new ArrayList<>())
+                    .build()),
+            Map.entry(EBuildings.WAREHOUSE, BuildTemplate.builder()
+                    .type(EBuildingType.INFRASTRUCTURE)
+                    .cost(Arrays.asList(130, 160, 90, 40))
+                    .k(1.28).cu(1).cp(1).time(new Time(3875)).maxLevel(20)
+                    .description("Limits maximum amount of resources available in village. When no it, capacity is 800.")
+                    .requirementBuildings(List.of(new RequirementBuilding(EBuildings.MAIN.getName(), 3, false)))
+                    .isMulti(true)
+                    .build()),
+            Map.entry(EBuildings.GRANARY, BuildTemplate.builder()
+                    .type(EBuildingType.INFRASTRUCTURE)
+                    .cost(Arrays.asList(80, 100, 70, 20))
+                    .k(1.28).cu(1).cp(1).time(new Time(3475)).maxLevel(20)
+                    .description("Limits maximum amount of crop available in village. When no it, capacity is 800.")
+                    .requirementBuildings(List.of(new RequirementBuilding(EBuildings.MAIN.getName(), 3, false)))
+                    .isMulti(true)
+                    .build()),
+            Map.entry(EBuildings.BARRACK, BuildTemplate.builder()
+                    .type(EBuildingType.MILITARY)
+                    .cost(Arrays.asList(210, 140, 260, 120))
+                    .k(1.28).cu(4).cp(1).time(new Time(3875)).maxLevel(20)
+                    .description("Once troops queued for training, their training time won't be changed disregarding of further changes " +
+                            "in barracks level, effect from artifacts or items(T4). Even if barracks would be demolished, troops training " +
+                            "will be continued.")
+                    .requirementBuildings(
+                            Arrays.asList(
+                                    new RequirementBuilding(EBuildings.MAIN.getName(), 3, false),
+                                    new RequirementBuilding(EBuildings.WAREHOUSE.getName(), 1, false),
+                                    new RequirementBuilding(EBuildings.GRANARY.getName(), 1, false)))
+                    .build()),
+            Map.entry(EBuildings.MARKETPLACE, BuildTemplate.builder()
+                    .type(EBuildingType.INFRASTRUCTURE)
+                    .cost(Arrays.asList(80,  70, 120,  70))
+                    .k(1.28).cu(4).cp(3).time(new Time(3675)).maxLevel(20)
+                    .description("Could be used as extra stockyard (but not a cranny!), by placing sell offer. " +
+                        "Keep in mind, that resources could be stolen in raid.")
+                    .requirementBuildings(Arrays.asList(
+                        new RequirementBuilding(EBuildings.MAIN.getName(), 1, false),
+                        new RequirementBuilding(EBuildings.WAREHOUSE.getName(), 1, false),
+                        new RequirementBuilding(EBuildings.GRANARY.getName(), 1, false)))
+                    .build())
     );
 
     private static final Integer[] productions = {3, 7, 13, 21, 31, 46, 70, 98, 140, 203, 280};
+
+    public static List<NewBuilding> getListOfNewBuildings(){
+        var result = new ArrayList<NewBuilding>();
+        buildings.forEach((k,v) -> {
+            if (!v.getType().equals(EBuildingType.RESOURCE)){
+                var template = getBuilding(k, 0);
+                result.add(new NewBuilding(k.getName(), v.getType(), v.getDescription(), template.getResourcesToNextLevel(),
+                        template.getTimeToNextLevel(), v.getRequirementBuildings(), true));
+            }
+        });
+        return result;
+    }
 
     public static BuildingBase getBuilding(EBuildings name, int level){
         BuildingBase result;
@@ -53,6 +133,8 @@ public class BuildingsFactory {
             case GRANARY: result = new GranaryBuilding(750);
                 break;
             case BARRACK: result = new BarrackBuilding(0);
+                break;
+            case MARKETPLACE: result = new Marketplace(1);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + name);
