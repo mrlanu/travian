@@ -1,5 +1,6 @@
 package io.lanu.travian.game.controllers;
 
+import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.game.entities.ArmyOrderEntity;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.BuildIEvent;
@@ -47,16 +48,17 @@ public class VillageController {
         return villageService.getListOfAllNewBuildings(villageId);
     }
 
-    @PostMapping("/{villageId}/buildings/{buildingPosition}/new")
+    @PutMapping("/{villageId}/buildings/{position}/new")
     public ResponseEntity<String> bewBuilding(@PathVariable String villageId,
-                                              @PathVariable Integer buildingPosition){
-        BuildIEvent buildEvent = eventService.createBuildEvent(villageId, buildingPosition);
+                                              @PathVariable Integer position,
+                                              @RequestParam EBuildings kind){
+        BuildIEvent buildEvent = eventService.createBuildEvent(villageId, position, kind);
         return ResponseEntity.status(HttpStatus.CREATED).body(buildEvent.getEventId());
     }
 
     @PutMapping("/{villageId}/buildings/{position}/upgrade")
     public ResponseEntity<String> upgradeBuilding(@PathVariable String villageId, @PathVariable Integer position){
-        BuildIEvent buildEvent = eventService.createBuildEvent(villageId, position);
+        BuildIEvent buildEvent = eventService.createBuildEvent(villageId, position, null);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

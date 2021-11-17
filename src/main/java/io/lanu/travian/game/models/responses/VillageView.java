@@ -72,7 +72,7 @@ public class VillageView {
     private List<BuildingBase> buildBuildingsView(Map<Integer, BuildModel> buildings, List<BuildIEvent> eventList) {
         return IntStream.range(1, 40)
                 .mapToObj(i -> {
-                    BuildingBase building = BuildingsFactory.getBuilding(buildings.get(i).getBuildingName(), buildings.get(i).getLevel());
+                    BuildingBase building = BuildingsFactory.getBuilding(buildings.get(i).getKind(), buildings.get(i).getLevel());
                     building.setPosition(i);
                     return building;
                 })

@@ -1,5 +1,6 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.events.BuildIEvent;
@@ -26,7 +27,7 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public BuildIEvent createBuildEvent(String villageId, Integer buildingPosition) {
+    public BuildIEvent createBuildEvent(String villageId, Integer buildingPosition, EBuildings kind) {
 
         var villageEntity = villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String
@@ -37,8 +38,15 @@ public class EventServiceImpl implements EventService{
                 .sorted(Comparator.comparing(BuildIEvent::getExecutionTime))
                 .collect(Collectors.toList());
 
-        BuildModel buildModel = villageEntity.getBuildings().get(buildingPosition);
-        BuildingBase building = BuildingsFactory.getBuilding(buildModel.getBuildingName(), buildModel.getLevel());
+        BuildModel buildModel;
+        //will get a kind if requested new building and null if requested upgrade
+        if (kind != null) {
+            buildModel = new BuildModel(kind, 0);
+            villageEntity.getBuildings().put(buildingPosition, buildModel);
+        } else {
+            buildModel = villageEntity.getBuildings().get(buildingPosition);
+        }
+        BuildingBase building = BuildingsFactory.getBuilding(buildModel.getKind(), buildModel.getLevel());
 
         LocalDateTime executionTime = events.size() > 0 ?
                 events.get(events.size() - 1).getExecutionTime().plusSeconds(building.getTimeToNextLevel()) :
@@ -46,7 +54,7 @@ public class EventServiceImpl implements EventService{
 
         villageEntity.manipulateGoods(EManipulation.SUBTRACT, building.getResourcesToNextLevel());
 
-        BuildIEvent buildEvent = new BuildIEvent(buildingPosition, buildModel.getBuildingName(), building.getLevel() + 1, villageId, executionTime);
+        BuildIEvent buildEvent = new BuildIEvent(buildingPosition, buildModel.getKind(), building.getLevel() + 1, villageId, executionTime);
 
         this.villageRepository.save(villageEntity);
         return this.eventRepository.save(buildEvent);
@@ -64,7 +72,7 @@ public class EventServiceImpl implements EventService{
                 .orElseThrow(() -> new IllegalStateException(String
                 .format("Village with id - %s is not exist.", event.getVillageId())));
         BuildModel buildModel = villageEntity.getBuildings().get(event.getBuildingPosition());
-        BuildingBase field = BuildingsFactory.getBuilding(buildModel.getBuildingName(), buildModel.getLevel());
+        BuildingBase field = BuildingsFactory.getBuilding(buildModel.getKind(), buildModel.getLevel());
         var events = eventRepository.findAllByVillageId(villageEntity.getVillageId())
                 .stream()
                 .sorted(Comparator.comparing(BuildIEvent::getExecutionTime))

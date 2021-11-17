@@ -7,7 +7,7 @@ public enum EBuildings {
     CROPLAND("Cropland"),
     BARRACK("Barrack"),
     GRANARY("Granary"),
-    MAIN("Main building"),
+    MAIN("Main-building"),
     WAREHOUSE("Warehouse"),
     EMPTY("empty-spot"),
     MARKETPLACE("Marketplace");
@@ -20,4 +20,5 @@ public enum EBuildings {
     public String getName() {
         return name;
     }
+
 }

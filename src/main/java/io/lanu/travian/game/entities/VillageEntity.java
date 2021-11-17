@@ -46,7 +46,7 @@ public class VillageEntity {
 
     public Map<EResource, BigDecimal> calculateProducePerHour(){
         var result = IntStream.range(1, 19)
-                .mapToObj(i -> BuildingsFactory.getBuilding(buildings.get(i).getBuildingName(), buildings.get(i).getLevel()))
+                .mapToObj(i -> BuildingsFactory.getBuilding(buildings.get(i).getKind(), buildings.get(i).getLevel()))
                 .collect(Collectors.groupingBy(BuildingBase::getResource,
                         Collectors.reducing(BigDecimal.ZERO, BuildingBase::getProduction, BigDecimal::add)));
         result.put(EResource.CROP, result.get(EResource.CROP).subtract(calculateEatPerHour()));

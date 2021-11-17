@@ -1,6 +1,7 @@
 package io.lanu.travian.game.models.responses;
 
 import io.lanu.travian.enums.EBuildingType;
+import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.templates.buildings.RequirementBuilding;
@@ -18,6 +19,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class NewBuilding {
     private String name;
+    private EBuildings kind;
     private EBuildingType type; // infrastructure | military | industrial
     private String description;
     private Map<EResource, BigDecimal> cost;
@@ -28,7 +30,7 @@ public class NewBuilding {
     public void checkAvailability(Collection<BuildModel> buildings, Map<EResource, BigDecimal> storage){
         requirements.forEach(requirementBuilding -> {
             var isBuildingExist = buildings.stream().anyMatch(
-                    buildModel -> buildModel.getBuildingName().getName().equals(requirementBuilding.getName())
+                    buildModel -> buildModel.getKind().getName().equals(requirementBuilding.getName())
                             && buildModel.getLevel() >= requirementBuilding.getLevel());
             if (isBuildingExist){
                 requirementBuilding.setExist(true);

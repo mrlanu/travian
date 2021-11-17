@@ -105,17 +105,17 @@ public class BuildingsFactory {
         buildings.forEach((k,v) -> {
             if (!v.getType().equals(EBuildingType.RESOURCE)){
                 var template = getBuilding(k, 0);
-                result.add(new NewBuilding(k.getName(), v.getType(), v.getDescription(), template.getResourcesToNextLevel(),
+                result.add(new NewBuilding(k.getName(), k, v.getType(), v.getDescription(), template.getResourcesToNextLevel(),
                         template.getTimeToNextLevel(), v.getRequirementBuildings(), true));
             }
         });
         return result;
     }
 
-    public static BuildingBase getBuilding(EBuildings name, int level){
+    public static BuildingBase getBuilding(EBuildings kind, int level){
         BuildingBase result;
-        var template = buildings.get(name);
-        switch (name){
+        var template = buildings.get(kind);
+        switch (kind){
             case CROPLAND: result = new ResourceField(EResource.CROP, BigDecimal.valueOf(productions[level]));
                 break;
             case CLAY_PIT: result = new ResourceField(EResource.CLAY, BigDecimal.valueOf(productions[level]));
@@ -137,7 +137,7 @@ public class BuildingsFactory {
             case MARKETPLACE: result = new Marketplace(1);
                 break;
             default:
-                throw new IllegalStateException("Unexpected value: " + name);
+                throw new IllegalStateException("Unexpected value: " + kind);
         }
 
         if (template != null) {
