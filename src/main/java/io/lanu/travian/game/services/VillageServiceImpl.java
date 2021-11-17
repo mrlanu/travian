@@ -2,6 +2,7 @@ package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.EVillageType;
+import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.BuildIEvent;
 import io.lanu.travian.game.entities.events.DeathIEvent;
@@ -23,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,10 +82,30 @@ public class VillageServiceImpl implements VillageService{
     public List<NewBuilding> getListOfAllNewBuildings(String villageId) {
         var villageEntity = this.villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
+        var events = this.eventService.findAllByVillageId(villageEntity.getVillageId());
         var all = BuildingsFactory.getListOfNewBuildings();
-        return all.stream()
+        // if events size >=2 return all buildings unavailable for build otherwise checking ability to build
+        return events.size() >= 2 ? all : all.stream()
+                .filter(newBuilding -> isBuildingExistAndMaxLevelAndMulti(villageEntity.getBuildings(), newBuilding))
                 .peek(newBuilding -> newBuilding.checkAvailability(villageEntity.getBuildings().values(), villageEntity.getStorage()))
                 .collect(Collectors.toList());
+    }
+
+    private boolean isBuildingExistAndMaxLevelAndMulti(Map<Integer, BuildModel> buildingsMap, NewBuilding newBuilding){
+        var isExist = buildingsMap.values()
+                .stream()
+                .anyMatch(buildModel -> buildModel.getKind().equals(newBuilding.getKind()));
+        var isMaxLevel = buildingsMap.values()
+                .stream()
+                .anyMatch(buildModel ->
+                        buildModel.getKind().equals(newBuilding.getKind()) && buildModel.getLevel() == newBuilding.getMaxLevel());
+        if (isExist){
+            if (isMaxLevel){
+                return newBuilding.isMulti();
+            }
+            return false;
+        }
+        return true;
     }
 
     private void recalculateVillage(VillageEntity villageEntity){

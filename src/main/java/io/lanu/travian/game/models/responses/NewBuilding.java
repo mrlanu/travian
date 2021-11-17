@@ -25,7 +25,9 @@ public class NewBuilding {
     private Map<EResource, BigDecimal> cost;
     private long time;
     private List<RequirementBuilding> requirements;
+    private int maxLevel;
     private boolean available;
+    private boolean multi;
 
     public void checkAvailability(Collection<BuildModel> buildings, Map<EResource, BigDecimal> storage){
         requirements.forEach(requirementBuilding -> {

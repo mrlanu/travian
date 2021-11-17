@@ -51,7 +51,7 @@ public class VillageEntityFactory {
                             Map.entry(31, new BuildModel(EBuildings.EMPTY, 0)),
                             Map.entry(32, new BuildModel(EBuildings.EMPTY, 0)),
                             Map.entry(33, new BuildModel(EBuildings.EMPTY, 0)),
-                            Map.entry(34, new BuildModel(EBuildings.WAREHOUSE, 1)),
+                            Map.entry(34, new BuildModel(EBuildings.WAREHOUSE, 20)),
                             Map.entry(35, new BuildModel(EBuildings.EMPTY, 0)),
                             Map.entry(36, new BuildModel(EBuildings.EMPTY, 0)),
                             Map.entry(37, new BuildModel(EBuildings.EMPTY, 0)),

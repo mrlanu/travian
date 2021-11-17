@@ -61,7 +61,7 @@ public class BuildingsFactory {
                     .cost(Arrays.asList(130, 160, 90, 40))
                     .k(1.28).cu(1).cp(1).time(new Time(3875)).maxLevel(20)
                     .description("Limits maximum amount of resources available in village. When no it, capacity is 800.")
-                    .requirementBuildings(List.of(new RequirementBuilding(EBuildings.MAIN.getName(), 3, false)))
+                    .requirementBuildings(List.of(new RequirementBuilding(EBuildings.MAIN.getName(), 1, false)))
                     .isMulti(true)
                     .build()),
             Map.entry(EBuildings.GRANARY, BuildTemplate.builder()
@@ -69,7 +69,7 @@ public class BuildingsFactory {
                     .cost(Arrays.asList(80, 100, 70, 20))
                     .k(1.28).cu(1).cp(1).time(new Time(3475)).maxLevel(20)
                     .description("Limits maximum amount of crop available in village. When no it, capacity is 800.")
-                    .requirementBuildings(List.of(new RequirementBuilding(EBuildings.MAIN.getName(), 3, false)))
+                    .requirementBuildings(List.of(new RequirementBuilding(EBuildings.MAIN.getName(), 1, false)))
                     .isMulti(true)
                     .build()),
             Map.entry(EBuildings.BARRACK, BuildTemplate.builder()
@@ -106,7 +106,7 @@ public class BuildingsFactory {
             if (!v.getType().equals(EBuildingType.RESOURCE)){
                 var template = getBuilding(k, 0);
                 result.add(new NewBuilding(k.getName(), k, v.getType(), v.getDescription(), template.getResourcesToNextLevel(),
-                        template.getTimeToNextLevel(), v.getRequirementBuildings(), true));
+                        template.getTimeToNextLevel(), v.getRequirementBuildings(), v.getMaxLevel(), false, v.isMulti()));
             }
         });
         return result;
