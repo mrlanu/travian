@@ -44,4 +44,21 @@ public class NewBuilding {
         available = (isAllBuildingsExist && isEnoughResources);
 
     }
+
+    public boolean isBuildingExistAndMaxLevelAndMulti(Map<Integer, BuildModel> buildingsMap){
+        var isExist = buildingsMap.values()
+                .stream()
+                .anyMatch(buildModel -> buildModel.getKind().equals(this.getKind()));
+        var isMaxLevel = buildingsMap.values()
+                .stream()
+                .anyMatch(buildModel ->
+                        buildModel.getKind().equals(this.getKind()) && buildModel.getLevel() == maxLevel);
+        if (isExist){
+            if (isMaxLevel){
+                return multi;
+            }
+            return false;
+        }
+        return true;
+    }
 }

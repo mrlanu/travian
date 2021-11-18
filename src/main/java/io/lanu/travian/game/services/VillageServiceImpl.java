@@ -86,26 +86,9 @@ public class VillageServiceImpl implements VillageService{
         var all = BuildingsFactory.getListOfNewBuildings();
         // if events size >=2 return all buildings unavailable for build otherwise checking ability to build
         return events.size() >= 2 ? all : all.stream()
-                .filter(newBuilding -> isBuildingExistAndMaxLevelAndMulti(villageEntity.getBuildings(), newBuilding))
+                .filter(newBuilding -> newBuilding.isBuildingExistAndMaxLevelAndMulti(villageEntity.getBuildings()))
                 .peek(newBuilding -> newBuilding.checkAvailability(villageEntity.getBuildings().values(), villageEntity.getStorage()))
                 .collect(Collectors.toList());
-    }
-
-    private boolean isBuildingExistAndMaxLevelAndMulti(Map<Integer, BuildModel> buildingsMap, NewBuilding newBuilding){
-        var isExist = buildingsMap.values()
-                .stream()
-                .anyMatch(buildModel -> buildModel.getKind().equals(newBuilding.getKind()));
-        var isMaxLevel = buildingsMap.values()
-                .stream()
-                .anyMatch(buildModel ->
-                        buildModel.getKind().equals(newBuilding.getKind()) && buildModel.getLevel() == newBuilding.getMaxLevel());
-        if (isExist){
-            if (isMaxLevel){
-                return newBuilding.isMulti();
-            }
-            return false;
-        }
-        return true;
     }
 
     private void recalculateVillage(VillageEntity villageEntity){
