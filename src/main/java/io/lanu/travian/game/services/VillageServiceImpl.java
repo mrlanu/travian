@@ -1,5 +1,7 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.enums.EBuildingType;
+import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.VillageEntity;
@@ -21,6 +23,7 @@ import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -83,12 +86,24 @@ public class VillageServiceImpl implements VillageService{
         var villageEntity = this.villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
         var events = this.eventService.findAllByVillageId(villageEntity.getVillageId());
-        var all = BuildingsFactory.getListOfNewBuildings();
+        var all = getListOfNewBuildings();
         // if events size >=2 return all buildings unavailable for build otherwise checking ability to build
         return events.size() >= 2 ? all : all.stream()
                 .filter(newBuilding -> newBuilding.isBuildingExistAndMaxLevelAndMulti(villageEntity.getBuildings()))
                 .peek(newBuilding -> newBuilding.checkAvailability(villageEntity.getBuildings().values(), villageEntity.getStorage()))
                 .collect(Collectors.toList());
+    }
+
+    private List<NewBuilding> getListOfNewBuildings(){
+        var result = new ArrayList<NewBuilding>();
+        Arrays.asList(EBuildings.values()).forEach(b -> {
+            if (!b.getType().equals(EBuildingType.RESOURCE) && !b.getType().equals(EBuildingType.EMPTY)){
+                var temp = BuildingsFactory.getBuilding(b, 0);
+                result.add(new NewBuilding(b.getName(), b, b.getType(), b.getDescription(), temp.getResourcesToNextLevel(),
+                        temp.getTimeToNextLevel(), b.getRequirementBuildings(), b.getMaxLevel(), false, b.isMulti()));
+            }
+        });
+        return result;
     }
 
     private void recalculateVillage(VillageEntity villageEntity){
