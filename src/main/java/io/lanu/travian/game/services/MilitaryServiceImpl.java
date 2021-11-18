@@ -4,34 +4,50 @@ import io.lanu.travian.enums.ENations;
 import io.lanu.travian.enums.EUnits;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.ArmyOrderEntity;
+import io.lanu.travian.game.entities.ResearchedUnitsEntity;
 import io.lanu.travian.game.entities.events.TroopBuildEvent;
+import io.lanu.travian.game.models.ResearchedUnitShort;
 import io.lanu.travian.game.models.TroopUnit;
 import io.lanu.travian.game.models.requests.ArmyOrderRequest;
 import io.lanu.travian.game.repositories.ArmyOrdersRepository;
+import io.lanu.travian.game.repositories.ResearchedUnitsRepository;
+import io.lanu.travian.templates.military.MilitaryUnitsFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class ArmiesServiceImpl implements ArmiesService {
+public class MilitaryServiceImpl implements MilitaryService {
 
     private final ArmyOrdersRepository armyOrdersRepository;
+    private final ResearchedUnitsRepository researchedUnitsRepository;
 
-    public ArmiesServiceImpl(ArmyOrdersRepository armyOrdersRepository) {
+    public MilitaryServiceImpl(ArmyOrdersRepository armyOrdersRepository, ResearchedUnitsRepository researchedUnitsRepository) {
         this.armyOrdersRepository = armyOrdersRepository;
+        this.researchedUnitsRepository = researchedUnitsRepository;
+    }
+
+    @Override
+    public void createResearchedUnits(String villageId) {
+        researchedUnitsRepository.save(new ResearchedUnitsEntity(villageId, Arrays.asList(new ResearchedUnitShort(EUnits.PHALANX.getName(), 0))));
+    }
+
+    @Override
+    public List<EUnits> getAllResearchedUnits(String villageId) {
+        return researchedUnitsRepository.findByVillageId(villageId).getUnits()
+                .stream()
+                .map(shortUnit -> MilitaryUnitsFactory.getUnit(shortUnit.getName(), shortUnit.getLevel()))
+                .collect(Collectors.toList());
     }
 
     @Override
     public ArmyOrderEntity orderUnits(ArmyOrderRequest armyOrderRequest) {
-        TroopUnit troop = new TroopUnit(EUnits.LEGIONNAIRE, ENations.ROME,
+        TroopUnit troop = new TroopUnit(EUnits.PHALANX, ENations.ROME,
                 Map.of(
                     EResource.WOOD, BigDecimal.valueOf(120),
                     EResource.CLAY, BigDecimal.valueOf(100),

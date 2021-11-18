@@ -2,7 +2,6 @@ package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.EVillageType;
-import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.BuildIEvent;
 import io.lanu.travian.game.entities.events.DeathIEvent;
@@ -24,21 +23,20 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class VillageServiceImpl implements VillageService{
     private final VillageRepository villageRepository;
     private final EventService eventService;
-    private final ArmiesService armiesService;
+    private final MilitaryService militaryService;
     private static final MathContext mc = new MathContext(3);
 
     public VillageServiceImpl(VillageRepository villageRepository,
-                              EventService eventService, ArmiesService armiesService) {
+                              EventService eventService, MilitaryService militaryService) {
         this.villageRepository = villageRepository;
         this.eventService = eventService;
-        this.armiesService = armiesService;
+        this.militaryService = militaryService;
     }
 
     @Override
@@ -47,7 +45,9 @@ public class VillageServiceImpl implements VillageService{
         newVillage.setAccountId(newVillageRequest.getAccountId());
         newVillage.setX(newVillageRequest.getX());
         newVillage.setY(newVillageRequest.getY());
-        return villageRepository.save(newVillage);
+        var result = villageRepository.save(newVillage);
+        militaryService.createResearchedUnits(result.getVillageId());
+        return result;
     }
 
     @Override
@@ -136,7 +136,7 @@ public class VillageServiceImpl implements VillageService{
                 .collect(Collectors.toList()));
 
         // add all units events
-        allEvents.addAll(this.armiesService.createTroopsBuildEventsFromOrders(villageEntity.getVillageId()));
+        allEvents.addAll(this.militaryService.createTroopsBuildEventsFromOrders(villageEntity.getVillageId()));
 
         allEvents.add(new LastEvent(LocalDateTime.now()));
 

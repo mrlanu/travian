@@ -1,14 +1,11 @@
 package io.lanu.travian.game.controllers;
 
 import io.lanu.travian.enums.EBuildings;
-import io.lanu.travian.game.entities.ArmyOrderEntity;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.BuildIEvent;
-import io.lanu.travian.game.models.requests.ArmyOrderRequest;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.NewBuilding;
 import io.lanu.travian.game.models.responses.VillageView;
-import io.lanu.travian.game.services.ArmiesService;
 import io.lanu.travian.game.services.EventService;
 import io.lanu.travian.game.services.VillageService;
 import org.springframework.http.HttpStatus;
@@ -23,12 +20,10 @@ import java.util.List;
 public class VillageController {
     private final VillageService villageService;
     private final EventService eventService;
-    private final ArmiesService armiesService;
 
-    public VillageController(VillageService villageService, EventService eventService, ArmiesService armiesService) {
+    public VillageController(VillageService villageService, EventService eventService) {
         this.villageService = villageService;
         this.eventService = eventService;
-        this.armiesService = armiesService;
     }
 
     @GetMapping("/{villageId}")
@@ -49,7 +44,7 @@ public class VillageController {
     }
 
     @PutMapping("/{villageId}/buildings/{position}/new")
-    public ResponseEntity<String> bewBuilding(@PathVariable String villageId,
+    public ResponseEntity<String> newBuilding(@PathVariable String villageId,
                                               @PathVariable Integer position,
                                               @RequestParam EBuildings kind){
         BuildIEvent buildEvent = eventService.createBuildEvent(villageId, position, kind);
@@ -72,10 +67,4 @@ public class VillageController {
         this.eventService.deleteByEventId(eventId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
-    @PostMapping("/armies")
-    public ArmyOrderEntity orderArmyUnits(@RequestBody ArmyOrderRequest armyOrderRequest) {
-        return armiesService.orderUnits(armyOrderRequest);
-    }
-
 }
