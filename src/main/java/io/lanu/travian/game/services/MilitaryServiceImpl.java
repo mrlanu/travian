@@ -1,20 +1,16 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.ENations;
 import io.lanu.travian.enums.EUnits;
-import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.ArmyOrderEntity;
 import io.lanu.travian.game.entities.ResearchedUnitsEntity;
 import io.lanu.travian.game.entities.events.TroopBuildEvent;
 import io.lanu.travian.game.models.ResearchedUnitShort;
-import io.lanu.travian.game.models.TroopUnit;
 import io.lanu.travian.game.models.requests.ArmyOrderRequest;
 import io.lanu.travian.game.repositories.ArmyOrdersRepository;
 import io.lanu.travian.game.repositories.ResearchedUnitsRepository;
 import io.lanu.travian.templates.military.MilitaryUnitsFactory;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -47,23 +43,17 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     @Override
     public ArmyOrderEntity orderUnits(ArmyOrderRequest armyOrderRequest) {
-        TroopUnit troop = new TroopUnit(EUnits.PHALANX, ENations.ROME,
-                Map.of(
-                    EResource.WOOD, BigDecimal.valueOf(120),
-                    EResource.CLAY, BigDecimal.valueOf(100),
-                    EResource.IRON, BigDecimal.valueOf(150),
-                    EResource.CROP, BigDecimal.valueOf(30)),
-                40, 35, 60, 6, 50, 1, 10);
 
+        EUnits unit = armyOrderRequest.getUnitType();
         List<ArmyOrderEntity> ordersList = getAllOrdersByVillageId(armyOrderRequest.getVillageId());
 
         LocalDateTime lastTime = ordersList.size() > 0 ? ordersList.get(ordersList.size() - 1).getEndOrderTime() : LocalDateTime.now();
 
         LocalDateTime endOrderTime = lastTime.plus(
-                armyOrderRequest.getAmount() * troop.getBaseProductionTime(), ChronoUnit.SECONDS);
+                armyOrderRequest.getAmount() * unit.getTime(), ChronoUnit.SECONDS);
 
         ArmyOrderEntity armyOrder = new ArmyOrderEntity(armyOrderRequest.getVillageId(), lastTime, armyOrderRequest.getUnitType(),
-                armyOrderRequest.getAmount(), troop.getBaseProductionTime(), troop.getEatHour(), endOrderTime);
+                armyOrderRequest.getAmount(), unit.getTime(), unit.getEat(), endOrderTime);
 
         return armyOrdersRepository.save(armyOrder);
     }

@@ -25,7 +25,7 @@ public enum EUnits {
     private final int capacity;
     private final Map<EResource, Integer> cost;
     private final int eat;
-    private int time;
+    private long time;
     private final String description;
 
     EUnits(String name, int attack, int defInfantry, int defCavalry, int speed, int capacity,
@@ -47,7 +47,7 @@ public enum EUnits {
         this.level = level;
     }
 
-    public void setTime(int time) {
+    public void setTime(long time) {
         this.time = time;
     }
 }
