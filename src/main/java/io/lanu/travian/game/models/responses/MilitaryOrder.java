@@ -13,5 +13,6 @@ public class MilitaryOrder {
     private String unit;
     private int amount;
     private long duration;
+    private long eachDuration;
     private LocalDateTime endOrder;
 }

@@ -8,4 +8,5 @@ public class ArmyOrderRequest {
     private String villageId;
     private EUnits unitType;
     private Integer amount;
+    private Integer level;
 }

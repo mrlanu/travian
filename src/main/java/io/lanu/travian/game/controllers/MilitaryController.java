@@ -24,9 +24,10 @@ public class MilitaryController {
     }
 
     @PostMapping("/military")
-    public ResponseEntity<String> orderArmyUnits(@RequestBody ArmyOrderRequest armyOrderRequest) {
-        militaryService.orderUnits(armyOrderRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Ordered");
+    public MilitaryOrder orderArmyUnits(@RequestBody ArmyOrderRequest armyOrderRequest) {
+        var result = militaryService.orderUnits(armyOrderRequest);
+        return new MilitaryOrder(result.getUnitType().getName(), result.getLeftTrain(),
+                result.getDurationEach(), result.getDurationEach() * result.getLeftTrain(), result.getEndOrderTime());
     }
 
     @GetMapping("/{villageId}/military-orders")
@@ -39,6 +40,7 @@ public class MilitaryController {
                         armyOrderEntity.getUnitType().getName(),
                         armyOrderEntity.getLeftTrain(),
                         duration,
+                        armyOrderEntity.getDurationEach(),
                         armyOrderEntity.getEndOrderTime());})
                 .collect(Collectors.toList());
     }

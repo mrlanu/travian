@@ -56,7 +56,7 @@ public class VillageEntity {
     //dummy implementation
     private BigDecimal calculateEatPerHour() {
         BigDecimal result = BigDecimal.ZERO;
-        return result.add(BigDecimal.valueOf(homeLegion.getOrDefault(EUnits.LEGIONNAIRE, 0)));
+        return result.add(BigDecimal.valueOf(homeLegion.getOrDefault(EUnits.PHALANX, 0)));
     }
 
     public void calculateProducedGoods(LocalDateTime lastModified, LocalDateTime untilTime){

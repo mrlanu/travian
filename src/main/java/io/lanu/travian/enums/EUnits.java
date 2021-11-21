@@ -10,7 +10,7 @@ import java.util.Map;
 public enum EUnits {
     PHALANX("Phalanx", 15, 40, 50, 7, 35,
             Map.of(EResource.WOOD, 100, EResource.CLAY, 130, EResource.IRON, 55, EResource.CROP, 30),
-            1, 1040, "Phalanx is a cheap and fast in learning infant unit."),
+            1, 60, "Phalanx is a cheap and fast in learning infant unit."), // time should be 1040
     LEGIONNAIRE("Legionnaire", 40, 35, 50, 6, 50,
             Map.of(EResource.WOOD, 120, EResource.CLAY, 100, EResource.IRON, 150, EResource.CROP, 30),
             1, 1600, "Legionnaire is a good infant unit.");
