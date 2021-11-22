@@ -1,8 +1,7 @@
 package io.lanu.travian.templates.buildings;
 
 import io.lanu.travian.enums.EResource;
-import io.lanu.travian.game.entities.events.BuildIEvent;
-import lombok.Builder;
+import io.lanu.travian.game.entities.events.ConstructionEvent;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -32,7 +31,7 @@ public class BuildingBase implements IResourceProd{
                 .noneMatch(x -> storage.get(x.getKey()).compareTo(x.getValue()) < 0);
     }
 
-    public void setUnderUpgrade(List<BuildIEvent> eventList) {
+    public void setUnderUpgrade(List<ConstructionEvent> eventList) {
         this.underUpgrade =
                 eventList.stream().anyMatch(e -> this.position == e.getBuildingPosition());
     }

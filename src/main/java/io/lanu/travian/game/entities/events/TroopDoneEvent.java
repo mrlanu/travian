@@ -5,18 +5,13 @@ import io.lanu.travian.game.entities.VillageEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document("events")
-@TypeAlias("troopEvent")
-public class TroopBuildEvent implements IEvent {
+public class TroopDoneEvent implements IEvent {
 
     private LocalDateTime executionTime;
     private EUnits unitType;

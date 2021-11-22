@@ -2,10 +2,8 @@ package io.lanu.travian.game.controllers;
 
 import io.lanu.travian.enums.EUnits;
 import io.lanu.travian.game.models.requests.ArmyOrderRequest;
-import io.lanu.travian.game.models.responses.MilitaryOrder;
+import io.lanu.travian.game.models.responses.ArmyOrderResponse;
 import io.lanu.travian.game.services.MilitaryService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -24,19 +22,19 @@ public class MilitaryController {
     }
 
     @PostMapping("/military")
-    public MilitaryOrder orderArmyUnits(@RequestBody ArmyOrderRequest armyOrderRequest) {
+    public ArmyOrderResponse orderArmyUnits(@RequestBody ArmyOrderRequest armyOrderRequest) {
         var result = militaryService.orderUnits(armyOrderRequest);
-        return new MilitaryOrder(result.getUnitType().getName(), result.getLeftTrain(),
+        return new ArmyOrderResponse(result.getUnitType().getName(), result.getLeftTrain(),
                 result.getDurationEach(), result.getDurationEach() * result.getLeftTrain(), result.getEndOrderTime());
     }
 
     @GetMapping("/{villageId}/military-orders")
-    public List<MilitaryOrder> getAllMilitaryOrders(@PathVariable String villageId){
+    public List<ArmyOrderResponse> getAllMilitaryOrders(@PathVariable String villageId){
         return militaryService.getAllOrdersByVillageId(villageId)
                 .stream()
                 .map(armyOrderEntity -> {
                     var duration = Duration.between(LocalDateTime.now(), armyOrderEntity.getEndOrderTime()).toSeconds();
-                    return new MilitaryOrder(
+                    return new ArmyOrderResponse(
                         armyOrderEntity.getUnitType().getName(),
                         armyOrderEntity.getLeftTrain(),
                         duration,

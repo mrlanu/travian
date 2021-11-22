@@ -6,7 +6,7 @@ import io.lanu.travian.enums.EUnits;
 import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.entities.events.BuildIEvent;
+import io.lanu.travian.game.entities.events.ConstructionEvent;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
 import lombok.AllArgsConstructor;
@@ -40,9 +40,9 @@ public class VillageView {
     private BigDecimal granaryCapacity;
     private Map<EUnits, Integer> homeLegion;
     private Map<EResource, BigDecimal> producePerHour;
-    private List<EventView> eventsList;
+    private List<ConstructionEventView> eventsList;
 
-    public VillageView(VillageEntity villageEntity, List<BuildIEvent> eventList) {
+    public VillageView(VillageEntity villageEntity, List<ConstructionEvent> eventList) {
         this.villageId = villageEntity.getVillageId();
         this.accountId = villageEntity.getAccountId();
         this.name = villageEntity.getName();
@@ -61,15 +61,15 @@ public class VillageView {
         this.eventsList = this.buildEventsView(eventList);
     }
 
-    private List<EventView> buildEventsView(List<BuildIEvent> buildEventList) {
+    private List<ConstructionEventView> buildEventsView(List<ConstructionEvent> buildEventList) {
         /*DurationFormatUtils.formatDuration(Duration.between(LocalDateTime.now(),
                 event.getExecutionTime()).toMillis(), "H:mm:ss", true)*/
         return buildEventList.stream()
-                .map(event -> new EventView(event.getEventId(), event.getBuildingName().getName(), event.getToLevel(), event.getExecutionTime(),
+                .map(event -> new ConstructionEventView(event.getEventId(), event.getBuildingName().getName(), event.getToLevel(), event.getExecutionTime(),
                         ChronoUnit.SECONDS.between(LocalDateTime.now(), event.getExecutionTime()))).collect(Collectors.toList());
     }
     
-    private List<BuildingBase> buildBuildingsView(Map<Integer, BuildModel> buildings, List<BuildIEvent> eventList) {
+    private List<BuildingBase> buildBuildingsView(Map<Integer, BuildModel> buildings, List<ConstructionEvent> eventList) {
         return IntStream.range(1, 40)
                 .mapToObj(i -> {
                     BuildingBase building = BuildingsFactory.getBuilding(buildings.get(i).getKind(), buildings.get(i).getLevel());

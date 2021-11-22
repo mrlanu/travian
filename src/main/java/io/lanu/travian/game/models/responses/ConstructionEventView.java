@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class EventView {
+public class ConstructionEventView {
     private String id;
     private String name;
     private int toLevel;

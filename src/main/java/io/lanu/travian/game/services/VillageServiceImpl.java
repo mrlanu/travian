@@ -1,56 +1,65 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.EBuildingType;
-import io.lanu.travian.enums.EBuildings;
-import io.lanu.travian.enums.EResource;
-import io.lanu.travian.enums.EVillageType;
+import io.lanu.travian.enums.*;
+import io.lanu.travian.game.entities.ArmyOrderEntity;
+import io.lanu.travian.game.entities.ResearchedTroopsEntity;
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.entities.events.BuildIEvent;
-import io.lanu.travian.game.entities.events.DeathIEvent;
-import io.lanu.travian.game.entities.events.IEvent;
-import io.lanu.travian.game.entities.events.LastEvent;
+import io.lanu.travian.game.entities.events.*;
+import io.lanu.travian.game.models.ResearchedTroopShort;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
-import io.lanu.travian.game.models.responses.NewBuilding;
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.models.responses.VillageView;
+import io.lanu.travian.game.repositories.ArmyOrdersRepository;
+import io.lanu.travian.game.repositories.ConstructionEventsRepository;
+import io.lanu.travian.game.repositories.ResearchedTroopsRepository;
 import io.lanu.travian.game.repositories.VillageRepository;
-import io.lanu.travian.templates.buildings.BuildingsFactory;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class VillageServiceImpl implements VillageService{
     private final VillageRepository villageRepository;
-    private final EventService eventService;
-    private final MilitaryService militaryService;
+    private final ArmyOrdersRepository armyOrdersRepository;
+    private final ConstructionEventsRepository constructionEventsRepository;
+    private final ResearchedTroopsRepository researchedTroopsRepository;
     private static final MathContext mc = new MathContext(3);
 
     public VillageServiceImpl(VillageRepository villageRepository,
-                              EventService eventService, MilitaryService militaryService) {
+                              ArmyOrdersRepository armyOrdersRepository,
+                              ConstructionEventsRepository constructionEventsRepository, ResearchedTroopsRepository researchedTroopsRepository) {
         this.villageRepository = villageRepository;
-        this.eventService = eventService;
-        this.militaryService = militaryService;
+        this.armyOrdersRepository = armyOrdersRepository;
+        this.constructionEventsRepository = constructionEventsRepository;
+        this.researchedTroopsRepository = researchedTroopsRepository;
     }
 
     @Override
     public VillageEntity createVillage(NewVillageRequest newVillageRequest) {
         VillageEntity newVillage = VillageEntityFactory.getVillageByType(EVillageType.SIX);
-        newVillage.setAccountId(newVillageRequest.getAccountId());
+        Objects.requireNonNull(newVillage).setAccountId(newVillageRequest.getAccountId());
         newVillage.setX(newVillageRequest.getX());
         newVillage.setY(newVillageRequest.getY());
         var result = villageRepository.save(newVillage);
-        militaryService.createResearchedUnits(result.getVillageId());
+        researchedTroopsRepository.save(
+                new ResearchedTroopsEntity(result.getVillageId(),
+                        List.of(new ResearchedTroopShort(EUnits.PHALANX.getName(), 0))));
         return result;
+    }
+
+    @Override
+    public List<ShortVillageInfo> getAllVillagesByUserId(String userId) {
+        return villageRepository.findAllByAccountId(userId)
+                .stream()
+                .map(village -> new ShortVillageInfo(village.getVillageId(), village.getName(), village.getX(), village.getY()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -64,49 +73,20 @@ public class VillageServiceImpl implements VillageService{
 
     @Override
     public VillageView getVillageById(String villageId) {
-        VillageEntity villageEntity = this.villageRepository.findById(villageId)
-                .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
-        recalculateVillage(villageEntity);
-        this.villageRepository.save(villageEntity);
-        eventService.deleteAllByVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
-        List<BuildIEvent> currentBuildingEvents = eventService.findAllByVillageId(villageId);
+        var villageEntity = recalculateVillage(villageId);
+        constructionEventsRepository.deleteAllByVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
+        List<ConstructionEvent> currentBuildingEvents = constructionEventsRepository.findAllByVillageId(villageId);
         return new VillageView(villageEntity, currentBuildingEvents);
     }
 
-    @Override
-    public List<ShortVillageInfo> getAllVillagesByUserId(String userId) {
-        return villageRepository.findAllByAccountId(userId)
-                .stream()
-                .map(village -> new ShortVillageInfo(village.getVillageId(), village.getName(), village.getX(), village.getY()))
-                .collect(Collectors.toList());
+    public VillageEntity saveVillage(VillageEntity villageEntity){
+        return villageRepository.save(villageEntity);
     }
 
-    @Override
-    public List<NewBuilding> getListOfAllNewBuildings(String villageId) {
-        var villageEntity = this.villageRepository.findById(villageId)
+    public VillageEntity recalculateVillage(String villageId){
+
+        VillageEntity villageEntity = this.villageRepository.findById(villageId)
                 .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
-        var events = this.eventService.findAllByVillageId(villageEntity.getVillageId());
-        var all = getListOfNewBuildings();
-        // if events size >=2 return all buildings unavailable for build otherwise checking ability to build
-        return events.size() >= 2 ? all : all.stream()
-                .filter(newBuilding -> newBuilding.isBuildingExistAndMaxLevelAndMulti(villageEntity.getBuildings()))
-                .peek(newBuilding -> newBuilding.checkAvailability(villageEntity.getBuildings().values(), villageEntity.getStorage()))
-                .collect(Collectors.toList());
-    }
-
-    private List<NewBuilding> getListOfNewBuildings(){
-        var result = new ArrayList<NewBuilding>();
-        Arrays.asList(EBuildings.values()).forEach(b -> {
-            if (!b.getType().equals(EBuildingType.RESOURCE) && !b.getType().equals(EBuildingType.EMPTY)){
-                var temp = BuildingsFactory.getBuilding(b, 0);
-                result.add(new NewBuilding(b.getName(), b, b.getType(), b.getDescription(), temp.getResourcesToNextLevel(),
-                        temp.getTimeToNextLevel(), b.getRequirementBuildings(), b.getMaxLevel(), false, b.isMulti()));
-            }
-        });
-        return result;
-    }
-
-    private void recalculateVillage(VillageEntity villageEntity){
 
         List<IEvent> allEvents = combineAllEvents(villageEntity);
         LocalDateTime modified = villageEntity.getModified();
@@ -123,7 +103,7 @@ public class VillageServiceImpl implements VillageService{
                 LocalDateTime deathTime = modified.plus(durationToDeath.longValue(), ChronoUnit.MILLIS);
 
                 if (deathTime.isBefore(event.getExecutionTime())) {
-                    IEvent deathBuildEvent = new DeathIEvent(deathTime);
+                    IEvent deathBuildEvent = new DeathEvent(deathTime);
                     villageEntity.calculateProducedGoods(modified, deathBuildEvent.getExecutionTime());
                     deathBuildEvent.execute(villageEntity);
                     modified = deathBuildEvent.getExecutionTime();
@@ -138,20 +118,21 @@ public class VillageServiceImpl implements VillageService{
             modified = event.getExecutionTime();
         }
         villageEntity.castStorage();
+        return saveVillage(villageEntity);
     }
 
     private List<IEvent> combineAllEvents(VillageEntity villageEntity) {
         List<IEvent> allEvents = new ArrayList<>();
 
         // add all building events
-        allEvents.addAll(this.eventService.findAllByVillageId(villageEntity.getVillageId())
+        allEvents.addAll(constructionEventsRepository.findAllByVillageId(villageEntity.getVillageId())
                 .stream()
                 .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
-                .sorted(Comparator.comparing(BuildIEvent::getExecutionTime))
+                .sorted(Comparator.comparing(ConstructionEvent::getExecutionTime))
                 .collect(Collectors.toList()));
 
         // add all units events
-        allEvents.addAll(this.militaryService.createTroopsBuildEventsFromOrders(villageEntity.getVillageId()));
+        allEvents.addAll(createTroopsBuildEventsFromOrders(villageEntity.getVillageId()));
 
         allEvents.add(new LastEvent(LocalDateTime.now()));
 
@@ -161,4 +142,43 @@ public class VillageServiceImpl implements VillageService{
                 .collect(Collectors.toList());
     }
 
+    private List<TroopDoneEvent> createTroopsBuildEventsFromOrders(String villageId) {
+
+        List<TroopDoneEvent> result = new ArrayList<>();
+        List<ArmyOrderEntity> ordersList = armyOrdersRepository.findAllByVillageId(villageId);
+
+        if (ordersList.size() > 0) {
+            for (ArmyOrderEntity order : ordersList) {
+                long duration = Duration.between(order.getLastTime(), LocalDateTime.now()).toSeconds();
+
+                if (LocalDateTime.now().isAfter(order.getEndOrderTime())) {
+                    // add all troops from order to result list
+                    result.addAll(addCompletedTroops(order, order.getLeftTrain()));
+                    armyOrdersRepository.deleteById(order.getOrderId());
+                    continue;
+                }
+
+                int completedTroops = (int) (duration / order.getDurationEach());
+
+                if (completedTroops > 0) {
+                    // add completed troops from order to result list
+                    result.addAll(addCompletedTroops(order, completedTroops));
+                    order.setLeftTrain(order.getLeftTrain() - completedTroops);
+                    order.setLastTime(order.getLastTime().plus(completedTroops * order.getDurationEach(), ChronoUnit.SECONDS));
+                    armyOrdersRepository.save(order);
+                }
+            }
+        }
+        return result;
+    }
+
+    private List<TroopDoneEvent> addCompletedTroops(ArmyOrderEntity order, Integer amount) {
+        List<TroopDoneEvent> result = new ArrayList<>();
+        LocalDateTime exec = order.getLastTime();
+        for (int i = 0; i < amount; i++) {
+            exec = exec.plus(order.getDurationEach(), ChronoUnit.SECONDS);
+            result.add(new TroopDoneEvent(exec, order.getUnitType(), order.getEatHour()));
+        }
+        return result;
+    }
 }

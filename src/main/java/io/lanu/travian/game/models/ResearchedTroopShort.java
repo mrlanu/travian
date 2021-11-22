@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ResearchedUnitShort {
+public class ResearchedTroopShort {
     private String name;
     private int level;
 }

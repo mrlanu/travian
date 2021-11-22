@@ -11,11 +11,11 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-public class DeathIEvent implements IEvent {
+public class DeathEvent implements IEvent {
 
     private LocalDateTime executionTime;
 
-    public DeathIEvent(LocalDateTime executionTime) {
+    public DeathEvent(LocalDateTime executionTime) {
         this.executionTime = executionTime;
     }
 

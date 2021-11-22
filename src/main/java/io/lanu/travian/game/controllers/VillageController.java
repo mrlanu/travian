@@ -2,11 +2,11 @@ package io.lanu.travian.game.controllers;
 
 import io.lanu.travian.enums.EBuildings;
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.entities.events.BuildIEvent;
+import io.lanu.travian.game.entities.events.ConstructionEvent;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.NewBuilding;
 import io.lanu.travian.game.models.responses.VillageView;
-import io.lanu.travian.game.services.EventService;
+import io.lanu.travian.game.services.BuildingsService;
 import io.lanu.travian.game.services.VillageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +19,11 @@ import java.util.List;
 @RequestMapping("/api/villages")
 public class VillageController {
     private final VillageService villageService;
-    private final EventService eventService;
+    private final BuildingsService buildingsService;
 
-    public VillageController(VillageService villageService, EventService eventService) {
+    public VillageController(VillageService villageService, BuildingsService buildingsService) {
         this.villageService = villageService;
-        this.eventService = eventService;
+        this.buildingsService = buildingsService;
     }
 
     @GetMapping("/{villageId}")
@@ -40,20 +40,20 @@ public class VillageController {
 
     @GetMapping("/{villageId}/buildings")
     public List<NewBuilding> getListOfAllNewBuildings(@PathVariable String villageId){
-        return villageService.getListOfAllNewBuildings(villageId);
+        return buildingsService.getListOfAllNewBuildings(villageId);
     }
 
     @PutMapping("/{villageId}/buildings/{position}/new")
     public ResponseEntity<String> newBuilding(@PathVariable String villageId,
                                               @PathVariable Integer position,
                                               @RequestParam EBuildings kind){
-        BuildIEvent buildEvent = eventService.createBuildEvent(villageId, position, kind);
+        ConstructionEvent buildEvent = buildingsService.createBuildEvent(villageId, position, kind);
         return ResponseEntity.status(HttpStatus.CREATED).body(buildEvent.getEventId());
     }
 
     @PutMapping("/{villageId}/buildings/{position}/upgrade")
     public ResponseEntity<String> upgradeBuilding(@PathVariable String villageId, @PathVariable Integer position){
-        BuildIEvent buildEvent = eventService.createBuildEvent(villageId, position, null);
+        ConstructionEvent buildEvent = buildingsService.createBuildEvent(villageId, position, null);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -64,7 +64,7 @@ public class VillageController {
 
     @DeleteMapping("/events/{eventId}")
     public ResponseEntity<String> deleteEventById(@PathVariable String eventId){
-        this.eventService.deleteByEventId(eventId);
+        this.buildingsService.deleteByEventId(eventId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

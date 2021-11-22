@@ -17,9 +17,8 @@ import java.time.LocalDateTime;
         @JsonSubTypes.Type(value = FieldUpgradeBuildEvent.class, name = "fieldUpgradeEvent"),
         @JsonSubTypes.Type(value = TroopBuildEvent.class, name = "troopEvent")
 })*/
-@Document("build-events")
-@TypeAlias("build-events")
-public class BuildIEvent implements IEvent {
+@Document("construction-events")
+public class ConstructionEvent implements IEvent {
 
     @Id
     private String eventId;
@@ -29,7 +28,7 @@ public class BuildIEvent implements IEvent {
     private String villageId;
     private LocalDateTime executionTime;
 
-    public BuildIEvent(int buildingPosition, EBuildings buildingName, int toLevel, String villageId, LocalDateTime executionTime) {
+    public ConstructionEvent(int buildingPosition, EBuildings buildingName, int toLevel, String villageId, LocalDateTime executionTime) {
         this.buildingPosition = buildingPosition;
         this.buildingName = buildingName;
         this.toLevel = toLevel;

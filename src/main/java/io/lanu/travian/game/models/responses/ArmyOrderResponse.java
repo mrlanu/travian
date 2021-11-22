@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MilitaryOrder {
+public class ArmyOrderResponse {
     private String unit;
     private int amount;
     private long duration;
