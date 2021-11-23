@@ -1,11 +1,10 @@
 package io.lanu.travian.game.entities;
 
-import io.lanu.travian.enums.EUnits;
-import io.lanu.travian.enums.EManipulation;
-import io.lanu.travian.enums.EResource;
-import io.lanu.travian.enums.EVillageType;
+import io.lanu.travian.enums.*;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
+import io.lanu.travian.templates.buildings.GranaryBuilding;
+import io.lanu.travian.templates.buildings.WarehouseBuilding;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +17,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -97,11 +98,26 @@ public class VillageEntity {
     }
 
     public BigDecimal getWarehouseCapacity() {
-        return BigDecimal.valueOf(800);
+        // in BuildModel overridden equals method so level doesnt matter in containsValue
+        return buildings.containsValue(new BuildModel(EBuildings.WAREHOUSE, 0)) ?
+                buildings.values()
+                    .stream()
+                    .filter(buildModel -> buildModel.getKind().equals(EBuildings.WAREHOUSE))
+                    .map(buildModel -> (WarehouseBuilding) BuildingsFactory.getBuilding(buildModel.getKind(), buildModel.getLevel()))
+                    .map(WarehouseBuilding::getCapacity)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                : BigDecimal.valueOf(800);
     }
 
     public BigDecimal getGranaryCapacity() {
-        return BigDecimal.valueOf(800);
+        return buildings.containsValue(new BuildModel(EBuildings.GRANARY, 0)) ?
+                buildings.values()
+                    .stream()
+                    .filter(buildModel -> buildModel.getKind().equals(EBuildings.GRANARY))
+                    .map(buildModel -> (GranaryBuilding) BuildingsFactory.getBuilding(buildModel.getKind(), buildModel.getLevel()))
+                    .map(GranaryBuilding::getCapacity)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                : BigDecimal.valueOf(800);
     }
 
     public void castStorage() {

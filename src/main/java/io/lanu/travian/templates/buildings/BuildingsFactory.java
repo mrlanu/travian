@@ -23,9 +23,9 @@ public class BuildingsFactory {
                 break;
             case MAIN: result = new MainBuilding(100);
                 break;
-            case WAREHOUSE: result = new WarehouseBuilding(750);
+            case WAREHOUSE: result = new WarehouseBuilding(BigDecimal.valueOf(buildingKind.getCapacity(level)));
                 break;
-            case GRANARY: result = new GranaryBuilding(750);
+            case GRANARY: result = new GranaryBuilding(BigDecimal.valueOf(buildingKind.getCapacity(level)));
                 break;
             case BARRACK: result = new BarrackBuilding(0);
                 break;

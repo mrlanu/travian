@@ -66,6 +66,8 @@ public enum EBuildings {
     EMPTY("empty-spot", EBuildingType.EMPTY);
 
     private static final Integer[] productions = {3, 7, 13, 21, 31, 46, 70, 98, 140, 203, 280};
+    private static final Integer[] capacity = {800, 1200, 1700, 2300, 3100, 4000, 5000, 6300, 7700, 9600, 12000,
+            14400, 18000, 22000, 26000, 32000, 38000, 45000, 55000, 66000, 80000};
 
     private final String name;
     private final EBuildingType type;
@@ -123,6 +125,8 @@ public enum EBuildings {
     public int getProduction(int level){
         return productions[level];
     }
+
+    public int getCapacity(int level) { return capacity[level]; }
 
     private long round(double v, double n){
         return (long) (Math.round(v / n) * n);
