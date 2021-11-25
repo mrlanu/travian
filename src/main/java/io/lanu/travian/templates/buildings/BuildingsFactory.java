@@ -21,6 +21,8 @@ public class BuildingsFactory {
                 break;
             case EMPTY: result = new EmptySpotBuilding();
                 break;
+            case RALLY_POINT: result = new RallyPoint();
+                break;
             case MAIN: result = new MainBuilding(100);
                 break;
             case WAREHOUSE: result = new WarehouseBuilding(BigDecimal.valueOf(buildingKind.getCapacity(level)));

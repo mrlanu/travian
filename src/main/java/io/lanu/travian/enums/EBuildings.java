@@ -29,6 +29,10 @@ public enum EBuildings {
             "Maximum level is 10, except capital — limited by stockyards there.",
             new ArrayList<>(), true),
 
+    RALLY_POINT("Rally-point", EBuildingType.MILITARY, null, Arrays.asList(110, 160, 90, 70), 1.28, 1, 1,
+        new Time(3875), 20,
+        "Rally point level N detects types of units in incoming attacks, unless there're more N units in that attack.",
+        new ArrayList<>(), false),
     MAIN("Main-building", EBuildingType.INFRASTRUCTURE, null, Arrays.asList(70, 40, 60, 20),1.28, 2, 2,
             new Time(3875), 20,
             "Affects construction speed of other buildings. Building speed is 5x slower on 0th level (destroyed) " +
