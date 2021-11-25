@@ -65,7 +65,7 @@ public class VillageView {
         /*DurationFormatUtils.formatDuration(Duration.between(LocalDateTime.now(),
                 event.getExecutionTime()).toMillis(), "H:mm:ss", true)*/
         return buildEventList.stream()
-                .map(event -> new ConstructionEventView(event.getEventId(), event.getBuildingName().getName(), event.getToLevel(), event.getExecutionTime(),
+                .map(event -> new ConstructionEventView(event.getEventId(), event.getBuildingPosition(), event.getBuildingName().getName(), event.getToLevel(), event.getExecutionTime(),
                         ChronoUnit.SECONDS.between(LocalDateTime.now(), event.getExecutionTime()))).collect(Collectors.toList());
     }
     
@@ -74,13 +74,17 @@ public class VillageView {
                 .mapToObj(i -> {
                     BuildingBase building = BuildingsFactory.getBuilding(buildings.get(i).getKind(), buildings.get(i).getLevel());
                     building.setPosition(i);
-                    return building;
-                })
-                .peek(building -> {
                     if (!building.getName().equals(EBuildings.EMPTY.getName())){
                         building.setAbleToUpgrade(this.storage);
                         building.setUnderUpgrade(eventList);
+                        // if current building is already under upgrade resources needed for next level should be overwritten
+                        if (building.isUnderUpgrade()){
+                            var resources = buildings.get(i).getKind().getResourcesToNextLevel(building.getLevel() + 1);
+                            building.setResourcesToNextLevel(resources);
+                            building.setAbleToUpgrade(this.storage);
+                        }
                     }
+                    return building;
                 })
                 .collect(Collectors.toList());
     }

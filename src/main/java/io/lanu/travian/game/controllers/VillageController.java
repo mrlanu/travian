@@ -53,7 +53,7 @@ public class VillageController {
 
     @PutMapping("/{villageId}/buildings/{position}/upgrade")
     public ResponseEntity<String> upgradeBuilding(@PathVariable String villageId, @PathVariable Integer position){
-        ConstructionEvent buildEvent = buildingsService.createBuildEvent(villageId, position, null);
+        buildingsService.createBuildEvent(villageId, position, null);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -62,9 +62,9 @@ public class VillageController {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.villageService.updateName(villageId, name));
     }
 
-    @DeleteMapping("/events/{eventId}")
-    public ResponseEntity<String> deleteEventById(@PathVariable String eventId){
-        this.buildingsService.deleteByEventId(eventId);
+    @DeleteMapping("/{villageId}/events/{eventId}")
+    public ResponseEntity<String> deleteEventById(@PathVariable String villageId, @PathVariable String eventId){
+        this.buildingsService.deleteBuildingEvent(villageId, eventId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

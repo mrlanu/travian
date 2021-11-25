@@ -13,7 +13,7 @@ public interface BuildingsService {
 
     List<ConstructionEvent> findAllByVillageId(String villageId);
 
-    void deleteByEventId(String eventId);
+    void deleteBuildingEvent(String villageId, String eventId);
 
     void deleteAllByVillageIdAndExecutionTimeBefore(String villageId, LocalDateTime time);
 

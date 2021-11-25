@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Data
 public class ConstructionEventView {
     private String id;
+    private int position;
     private String name;
     private int toLevel;
     private LocalDateTime completeTime;

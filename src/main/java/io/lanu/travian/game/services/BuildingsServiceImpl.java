@@ -37,15 +37,20 @@ public class BuildingsServiceImpl implements BuildingsService {
                 .sorted(Comparator.comparing(ConstructionEvent::getExecutionTime))
                 .collect(Collectors.toList());
 
+        // if current building is already under upgrade resources & time needed for next level should be overwritten
+        var alreadyUnderUpgrade = events.stream()
+                .anyMatch(constructionEvent -> constructionEvent.getBuildingPosition() == buildingPosition);
+
         BuildModel buildModel;
-        //will get a kind if requested new building and null if requested upgrade
+        //the kind of building if requested new building, and null if requested upgrade
         if (kind != null) {
             buildModel = new BuildModel(kind, 0);
             villageEntity.getBuildings().put(buildingPosition, buildModel);
         } else {
             buildModel = villageEntity.getBuildings().get(buildingPosition);
         }
-        BuildingBase building = BuildingsFactory.getBuilding(buildModel.getKind(), buildModel.getLevel());
+        BuildingBase building = BuildingsFactory.getBuilding(buildModel.getKind(),
+                alreadyUnderUpgrade ? buildModel.getLevel() + 1 : buildModel.getLevel());
 
         LocalDateTime executionTime = events.size() > 0 ?
                 events.get(events.size() - 1).getExecutionTime().plusSeconds(building.getTimeToNextLevel()) :
@@ -53,7 +58,8 @@ public class BuildingsServiceImpl implements BuildingsService {
 
         villageEntity.manipulateGoods(EManipulation.SUBTRACT, building.getResourcesToNextLevel());
 
-        ConstructionEvent buildEvent = new ConstructionEvent(buildingPosition, buildModel.getKind(), building.getLevel() + 1, villageId, executionTime);
+        ConstructionEvent buildEvent = new ConstructionEvent(buildingPosition, buildModel.getKind(),
+                building.getLevel() + 1, villageId, executionTime);
 
         villageService.saveVillage(villageEntity);
         return this.constructionEventsRepository.save(buildEvent);
@@ -65,18 +71,38 @@ public class BuildingsServiceImpl implements BuildingsService {
     }
 
     @Override
-    public void deleteByEventId(String eventId) {
-        var event = constructionEventsRepository.findBuildIEventByEventId(eventId);
+    public void deleteBuildingEvent(String villageId, String eventId) {
+        var allEvents = constructionEventsRepository.findAllByVillageId(villageId).stream()
+                .sorted(Comparator.comparing(ConstructionEvent::getExecutionTime))
+                .collect(Collectors.toList());
+        var event = allEvents.stream()
+                .filter(constructionEvent -> constructionEvent.getEventId().equals(eventId))
+                .findFirst()
+                .orElseThrow();
+        var numberOfEvents = allEvents.stream()
+                .filter(e -> e.getBuildingPosition() == event.getBuildingPosition())
+                .count();
+
         var villageEntity = villageService.recalculateVillage(event.getVillageId());
         BuildModel buildModel = villageEntity.getBuildings().get(event.getBuildingPosition());
-        BuildingBase field = BuildingsFactory.getBuilding(buildModel.getKind(), buildModel.getLevel());
-        var events = constructionEventsRepository.findAllByVillageId(villageEntity.getVillageId())
-                .stream()
-                .sorted(Comparator.comparing(ConstructionEvent::getExecutionTime))
+        BuildingBase building = BuildingsFactory.getBuilding(buildModel.getKind(),
+                numberOfEvents == 1 ? buildModel.getLevel() : buildModel.getLevel() + 1);
+        //deduct time that was needed for building from following events
+        var events = allEvents.stream()
                 .filter(e -> e.getExecutionTime().isAfter(event.getExecutionTime()))
                 .collect(Collectors.toList());
-        events.forEach(e -> e.setExecutionTime(e.getExecutionTime().minusSeconds(field.getTimeToNextLevel())));
-        villageEntity.manipulateGoods(EManipulation.ADD, field.getResourcesToNextLevel());
+        events.forEach(e -> {
+            e.setExecutionTime(e.getExecutionTime().minusSeconds(building.getTimeToNextLevel()));
+            //decrement level by one if we have previous events for this building
+            if (numberOfEvents > 1) {
+                e.setToLevel(e.getToLevel() - 1);
+            }
+        });
+        // if deleting any building construction to level 1. in this case should return empty spot (except resources fields)
+        if (event.getToLevel() == 1 && event.getBuildingPosition() >= 19 && numberOfEvents == 1){
+            villageEntity.getBuildings().put(event.getBuildingPosition(), new BuildModel(EBuildings.EMPTY, 0));
+        }
+        villageEntity.manipulateGoods(EManipulation.ADD, building.getResourcesToNextLevel());
         villageService.saveVillage(villageEntity);
         constructionEventsRepository.deleteByEventId(eventId);
         constructionEventsRepository.saveAll(events);
