@@ -1,6 +1,6 @@
 package io.lanu.travian.game.entities.events;
 
-import io.lanu.travian.enums.EUnits;
+import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.game.entities.VillageEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,10 +11,10 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TroopDoneEvent implements IEvent {
+public class CombatUnitDoneEvent implements IEvent {
 
     private LocalDateTime executionTime;
-    private EUnits unitType;
+    private ECombatUnit unitType;
     private int eatHour;
 
     @Override

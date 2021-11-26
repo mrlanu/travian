@@ -1,7 +1,7 @@
 package io.lanu.travian.game.models.responses;
 
 import io.lanu.travian.enums.EBuildingType;
-import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.templates.buildings.RequirementBuilding;
@@ -19,7 +19,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class NewBuilding {
     private String name;
-    private EBuildings kind;
+    private EBuilding kind;
     private EBuildingType type; // infrastructure | military | industrial
     private String description;
     private Map<EResource, BigDecimal> cost;

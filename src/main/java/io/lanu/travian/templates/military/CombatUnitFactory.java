@@ -1,15 +1,15 @@
 package io.lanu.travian.templates.military;
 
-import io.lanu.travian.enums.EUnits;
+import io.lanu.travian.enums.ECombatUnit;
 
-public class MilitaryUnitsFactory {
+public class CombatUnitFactory {
 
-    public static EUnits getUnit(String name, int level){
-        EUnits result;
+    public static ECombatUnit getUnit(String name, int level){
+        ECombatUnit result;
         switch (name){
-            case "Phalanx": result = EUnits.PHALANX;
+            case "Phalanx": result = ECombatUnit.PHALANX;
                 break;
-            case "Legionnaire": result = EUnits.LEGIONNAIRE;
+            case "Legionnaire": result = ECombatUnit.LEGIONNAIRE;
                 break;
             default: return null;
         }

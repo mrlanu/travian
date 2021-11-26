@@ -1,6 +1,6 @@
 package io.lanu.travian.game.entities;
 
-import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EBuilding;
 import lombok.*;
 
 import java.util.Objects;
@@ -10,7 +10,7 @@ import java.util.Objects;
 @Getter
 @Setter
 public class BuildModel {
-    private EBuildings kind;
+    private EBuilding kind;
     private int level;
 
     @Override

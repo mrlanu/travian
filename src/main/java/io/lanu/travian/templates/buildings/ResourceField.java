@@ -1,7 +1,7 @@
 package io.lanu.travian.templates.buildings;
 
 
-import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.EResource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,13 +20,13 @@ public class ResourceField extends BuildingBase{
         this.resource = resource;
         this.production = production;
         switch (this.resource){
-            case CROP: this.name = EBuildings.CROPLAND.getName();
+            case CROP: this.name = EBuilding.CROPLAND.getName();
                 break;
-            case WOOD: this.name = EBuildings.WOODCUTTER.getName();
+            case WOOD: this.name = EBuilding.WOODCUTTER.getName();
                 break;
-            case CLAY: this.name = EBuildings.CLAY_PIT.getName();
+            case CLAY: this.name = EBuilding.CLAY_PIT.getName();
                 break;
-            case IRON: this.name = EBuildings.IRON_MINE.getName();
+            case IRON: this.name = EBuilding.IRON_MINE.getName();
                 break;
         }
     }

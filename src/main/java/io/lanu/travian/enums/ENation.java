@@ -1,5 +1,5 @@
 package io.lanu.travian.enums;
 
-public enum ENations {
+public enum ENation {
     ROME, GALLS, GERMANS
 }

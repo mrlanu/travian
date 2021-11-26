@@ -1,13 +1,13 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.EUnits;
-import io.lanu.travian.game.entities.ArmyOrderEntity;
-import io.lanu.travian.game.models.requests.ArmyOrderRequest;
+import io.lanu.travian.enums.ECombatUnit;
+import io.lanu.travian.game.entities.OrderCombatUnitEntity;
+import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 
 import java.util.List;
 
 public interface MilitaryService {
-    List<ArmyOrderEntity> getAllOrdersByVillageId(String villageId);
-    ArmyOrderEntity orderUnits(ArmyOrderRequest armyOrderRequest);
-    List<EUnits> getAllResearchedUnits(String villageId);
+    List<OrderCombatUnitEntity> getAllOrdersByVillageId(String villageId);
+    OrderCombatUnitEntity orderUnits(OrderCombatUnitRequest orderCombatUnitRequest);
+    List<ECombatUnit> getAllResearchedUnits(String villageId);
 }

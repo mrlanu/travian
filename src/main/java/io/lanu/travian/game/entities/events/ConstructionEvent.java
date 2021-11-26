@@ -1,11 +1,10 @@
 package io.lanu.travian.game.entities.events;
 
-import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.game.entities.VillageEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -23,12 +22,12 @@ public class ConstructionEvent implements IEvent {
     @Id
     private String eventId;
     private int buildingPosition;
-    private EBuildings buildingName;
+    private EBuilding buildingName;
     private int toLevel;
     private String villageId;
     private LocalDateTime executionTime;
 
-    public ConstructionEvent(int buildingPosition, EBuildings buildingName, int toLevel, String villageId, LocalDateTime executionTime) {
+    public ConstructionEvent(int buildingPosition, EBuilding buildingName, int toLevel, String villageId, LocalDateTime executionTime) {
         this.buildingPosition = buildingPosition;
         this.buildingName = buildingName;
         this.toLevel = toLevel;

@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface ConstructionEventsRepository extends MongoRepository<ConstructionEvent, String> {
+public interface ConstructionEventRepository extends MongoRepository<ConstructionEvent, String> {
     List<ConstructionEvent> findAllByVillageId(String villageId);
     ConstructionEvent findBuildIEventByEventId(String eventId);
     void deleteByEventId(String eventId);

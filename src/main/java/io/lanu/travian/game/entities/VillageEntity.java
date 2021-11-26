@@ -17,8 +17,6 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -41,7 +39,7 @@ public class VillageEntity {
     private int approval;
     private Map<Integer, BuildModel> buildings;
     private Map<EResource, BigDecimal> storage;
-    private Map<EUnits, Integer> homeLegion;
+    private Map<ECombatUnit, Integer> homeLegion;
     @LastModifiedDate
     private LocalDateTime modified;
 
@@ -57,7 +55,7 @@ public class VillageEntity {
     //dummy implementation
     private BigDecimal calculateEatPerHour() {
         BigDecimal result = BigDecimal.ZERO;
-        return result.add(BigDecimal.valueOf(homeLegion.getOrDefault(EUnits.PHALANX, 0)));
+        return result.add(BigDecimal.valueOf(homeLegion.getOrDefault(ECombatUnit.PHALANX, 0)));
     }
 
     public void calculateProducedGoods(LocalDateTime lastModified, LocalDateTime untilTime){
@@ -99,10 +97,10 @@ public class VillageEntity {
 
     public BigDecimal getWarehouseCapacity() {
         // in BuildModel overridden equals method so level doesnt matter in containsValue
-        return buildings.containsValue(new BuildModel(EBuildings.WAREHOUSE, 0)) ?
+        return buildings.containsValue(new BuildModel(EBuilding.WAREHOUSE, 0)) ?
                 buildings.values()
                     .stream()
-                    .filter(buildModel -> buildModel.getKind().equals(EBuildings.WAREHOUSE))
+                    .filter(buildModel -> buildModel.getKind().equals(EBuilding.WAREHOUSE))
                     .map(buildModel -> (WarehouseBuilding) BuildingsFactory.getBuilding(buildModel.getKind(), buildModel.getLevel()))
                     .map(WarehouseBuilding::getCapacity)
                     .reduce(BigDecimal.ZERO, BigDecimal::add)
@@ -110,10 +108,10 @@ public class VillageEntity {
     }
 
     public BigDecimal getGranaryCapacity() {
-        return buildings.containsValue(new BuildModel(EBuildings.GRANARY, 0)) ?
+        return buildings.containsValue(new BuildModel(EBuilding.GRANARY, 0)) ?
                 buildings.values()
                     .stream()
-                    .filter(buildModel -> buildModel.getKind().equals(EBuildings.GRANARY))
+                    .filter(buildModel -> buildModel.getKind().equals(EBuilding.GRANARY))
                     .map(buildModel -> (GranaryBuilding) BuildingsFactory.getBuilding(buildModel.getKind(), buildModel.getLevel()))
                     .map(GranaryBuilding::getCapacity)
                     .reduce(BigDecimal.ZERO, BigDecimal::add)

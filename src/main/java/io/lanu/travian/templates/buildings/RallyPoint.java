@@ -1,6 +1,6 @@
 package io.lanu.travian.templates.buildings;
 
-import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EBuilding;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,7 +10,7 @@ public class RallyPoint extends BuildingBase {
 
     public RallyPoint() {
         super();
-        this.name = EBuildings.RALLY_POINT.getName();
+        this.name = EBuilding.RALLY_POINT.getName();
     }
 
 }

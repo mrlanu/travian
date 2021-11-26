@@ -1,6 +1,6 @@
 package io.lanu.travian.templates.buildings;
 
-import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EBuilding;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ public class MainBuilding extends BuildingBase {
 
     public MainBuilding(Integer buildSpeed) {
         super();
-        this.name = EBuildings.MAIN.getName();
+        this.name = EBuilding.MAIN.getName();
         this.buildSpeed = buildSpeed;
     }
 

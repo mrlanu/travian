@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-public enum EBuildings {
+public enum EBuilding {
     WOODCUTTER("Woodcutter", EBuildingType.RESOURCE, EResource.WOOD, Arrays.asList(40, 100, 50, 60), 1.67, 2, 1,
             new Time(1780/3,1.6, 1000/3), 22,
             "Maximum level is 10, except capital — limited by stockyards there.",
@@ -41,12 +41,12 @@ public enum EBuildings {
 
     GRANARY("Granary", EBuildingType.INFRASTRUCTURE,null, Arrays.asList(80, 100, 70, 20), 1.28, 1, 1,
             new Time(3475), 20, "Limits maximum amount of crop available in village. When no it, capacity is 800.",
-            List.of(new RequirementBuilding(EBuildings.MAIN.getName(), 1, false)), true),
+            List.of(new RequirementBuilding(EBuilding.MAIN.getName(), 1, false)), true),
 
     WAREHOUSE("Warehouse", EBuildingType.INFRASTRUCTURE,null, Arrays.asList(130, 160, 90, 40), 1.28, 1, 1,
             new Time(3875), 20,
             "Limits maximum amount of resources available in village. When no it, capacity is 800.",
-            List.of(new RequirementBuilding(EBuildings.MAIN.getName(), 1, false)), true),
+            List.of(new RequirementBuilding(EBuilding.MAIN.getName(), 1, false)), true),
 
     BARRACK("Barrack", EBuildingType.MILITARY,null, Arrays.asList(210, 140, 260, 120), 1.28, 4, 1,
             new Time(3875), 20,
@@ -54,18 +54,18 @@ public enum EBuildings {
                     "in barracks level, effect from artifacts or items(T4). Even if barracks would be demolished, troops training " +
                     "will be continued.",
             Arrays.asList(
-                    new RequirementBuilding(EBuildings.MAIN.getName(), 3, false),
-                    new RequirementBuilding(EBuildings.WAREHOUSE.getName(), 1, false),
-                    new RequirementBuilding(EBuildings.GRANARY.getName(), 1, false)), false),
+                    new RequirementBuilding(EBuilding.MAIN.getName(), 3, false),
+                    new RequirementBuilding(EBuilding.WAREHOUSE.getName(), 1, false),
+                    new RequirementBuilding(EBuilding.GRANARY.getName(), 1, false)), false),
 
     MARKETPLACE("Marketplace", EBuildingType.INFRASTRUCTURE,null, Arrays.asList(80,  70, 120,  70), 1.28, 4, 3,
             new Time(3675), 20,
             "Could be used as extra stockyard (but not a cranny!), by placing sell offer. " +
                     "Keep in mind, that resources could be stolen in raid.",
             Arrays.asList(
-                    new RequirementBuilding(EBuildings.MAIN.getName(), 1, false),
-                    new RequirementBuilding(EBuildings.WAREHOUSE.getName(), 1, false),
-                    new RequirementBuilding(EBuildings.GRANARY.getName(), 1, false)), false),
+                    new RequirementBuilding(EBuilding.MAIN.getName(), 1, false),
+                    new RequirementBuilding(EBuilding.WAREHOUSE.getName(), 1, false),
+                    new RequirementBuilding(EBuilding.GRANARY.getName(), 1, false)), false),
 
     EMPTY("empty-spot", EBuildingType.EMPTY);
 
@@ -86,7 +86,7 @@ public enum EBuildings {
     private final List<RequirementBuilding> requirementBuildings;
     private final boolean isMulti;
 
-    EBuildings(String name, EBuildingType type){
+    EBuilding(String name, EBuildingType type){
         this.name = name;
         this.resource = null;
         this.cost = null;
@@ -101,8 +101,8 @@ public enum EBuildings {
         this.isMulti = true;
     }
 
-    EBuildings(String name, EBuildingType type, EResource resource, List<Integer> cost, double k, int cu, int cp,
-               Time time, int maxLevel, String description, List<RequirementBuilding> requirementBuildings, boolean isMulti) {
+    EBuilding(String name, EBuildingType type, EResource resource, List<Integer> cost, double k, int cu, int cp,
+              Time time, int maxLevel, String description, List<RequirementBuilding> requirementBuildings, boolean isMulti) {
         this.name = name;
         this.resource = resource;
         this.cost = cost;

@@ -1,6 +1,6 @@
 package io.lanu.travian.templates.buildings;
 
-import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.EResource;
 
 import java.math.BigDecimal;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class BuildingsFactory {
 
-    public static BuildingBase getBuilding(EBuildings buildingKind, int level){
+    public static BuildingBase getBuilding(EBuilding buildingKind, int level){
         BuildingBase result;
         switch (buildingKind){
             case CROPLAND: result = new ResourceField(EResource.CROP, BigDecimal.valueOf(buildingKind.getProduction(level)));

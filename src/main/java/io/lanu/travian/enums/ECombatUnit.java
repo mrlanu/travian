@@ -7,7 +7,7 @@ import java.util.Map;
 
 @Getter
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public enum EUnits {
+public enum ECombatUnit {
     PHALANX("Phalanx", 15, 40, 50, 7, 35,
             Map.of(EResource.WOOD, 100, EResource.CLAY, 130, EResource.IRON, 55, EResource.CROP, 30),
             1, 60, "Phalanx is a cheap and fast in learning infant unit."), // time should be 1040
@@ -28,8 +28,8 @@ public enum EUnits {
     private long time;
     private final String description;
 
-    EUnits(String name, int attack, int defInfantry, int defCavalry, int speed, int capacity,
-           Map<EResource, Integer> cost, int eat, int time, String description) {
+    ECombatUnit(String name, int attack, int defInfantry, int defCavalry, int speed, int capacity,
+                Map<EResource, Integer> cost, int eat, int time, String description) {
         this.name = name;
         this.level = 0;
         this.attack = attack;

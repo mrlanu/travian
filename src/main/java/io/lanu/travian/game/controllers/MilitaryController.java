@@ -1,8 +1,8 @@
 package io.lanu.travian.game.controllers;
 
-import io.lanu.travian.enums.EUnits;
-import io.lanu.travian.game.models.requests.ArmyOrderRequest;
-import io.lanu.travian.game.models.responses.ArmyOrderResponse;
+import io.lanu.travian.enums.ECombatUnit;
+import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
+import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
 import io.lanu.travian.game.services.MilitaryService;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,19 +22,19 @@ public class MilitaryController {
     }
 
     @PostMapping("/military")
-    public ArmyOrderResponse orderArmyUnits(@RequestBody ArmyOrderRequest armyOrderRequest) {
-        var result = militaryService.orderUnits(armyOrderRequest);
-        return new ArmyOrderResponse(result.getUnitType().getName(), result.getLeftTrain(),
+    public CombatUnitOrderResponse orderArmyUnits(@RequestBody OrderCombatUnitRequest orderCombatUnitRequest) {
+        var result = militaryService.orderUnits(orderCombatUnitRequest);
+        return new CombatUnitOrderResponse(result.getUnitType().getName(), result.getLeftTrain(),
                 result.getDurationEach(), result.getDurationEach() * result.getLeftTrain(), result.getEndOrderTime());
     }
 
     @GetMapping("/{villageId}/military-orders")
-    public List<ArmyOrderResponse> getAllMilitaryOrders(@PathVariable String villageId){
+    public List<CombatUnitOrderResponse> getAllMilitaryOrders(@PathVariable String villageId){
         return militaryService.getAllOrdersByVillageId(villageId)
                 .stream()
                 .map(armyOrderEntity -> {
                     var duration = Duration.between(LocalDateTime.now(), armyOrderEntity.getEndOrderTime()).toSeconds();
-                    return new ArmyOrderResponse(
+                    return new CombatUnitOrderResponse(
                         armyOrderEntity.getUnitType().getName(),
                         armyOrderEntity.getLeftTrain(),
                         duration,
@@ -44,7 +44,7 @@ public class MilitaryController {
     }
 
     @GetMapping("/{villageId}/military/researched")
-    public List<EUnits> getAllResearchedUnits(@PathVariable String villageId){
+    public List<ECombatUnit> getAllResearchedUnits(@PathVariable String villageId){
         return this.militaryService.getAllResearchedUnits(villageId);
     }
 }

@@ -1,8 +1,8 @@
 package io.lanu.travian.game.models.responses;
 
-import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.EResource;
-import io.lanu.travian.enums.EUnits;
+import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.VillageEntity;
@@ -38,7 +38,7 @@ public class VillageView {
     private Map<EResource, BigDecimal> storage;
     private BigDecimal warehouseCapacity;
     private BigDecimal granaryCapacity;
-    private Map<EUnits, Integer> homeLegion;
+    private Map<ECombatUnit, Integer> homeLegion;
     private Map<EResource, BigDecimal> producePerHour;
     private List<ConstructionEventView> eventsList;
 
@@ -74,7 +74,7 @@ public class VillageView {
                 .mapToObj(i -> {
                     BuildingBase building = BuildingsFactory.getBuilding(buildings.get(i).getKind(), buildings.get(i).getLevel());
                     building.setPosition(i);
-                    if (!building.getName().equals(EBuildings.EMPTY.getName())){
+                    if (!building.getName().equals(EBuilding.EMPTY.getName())){
                         building.setAbleToUpgrade(this.storage);
                         building.setUnderUpgrade(eventList);
                         // if current building is already under upgrade resources needed for next level should be overwritten

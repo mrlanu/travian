@@ -1,6 +1,6 @@
 package io.lanu.travian.game.entities.events;
 
-import io.lanu.travian.enums.EUnits;
+import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.VillageEntity;
 import lombok.Data;
@@ -23,7 +23,7 @@ public class DeathEvent implements IEvent {
     public void execute(VillageEntity villageEntity) {
         // dummy implementation
         var army = villageEntity.getHomeLegion();
-        army.put(EUnits.LEGIONNAIRE, army.getOrDefault(EUnits.LEGIONNAIRE, 0) - 1);
+        army.put(ECombatUnit.LEGIONNAIRE, army.getOrDefault(ECombatUnit.LEGIONNAIRE, 0) - 1);
         var stor = villageEntity.getStorage();
         stor.put(EResource.CROP, stor.get(EResource.CROP).add(BigDecimal.ONE));
     }

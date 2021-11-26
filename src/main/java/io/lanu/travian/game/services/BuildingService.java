@@ -1,15 +1,15 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.game.entities.events.ConstructionEvent;
 import io.lanu.travian.game.models.responses.NewBuilding;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface BuildingsService {
+public interface BuildingService {
 
-    ConstructionEvent createBuildEvent(String villageId, Integer fieldPosition, EBuildings kind);
+    ConstructionEvent createBuildEvent(String villageId, Integer fieldPosition, EBuilding kind);
 
     List<ConstructionEvent> findAllByVillageId(String villageId);
 

@@ -1,6 +1,6 @@
 package io.lanu.travian.game.entities;
 
-import io.lanu.travian.game.models.ResearchedTroopShort;
+import io.lanu.travian.game.models.ResearchedCombatUnitShort;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResearchedTroopsEntity {
+public class ResearchedCombatUnitEntity {
     private String villageId;
-    private List<ResearchedTroopShort> units;
+    private List<ResearchedCombatUnitShort> units;
 }

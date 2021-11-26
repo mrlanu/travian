@@ -1,7 +1,7 @@
 package io.lanu.travian.templates.buildings;
 
 
-import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EBuilding;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -14,7 +14,7 @@ public class Marketplace extends BuildingBase{
 
     public Marketplace(Integer traders) {
         super();
-        this.name = EBuildings.MARKETPLACE.getName();
+        this.name = EBuilding.MARKETPLACE.getName();
         this.traders = traders;
     }
 }

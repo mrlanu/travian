@@ -2,13 +2,13 @@ package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.enums.EResource;
-import io.lanu.travian.enums.EUnits;
-import io.lanu.travian.game.entities.ArmyOrderEntity;
+import io.lanu.travian.enums.ECombatUnit;
+import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.models.requests.ArmyOrderRequest;
-import io.lanu.travian.game.repositories.ArmyOrdersRepository;
-import io.lanu.travian.game.repositories.ResearchedTroopsRepository;
-import io.lanu.travian.templates.military.MilitaryUnitsFactory;
+import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
+import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
+import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
+import io.lanu.travian.templates.military.CombatUnitFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,59 +20,59 @@ import java.util.stream.Collectors;
 @Service
 public class MilitaryServiceImpl implements MilitaryService {
 
-    private final ArmyOrdersRepository armyOrdersRepository;
-    private final ResearchedTroopsRepository researchedTroopsRepository;
+    private final CombatUnitOrderRepository combatUnitOrderRepository;
+    private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
     private final VillageService villageService;
 
-    public MilitaryServiceImpl(ArmyOrdersRepository armyOrdersRepository,
-                               ResearchedTroopsRepository researchedTroopsRepository,
+    public MilitaryServiceImpl(CombatUnitOrderRepository combatUnitOrderRepository,
+                               ResearchedCombatUnitRepository researchedCombatUnitRepository,
                                VillageService villageService) {
-        this.armyOrdersRepository = armyOrdersRepository;
-        this.researchedTroopsRepository = researchedTroopsRepository;
+        this.combatUnitOrderRepository = combatUnitOrderRepository;
+        this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.villageService = villageService;
     }
 
     @Override
-    public List<EUnits> getAllResearchedUnits(String villageId) {
-        return researchedTroopsRepository.findByVillageId(villageId).getUnits()
+    public List<ECombatUnit> getAllResearchedUnits(String villageId) {
+        return researchedCombatUnitRepository.findByVillageId(villageId).getUnits()
                 .stream()
-                .map(shortUnit -> MilitaryUnitsFactory.getUnit(shortUnit.getName(), shortUnit.getLevel()))
+                .map(shortUnit -> CombatUnitFactory.getUnit(shortUnit.getName(), shortUnit.getLevel()))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ArmyOrderEntity orderUnits(ArmyOrderRequest armyOrderRequest) {
+    public OrderCombatUnitEntity orderUnits(OrderCombatUnitRequest orderCombatUnitRequest) {
 
-        VillageEntity villageEntity = villageService.recalculateVillage(armyOrderRequest.getVillageId());
-        EUnits unit = armyOrderRequest.getUnitType();
-        List<ArmyOrderEntity> ordersList = getAllOrdersByVillageId(armyOrderRequest.getVillageId());
+        VillageEntity villageEntity = villageService.recalculateVillage(orderCombatUnitRequest.getVillageId());
+        ECombatUnit unit = orderCombatUnitRequest.getUnitType();
+        List<OrderCombatUnitEntity> ordersList = getAllOrdersByVillageId(orderCombatUnitRequest.getVillageId());
 
         LocalDateTime lastTime = ordersList.size() > 0 ? ordersList.get(ordersList.size() - 1).getEndOrderTime() : LocalDateTime.now();
 
         LocalDateTime endOrderTime = lastTime.plus(
-                armyOrderRequest.getAmount() * unit.getTime(), ChronoUnit.SECONDS);
+                orderCombatUnitRequest.getAmount() * unit.getTime(), ChronoUnit.SECONDS);
 
-        ArmyOrderEntity armyOrder = new ArmyOrderEntity(armyOrderRequest.getVillageId(), lastTime, armyOrderRequest.getUnitType(),
-                armyOrderRequest.getAmount(), unit.getTime(), unit.getEat(), endOrderTime);
+        OrderCombatUnitEntity armyOrder = new OrderCombatUnitEntity(orderCombatUnitRequest.getVillageId(), lastTime, orderCombatUnitRequest.getUnitType(),
+                orderCombatUnitRequest.getAmount(), unit.getTime(), unit.getEat(), endOrderTime);
 
-        spendResources(armyOrderRequest.getAmount(), villageEntity, unit);
+        spendResources(orderCombatUnitRequest.getAmount(), villageEntity, unit);
 
         villageService.saveVillage(villageEntity);
-        return armyOrdersRepository.save(armyOrder);
+        return combatUnitOrderRepository.save(armyOrder);
     }
 
-    private void spendResources(int unitsAmount, VillageEntity villageEntity, EUnits kind) {
+    private void spendResources(int unitsAmount, VillageEntity villageEntity, ECombatUnit kind) {
         Map<EResource, BigDecimal> neededResources = new HashMap<>();
         kind.getCost().forEach((k, v) -> neededResources.put(k, BigDecimal.valueOf((long) v * unitsAmount)));
         villageEntity.manipulateGoods(EManipulation.SUBTRACT, neededResources);
     }
 
     @Override
-    public List<ArmyOrderEntity> getAllOrdersByVillageId(String villageId){
-        return armyOrdersRepository
+    public List<OrderCombatUnitEntity> getAllOrdersByVillageId(String villageId){
+        return combatUnitOrderRepository
                 .findAllByVillageId(villageId)
                 .stream()
-                .sorted(Comparator.comparing(ArmyOrderEntity::getCreated))
+                .sorted(Comparator.comparing(OrderCombatUnitEntity::getCreated))
                 .collect(Collectors.toList());
     }
 

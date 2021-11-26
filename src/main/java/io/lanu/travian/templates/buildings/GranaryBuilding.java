@@ -1,6 +1,6 @@
 package io.lanu.travian.templates.buildings;
 
-import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EBuilding;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,7 @@ public class GranaryBuilding extends BuildingBase {
 
     public GranaryBuilding(BigDecimal capacity) {
         super();
-        this.name = EBuildings.GRANARY.getName();
+        this.name = EBuilding.GRANARY.getName();
         this.capacity = capacity;
     }
 

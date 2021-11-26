@@ -1,6 +1,6 @@
 package io.lanu.travian.templates.buildings;
 
-import io.lanu.travian.enums.EBuildings;
+import io.lanu.travian.enums.EBuilding;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ public class BarrackBuilding extends BuildingBase {
 
     public BarrackBuilding(Integer timeReduction) {
         super();
-        this.name = EBuildings.BARRACK.getName();
+        this.name = EBuilding.BARRACK.getName();
         this.timeReduction = timeReduction;
     }
 }
