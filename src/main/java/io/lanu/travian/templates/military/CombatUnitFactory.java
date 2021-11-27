@@ -9,8 +9,6 @@ public class CombatUnitFactory {
         switch (name){
             case "Phalanx": result = ECombatUnit.PHALANX;
                 break;
-            case "Legionnaire": result = ECombatUnit.LEGIONNAIRE;
-                break;
             default: return null;
         }
         result.setLevel(level);

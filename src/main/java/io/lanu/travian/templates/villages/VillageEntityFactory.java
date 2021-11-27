@@ -1,13 +1,13 @@
 package io.lanu.travian.templates.villages;
 
 import io.lanu.travian.enums.EBuilding;
+import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.BuildModel;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 
 public class VillageEntityFactory {
@@ -48,7 +48,7 @@ public class VillageEntityFactory {
                             Map.entry(28, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(29, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(30, new BuildModel(EBuilding.GRANARY, 1)),
-                            Map.entry(31, new BuildModel(EBuilding.EMPTY, 0)),
+                            Map.entry(31, new BuildModel(EBuilding.RALLY_POINT, 1)),
                             Map.entry(32, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(33, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(34, new BuildModel(EBuilding.EMPTY, 0)),
@@ -61,7 +61,10 @@ public class VillageEntityFactory {
                             EResource.CLAY, BigDecimal.valueOf(500),
                             EResource.WOOD, BigDecimal.valueOf(500),
                             EResource.IRON, BigDecimal.valueOf(500)),
-                    new HashMap<>(),
+                    Map.of(ECombatUnit.PHALANX, 5, ECombatUnit.SWORDSMAN, 0, ECombatUnit.PATHFINDER, 0,
+                            ECombatUnit.THUNDER, 2, ECombatUnit.DRUIDRIDER, 0, ECombatUnit.HAEDUAN, 0,
+                            ECombatUnit.RAM, 0, ECombatUnit.TREBUCHET, 0, ECombatUnit.CHIEFTAIN, 0,
+                            ECombatUnit.SETTLER, 0),
                     null);
             default: return null;
         }

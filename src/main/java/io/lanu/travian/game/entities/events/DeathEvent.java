@@ -23,7 +23,7 @@ public class DeathEvent implements IEvent {
     public void execute(VillageEntity villageEntity) {
         // dummy implementation
         var army = villageEntity.getHomeLegion();
-        army.put(ECombatUnit.LEGIONNAIRE, army.getOrDefault(ECombatUnit.LEGIONNAIRE, 0) - 1);
+        army.put(ECombatUnit.PHALANX, army.getOrDefault(ECombatUnit.PHALANX, 0) - 1);
         var stor = villageEntity.getStorage();
         stor.put(EResource.CROP, stor.get(EResource.CROP).add(BigDecimal.ONE));
     }

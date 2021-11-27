@@ -52,10 +52,11 @@ public class VillageEntity {
         return result;
     }
 
-    //dummy implementation
     private BigDecimal calculateEatPerHour() {
-        BigDecimal result = BigDecimal.ZERO;
-        return result.add(BigDecimal.valueOf(homeLegion.getOrDefault(ECombatUnit.PHALANX, 0)));
+        var eatExpenses = (Integer) homeLegion.entrySet().stream()
+                .mapToInt(entry -> entry.getKey().getEat() * entry.getValue())
+                .sum();
+        return BigDecimal.valueOf(eatExpenses);
     }
 
     public void calculateProducedGoods(LocalDateTime lastModified, LocalDateTime untilTime){
