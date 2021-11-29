@@ -61,10 +61,13 @@ public class VillageEntityFactory {
                             EResource.CLAY, BigDecimal.valueOf(500),
                             EResource.WOOD, BigDecimal.valueOf(500),
                             EResource.IRON, BigDecimal.valueOf(500)),
-                    Map.of(ECombatUnit.PHALANX, 5, ECombatUnit.SWORDSMAN, 0, ECombatUnit.PATHFINDER, 0,
-                            ECombatUnit.THUNDER, 2, ECombatUnit.DRUIDRIDER, 0, ECombatUnit.HAEDUAN, 0,
-                            ECombatUnit.RAM, 0, ECombatUnit.TREBUCHET, 0, ECombatUnit.CHIEFTAIN, 0,
-                            ECombatUnit.SETTLER, 0),
+                    Map.ofEntries(
+                            Map.entry(ECombatUnit.PHALANX, 5), Map.entry(ECombatUnit.SWORDSMAN, 0),
+                            Map.entry(ECombatUnit.PATHFINDER, 0), Map.entry(ECombatUnit.THUNDER, 2),
+                            Map.entry(ECombatUnit.DRUIDRIDER, 0), Map.entry(ECombatUnit.HAEDUAN, 0),
+                            Map.entry(ECombatUnit.RAM, 0), Map.entry(ECombatUnit.TREBUCHET, 0),
+                            Map.entry(ECombatUnit.CHIEFTAIN, 0), Map.entry(ECombatUnit.SETTLER, 0),
+                            Map.entry(ECombatUnit.HERO, 1)),
                     null);
             default: return null;
         }

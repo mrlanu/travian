@@ -24,7 +24,7 @@ public class CombatUnitFactory {
 
     public static List<Integer> mapHomeArmyToList(Map<ECombatUnit, Integer> armyMap){
         var result = new ArrayList<Integer>();
-        IntStream.range(0, 10).forEach(i -> result.add(0));
+        IntStream.range(0, 11).forEach(i -> result.add(0));
         armyMap.forEach((k, v) -> {
             switch (k){
                 case PHALANX: result.set(0, v);
@@ -47,6 +47,8 @@ public class CombatUnitFactory {
                     break;
                 case SETTLER: result.set(9, v);
                     break;
+                case HERO: result.set(10, v);
+                break;
             }
         });
         return result;

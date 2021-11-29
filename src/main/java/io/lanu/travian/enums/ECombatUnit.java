@@ -8,6 +8,9 @@ import java.util.Map;
 @Getter
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum ECombatUnit {
+    HERO("Hero", 15, 40, 50, 7, 35,
+            Map.of(EResource.WOOD, 100, EResource.CLAY, 130, EResource.IRON, 55, EResource.CROP, 30),
+            1, 60, "Hero."),// time should be 1040
     PHALANX("Phalanx", 15, 40, 50, 7, 35,
             Map.of(EResource.WOOD, 100, EResource.CLAY, 130, EResource.IRON, 55, EResource.CROP, 30),
             1, 60, "Phalanx is a cheap and fast in learning infant unit."),// time should be 1040
