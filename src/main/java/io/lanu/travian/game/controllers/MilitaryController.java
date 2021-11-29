@@ -3,6 +3,7 @@ package io.lanu.travian.game.controllers;
 import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
+import io.lanu.travian.game.models.responses.MilitaryUnitResponse;
 import io.lanu.travian.game.services.MilitaryService;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +22,14 @@ public class MilitaryController {
         this.militaryService = militaryService;
     }
 
+    @GetMapping("/{villageId}/military-units")
+    public List<MilitaryUnitResponse> getAllMilitaryUnitsByVillageId(@PathVariable String villageId){
+        return militaryService.getAllMilitaryUnitsByVillageId(villageId);
+    }
+
     @PostMapping("/military")
     public CombatUnitOrderResponse orderArmyUnits(@RequestBody OrderCombatUnitRequest orderCombatUnitRequest) {
-        var result = militaryService.orderUnits(orderCombatUnitRequest);
+        var result = militaryService.orderCombatUnits(orderCombatUnitRequest);
         return new CombatUnitOrderResponse(result.getUnitType().getName(), result.getLeftTrain(),
                 result.getDurationEach(), result.getDurationEach() * result.getLeftTrain(), result.getEndOrderTime());
     }
