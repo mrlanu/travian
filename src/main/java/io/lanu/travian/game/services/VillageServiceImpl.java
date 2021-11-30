@@ -55,6 +55,11 @@ public class VillageServiceImpl implements VillageService{
     }
 
     @Override
+    public Optional<VillageEntity> findVillageByCoordinates(int x, int y) {
+        return villageRepository.findByXAndY(x, y);
+    }
+
+    @Override
     public List<ShortVillageInfo> getAllVillagesByUserId(String userId) {
         return villageRepository.findAllByAccountId(userId)
                 .stream()

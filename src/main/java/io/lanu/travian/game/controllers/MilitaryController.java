@@ -2,8 +2,10 @@ package io.lanu.travian.game.controllers;
 
 import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
+import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
 import io.lanu.travian.game.models.responses.MilitaryUnitResponse;
+import io.lanu.travian.game.models.responses.TroopsSendingResponse;
 import io.lanu.travian.game.services.MilitaryService;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,4 +55,11 @@ public class MilitaryController {
     public List<ECombatUnit> getAllResearchedUnits(@PathVariable String villageId){
         return this.militaryService.getAllResearchedUnits(villageId);
     }
+
+    @PostMapping("/check-troops-send")
+    public TroopsSendingResponse checkTroopsSendingRequest(@RequestBody TroopsSendingRequest troopsSendingRequest) {
+        return militaryService.checkTroopsSendingRequest(troopsSendingRequest);
+    }
+
 }
+

@@ -7,6 +7,7 @@ import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.models.responses.VillageView;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface VillageService {
     VillageEntity saveVillage(VillageEntity villageEntity);
@@ -15,4 +16,5 @@ public interface VillageService {
     VillageEntity recalculateVillage(String villageId);
     List<ShortVillageInfo> getAllVillagesByUserId(String userId);
     String updateName(String villageId, String newName);
+    Optional<VillageEntity> findVillageByCoordinates(int x, int y);
 }

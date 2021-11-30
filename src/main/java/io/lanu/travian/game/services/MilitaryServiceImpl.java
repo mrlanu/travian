@@ -4,15 +4,19 @@ import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.enums.ENation;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.ECombatUnit;
+import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
+import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.MilitaryUnitResponse;
+import io.lanu.travian.game.models.responses.TroopsSendingResponse;
 import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
 import io.lanu.travian.game.repositories.IMilitaryUnitRepository;
 import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
+import io.lanu.travian.security.UserEntity;
+import io.lanu.travian.security.UsersRepository;
 import io.lanu.travian.templates.military.CombatUnitFactory;
-import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,7 +24,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 public class MilitaryServiceImpl implements MilitaryService {
@@ -29,14 +32,16 @@ public class MilitaryServiceImpl implements MilitaryService {
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
     private final VillageService villageService;
     private final IMilitaryUnitRepository militaryUnitRepository;
+    private final UsersRepository usersRepository;
 
     public MilitaryServiceImpl(CombatUnitOrderRepository combatUnitOrderRepository,
                                ResearchedCombatUnitRepository researchedCombatUnitRepository,
-                               VillageService villageService, IMilitaryUnitRepository militaryUnitRepository) {
+                               VillageService villageService, IMilitaryUnitRepository militaryUnitRepository, UsersRepository usersRepository) {
         this.combatUnitOrderRepository = combatUnitOrderRepository;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.villageService = villageService;
         this.militaryUnitRepository = militaryUnitRepository;
+        this.usersRepository = usersRepository;
     }
 
     @Override
@@ -92,4 +97,21 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public TroopsSendingResponse checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest) {
+        VillageEntity attackedVillage;
+        UserEntity attackedUser;
+        var attackedVillageOpt = villageService
+                .findVillageByCoordinates(troopsSendingRequest.getX(), troopsSendingRequest.getY());
+        if (attackedVillageOpt.isPresent()){
+            attackedVillage = villageService.recalculateVillage(attackedVillageOpt.get().getVillageId());
+            attackedUser = usersRepository.findByUserId(attackedVillage.getAccountId()).orElseThrow();
+        } else {
+            throw new UserErrorException("There is nothing on those coordinates");
+        }
+
+        return new TroopsSendingResponse(troopsSendingRequest.getVillageId(), attackedVillage.getName(),
+                attackedVillage.getX(), attackedVillage.getY(), attackedUser.getUsername(),
+                troopsSendingRequest.getWaves().get(0).getTroops(), 120, LocalDateTime.now().plusSeconds(120));
+    }
 }
