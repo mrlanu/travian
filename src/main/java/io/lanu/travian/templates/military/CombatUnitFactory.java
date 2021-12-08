@@ -22,32 +22,31 @@ public class CombatUnitFactory {
         return result;
     }
 
-    public static List<Integer> mapHomeArmyToList(Map<ECombatUnit, Integer> armyMap){
-        var result = new ArrayList<Integer>();
-        IntStream.range(0, 11).forEach(i -> result.add(0));
+    public static int[] mapHomeArmyToIntArray(Map<ECombatUnit, Integer> armyMap){
+        var result = new int[11];
         armyMap.forEach((k, v) -> {
             switch (k){
-                case PHALANX: result.set(0, v);
+                case PHALANX: result[0] = v;
                     break;
-                case SWORDSMAN: result.set(1, v);
+                case SWORDSMAN: result[1] = v;
                     break;
-                case PATHFINDER: result.set(2, v);
+                case PATHFINDER: result[2] = v;
                     break;
-                case THUNDER: result.set(3, v);
+                case THUNDER: result[3] = v;
                     break;
-                case DRUIDRIDER: result.set(4, v);
+                case DRUIDRIDER: result[4] = v;
                     break;
-                case HAEDUAN: result.set(5, v);
+                case HAEDUAN: result[5] = v;
                     break;
-                case RAM: result.set(6, v);
+                case RAM: result[6] = v;
                     break;
-                case TREBUCHET: result.set(7, v);
+                case TREBUCHET: result[7] = v;
                     break;
-                case CHIEFTAIN: result.set(8, v);
+                case CHIEFTAIN: result[8] = v;
                     break;
-                case SETTLER: result.set(9, v);
+                case SETTLER: result[9] = v;
                     break;
-                case HERO: result.set(10, v);
+                case HERO: result[10] = v;
                 break;
             }
         });

@@ -4,5 +4,4 @@ import io.lanu.travian.game.entities.MilitaryUnitEntity;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface IMilitaryUnitRepository extends MongoRepository<MilitaryUnitEntity, String> {
-    MilitaryUnitEntity getByOriginVillageIdAndHomeMilitaryUnit(String villageId, boolean home);
 }

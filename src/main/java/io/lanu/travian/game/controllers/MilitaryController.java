@@ -5,7 +5,6 @@ import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
 import io.lanu.travian.game.models.responses.MilitaryUnitResponse;
-import io.lanu.travian.game.models.responses.TroopsSendingResponse;
 import io.lanu.travian.game.services.MilitaryService;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,7 +56,7 @@ public class MilitaryController {
     }
 
     @PostMapping("/check-troops-send")
-    public TroopsSendingResponse checkTroopsSendingRequest(@RequestBody TroopsSendingRequest troopsSendingRequest) {
+    public MilitaryUnitResponse checkTroopsSendingRequest(@RequestBody TroopsSendingRequest troopsSendingRequest) {
         return militaryService.checkTroopsSendingRequest(troopsSendingRequest);
     }
 
