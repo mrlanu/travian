@@ -20,6 +20,6 @@ public class CombatUnitDoneEvent implements IEvent {
     @Override
     public void execute(VillageEntity villageEntity) {
         var homeLeg = villageEntity.getHomeLegion();
-        homeLeg.put(unitType, homeLeg.getOrDefault(unitType, 0) + 1);
+        homeLeg[0] = homeLeg[0] + 1;
     }
 }

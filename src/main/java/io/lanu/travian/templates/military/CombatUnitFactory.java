@@ -1,11 +1,9 @@
 package io.lanu.travian.templates.military;
 
 import io.lanu.travian.enums.ECombatUnit;
+import io.lanu.travian.enums.ENation;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
 
 public class CombatUnitFactory {
 
@@ -51,5 +49,78 @@ public class CombatUnitFactory {
             }
         });
         return result;
+    }
+
+    public static ECombatUnit getCombatUnitFromArrayPosition(int position, ENation nation){
+        switch (position){
+            case 0: if (nation.equals(ENation.GALLS)){
+                return ECombatUnit.PHALANX;
+            } else if (nation.equals(ENation.ROME)){
+                return null; // here should be Rome unit
+            }
+            break;
+            case 1: if (nation.equals(ENation.GALLS)){
+                return ECombatUnit.SWORDSMAN;
+            } else if (nation.equals(ENation.ROME)){
+                return null; // here should be Rome unit
+            }
+            break;
+            case 2: if (nation.equals(ENation.GALLS)){
+                return ECombatUnit.PATHFINDER;
+            } else if (nation.equals(ENation.ROME)){
+                return null; // here should be Rome unit
+            }
+                break;
+            case 3: if (nation.equals(ENation.GALLS)){
+                return ECombatUnit.THUNDER;
+            } else if (nation.equals(ENation.ROME)){
+                return null; // here should be Rome unit
+            }
+                break;
+            case 4: if (nation.equals(ENation.GALLS)){
+                return ECombatUnit.DRUIDRIDER;
+            } else if (nation.equals(ENation.ROME)){
+                return null; // here should be Rome unit
+            }
+                break;
+            case 5: if (nation.equals(ENation.GALLS)){
+                return ECombatUnit.HAEDUAN;
+            } else if (nation.equals(ENation.ROME)){
+                return null; // here should be Rome unit
+            }
+                break;
+            case 6: if (nation.equals(ENation.GALLS)){
+                return ECombatUnit.RAM;
+            } else if (nation.equals(ENation.ROME)){
+                return null; // here should be Rome unit
+            }
+                break;
+            case 7: if (nation.equals(ENation.GALLS)){
+                return ECombatUnit.TREBUCHET;
+            } else if (nation.equals(ENation.ROME)){
+                return null; // here should be Rome unit
+            }
+                break;
+            case 8: if (nation.equals(ENation.GALLS)){
+                return ECombatUnit.CHIEFTAIN;
+            } else if (nation.equals(ENation.ROME)){
+                return null; // here should be Rome unit
+            }
+                break;
+            case 9: if (nation.equals(ENation.GALLS)){
+                return ECombatUnit.SETTLER;
+            } else if (nation.equals(ENation.ROME)){
+                return null; // here should be Rome unit
+            }
+                break;
+            case 10: if (nation.equals(ENation.GALLS)){
+                return ECombatUnit.HERO;
+            } else if (nation.equals(ENation.ROME)){
+                return null; // here should be Rome unit
+            }
+                break;
+            default: return null;
+        }
+        return null;
     }
 }

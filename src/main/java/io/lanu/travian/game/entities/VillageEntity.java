@@ -5,6 +5,7 @@ import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
 import io.lanu.travian.templates.buildings.GranaryBuilding;
 import io.lanu.travian.templates.buildings.WarehouseBuilding;
+import io.lanu.travian.templates.military.CombatUnitFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,6 +31,7 @@ public class VillageEntity {
     @Id
     protected String villageId;
     private String accountId;
+    private ENation nation;
     private String name;
     private int x;
     private int y;
@@ -39,7 +41,7 @@ public class VillageEntity {
     private int approval;
     private Map<Integer, BuildModel> buildings;
     private Map<EResource, BigDecimal> storage;
-    private Map<ECombatUnit, Integer> homeLegion;
+    private int[] homeLegion;
     @LastModifiedDate
     private LocalDateTime modified;
 
@@ -53,9 +55,9 @@ public class VillageEntity {
     }
 
     public BigDecimal calculateEatPerHour() {
-        var eatExpenses = (Integer) homeLegion.entrySet().stream()
-                .mapToInt(entry -> entry.getKey().getEat() * entry.getValue())
-                .sum();
+        var eatExpenses = IntStream.range(0, 10)
+                .mapToObj(i -> CombatUnitFactory.getCombatUnitFromArrayPosition(i, ENation.GALLS).getEat() * homeLegion[i])
+                .reduce(0, Integer::sum);
         return BigDecimal.valueOf(eatExpenses);
     }
 

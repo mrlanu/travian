@@ -19,7 +19,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,7 +50,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         return List.of(
                 new MilitaryUnitResponse("home-army", ENation.GALLS, false, EMilitaryUnitMission.HOME.getName(),
                         villageId, village.getName(), new int[]{village.getX(), village.getY()}, villageId, null, null,
-                        null, null, CombatUnitFactory.mapHomeArmyToIntArray(village.getHomeLegion()),
+                        null, null, village.getHomeLegion(),
                     null, 0, village.calculateEatPerHour().intValue()));
 
     }
@@ -115,5 +118,12 @@ public class MilitaryServiceImpl implements MilitaryService {
 
         return militaryUnit.toMilitaryUnitResponse(troopsSendingRequest.getKind().getName(), attackingVillage,
                 attackedVillage, attackedUser.getUsername(), 0);
+    }
+
+    @Override
+    public void sendTroops(MilitaryUnitResponse militaryUnitResponse) {
+
+        // deduct all involved units from village army
+        // create MilitaryUnitEntity
     }
 }

@@ -1,14 +1,15 @@
 package io.lanu.travian.game.models.responses;
 
 import io.lanu.travian.enums.EBuilding;
+import io.lanu.travian.enums.ENation;
 import io.lanu.travian.enums.EResource;
-import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.ConstructionEvent;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
+import io.lanu.travian.templates.military.CombatUnitFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,8 +17,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,6 +27,7 @@ import java.util.stream.IntStream;
 public class VillageView {
     private String villageId;
     private String accountId;
+    private ENation nation;
     private String name;
     private int x;
     private int y;
@@ -38,13 +39,14 @@ public class VillageView {
     private Map<EResource, BigDecimal> storage;
     private BigDecimal warehouseCapacity;
     private BigDecimal granaryCapacity;
-    private Map<ECombatUnit, Integer> homeLegion;
+    private Map<String, Integer> homeLegion;
     private Map<EResource, BigDecimal> producePerHour;
     private List<ConstructionEventView> eventsList;
 
     public VillageView(VillageEntity villageEntity, List<ConstructionEvent> eventList) {
         this.villageId = villageEntity.getVillageId();
         this.accountId = villageEntity.getAccountId();
+        this.nation = villageEntity.getNation();
         this.name = villageEntity.getName();
         this.x = villageEntity.getX();
         this.y = villageEntity.getY();
@@ -56,9 +58,17 @@ public class VillageView {
         this.warehouseCapacity = villageEntity.getWarehouseCapacity();
         this.granaryCapacity = villageEntity.getGranaryCapacity();
         this.buildings = this.buildBuildingsView(villageEntity.getBuildings(), eventList);
-        this.homeLegion = villageEntity.getHomeLegion();
+        this.homeLegion = this.mapHomeLegion(villageEntity.getHomeLegion(), villageEntity.getNation());
         this.producePerHour = villageEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(eventList);
+    }
+
+    private Map<String, Integer> mapHomeLegion(int[] homeLegion, ENation nation) {
+        var result = new LinkedHashMap<String, Integer>();
+        for (int i = 0; i < homeLegion.length; i++){
+            result.put(CombatUnitFactory.getCombatUnitFromArrayPosition(i, nation).getName(), homeLegion[i]);
+        }
+        return result;
     }
 
     private List<ConstructionEventView> buildEventsView(List<ConstructionEvent> buildEventList) {

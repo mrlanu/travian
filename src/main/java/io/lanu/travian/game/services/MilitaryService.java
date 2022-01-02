@@ -14,4 +14,5 @@ public interface MilitaryService {
     List<ECombatUnit> getAllResearchedUnits(String villageId);
     List<MilitaryUnitResponse> getAllMilitaryUnitsByVillageId(String villageId);
     MilitaryUnitResponse checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest);
+    void sendTroops(MilitaryUnitResponse militaryUnitResponse);
 }

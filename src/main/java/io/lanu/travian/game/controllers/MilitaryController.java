@@ -60,5 +60,10 @@ public class MilitaryController {
         return militaryService.checkTroopsSendingRequest(troopsSendingRequest);
     }
 
+    @PostMapping("/troops-send")
+    public void sendTroops(@RequestBody MilitaryUnitResponse militaryUnitResponse){
+        militaryService.sendTroops(militaryUnitResponse);
+    }
+
 }
 

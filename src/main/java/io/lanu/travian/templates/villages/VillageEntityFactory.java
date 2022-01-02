@@ -1,11 +1,11 @@
 package io.lanu.travian.templates.villages;
 
 import io.lanu.travian.enums.EBuilding;
-import io.lanu.travian.enums.ECombatUnit;
+import io.lanu.travian.enums.ENation;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.EVillageType;
-import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.BuildModel;
+import io.lanu.travian.game.entities.VillageEntity;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -14,7 +14,7 @@ public class VillageEntityFactory {
 
     public static VillageEntity getVillageByType(EVillageType villageType){
         switch (villageType){
-            case SIX: return new VillageEntity(null, null, "New Village", 0, 0,
+            case SIX: return new VillageEntity(null, null, ENation.GALLS, "New Village", 0, 0,
                     EVillageType.SIX, 100, 100, 100,
                     Map.ofEntries(
                             Map.entry(1, new BuildModel(EBuilding.WOODCUTTER, 1)),
@@ -61,13 +61,7 @@ public class VillageEntityFactory {
                             EResource.CLAY, BigDecimal.valueOf(500),
                             EResource.WOOD, BigDecimal.valueOf(500),
                             EResource.IRON, BigDecimal.valueOf(500)),
-                    Map.ofEntries(
-                            Map.entry(ECombatUnit.PHALANX, 5), Map.entry(ECombatUnit.SWORDSMAN, 0),
-                            Map.entry(ECombatUnit.PATHFINDER, 0), Map.entry(ECombatUnit.THUNDER, 2),
-                            Map.entry(ECombatUnit.DRUIDRIDER, 0), Map.entry(ECombatUnit.HAEDUAN, 0),
-                            Map.entry(ECombatUnit.RAM, 0), Map.entry(ECombatUnit.TREBUCHET, 0),
-                            Map.entry(ECombatUnit.CHIEFTAIN, 0), Map.entry(ECombatUnit.SETTLER, 0),
-                            Map.entry(ECombatUnit.HERO, 1)),
+                    new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
                     null);
             default: return null;
         }
