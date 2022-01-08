@@ -1,10 +1,11 @@
 package io.lanu.travian.game.controllers;
 
 import io.lanu.travian.enums.ECombatUnit;
+import io.lanu.travian.game.entities.MilitaryUnitEntity;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
-import io.lanu.travian.game.models.responses.MilitaryUnitResponse;
+import io.lanu.travian.game.models.responses.MilitaryUnitContract;
 import io.lanu.travian.game.services.MilitaryService;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class MilitaryController {
     }
 
     @GetMapping("/{villageId}/military-units")
-    public List<MilitaryUnitResponse> getAllMilitaryUnitsByVillageId(@PathVariable String villageId){
+    public List<MilitaryUnitEntity> getAllMilitaryUnitsByVillageId(@PathVariable String villageId){
         return militaryService.getAllMilitaryUnitsByVillageId(villageId);
     }
 
@@ -56,13 +57,13 @@ public class MilitaryController {
     }
 
     @PostMapping("/check-troops-send")
-    public MilitaryUnitResponse checkTroopsSendingRequest(@RequestBody TroopsSendingRequest troopsSendingRequest) {
+    public MilitaryUnitContract checkTroopsSendingRequest(@RequestBody TroopsSendingRequest troopsSendingRequest) {
         return militaryService.checkTroopsSendingRequest(troopsSendingRequest);
     }
 
     @PostMapping("/troops-send")
-    public void sendTroops(@RequestBody MilitaryUnitResponse militaryUnitResponse){
-        militaryService.sendTroops(militaryUnitResponse);
+    public boolean sendTroops(@RequestBody MilitaryUnitContract militaryUnitContract){
+        return militaryService.sendTroops(militaryUnitContract);
     }
 
 }

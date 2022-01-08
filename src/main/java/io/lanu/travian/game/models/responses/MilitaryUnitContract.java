@@ -12,15 +12,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MilitaryUnitResponse {
-    private String id;
+public class MilitaryUnitContract {
     private ENation nation;
-    private boolean move;
     private String mission;
     private String originVillageId;
     private String originVillageName;
     private int[] originVillageCoordinates;
-    private String currentLocationVillageId;
     private String targetVillageId;
     private String targetVillageName;
     private String targetPlayerName;
@@ -28,5 +25,4 @@ public class MilitaryUnitResponse {
     private int[] units;
     private LocalDateTime arrivalTime;
     private long duration;
-    private int expensesPerHour;
 }

@@ -40,6 +40,7 @@ public class VillageView {
     private BigDecimal warehouseCapacity;
     private BigDecimal granaryCapacity;
     private Map<String, Integer> homeLegion;
+    private int[] homeUnits;
     private Map<EResource, BigDecimal> producePerHour;
     private List<ConstructionEventView> eventsList;
 
@@ -59,6 +60,7 @@ public class VillageView {
         this.granaryCapacity = villageEntity.getGranaryCapacity();
         this.buildings = this.buildBuildingsView(villageEntity.getBuildings(), eventList);
         this.homeLegion = this.mapHomeLegion(villageEntity.getHomeLegion(), villageEntity.getNation());
+        this.homeUnits = villageEntity.getHomeLegion();
         this.producePerHour = villageEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(eventList);
     }

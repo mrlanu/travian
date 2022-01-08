@@ -7,7 +7,7 @@ import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
-import io.lanu.travian.game.models.responses.MilitaryUnitResponse;
+import io.lanu.travian.game.models.responses.MilitaryUnitContract;
 import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
 import io.lanu.travian.game.repositories.IMilitaryUnitRepository;
 import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,13 +42,15 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public List<MilitaryUnitResponse> getAllMilitaryUnitsByVillageId(String villageId) {
+    public List<MilitaryUnitEntity> getAllMilitaryUnitsByVillageId(String villageId) {
+        var result = new ArrayList<MilitaryUnitEntity>();
         var village = villageService.recalculateVillage(villageId);
-        return List.of(
-                new MilitaryUnitResponse("home-army", ENation.GALLS, false, EMilitaryUnitMission.HOME.getName(),
-                        villageId, village.getName(), new int[]{village.getX(), village.getY()}, villageId, null, null,
-                        null, null, village.getHomeLegion(),
-                    null, 0, village.calculateEatPerHour().intValue()));
+        var militaryUnitHomeArmy = new MilitaryUnitEntity(village.getNation(), false, EMilitaryUnitState.HOME,
+                EMilitaryUnitMission.HOME.getName(), villageId, village.getName(),
+                new int[]{village.getX(), village.getY()}, null, null, null,
+                null, 0, 0, village.getHomeLegion());
+        result.add(militaryUnitHomeArmy);
+        return result;
 
     }
 
@@ -100,7 +99,7 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public MilitaryUnitResponse checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest) {
+    public MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest) {
         var attackingVillage = villageService.recalculateVillage(troopsSendingRequest.getVillageId());
         VillageEntity attackedVillage;
         UserEntity attackedUser;
@@ -113,17 +112,39 @@ public class MilitaryServiceImpl implements MilitaryService {
             throw new UserErrorException("There is nothing on those coordinates");
         }
 
-        var militaryUnit = new MilitaryUnitEntity(null, ENation.GALLS, true, troopsSendingRequest.getVillageId(), attackedVillage.getVillageId(),
-                troopsSendingRequest.getVillageId(), LocalDateTime.now().plusSeconds(240), troopsSendingRequest.getWaves().get(0).getTroops());
-
-        return militaryUnit.toMilitaryUnitResponse(troopsSendingRequest.getKind().getName(), attackingVillage,
-                attackedVillage, attackedUser.getUsername(), 0);
+        return MilitaryUnitContract.builder()
+                .nation(attackingVillage.getNation())
+                .mission(troopsSendingRequest.getKind().getName())
+                .originVillageId(attackingVillage.getVillageId())
+                .originVillageName(attackingVillage.getName())
+                .originVillageCoordinates(new int[]{attackingVillage.getX(), attackingVillage.getY()})
+                .targetVillageId(attackedVillage.getVillageId())
+                .targetVillageName(attackedVillage.getName())
+                .targetPlayerName(attackedUser.getUsername())
+                .targetVillageCoordinates(new int[]{attackedVillage.getX(), attackedVillage.getY()})
+                .units(troopsSendingRequest.getWaves().get(0).getTroops())
+                .arrivalTime(LocalDateTime.now().plusMinutes(2))
+                .duration(2000)
+                .build();
     }
 
     @Override
-    public void sendTroops(MilitaryUnitResponse militaryUnitResponse) {
-
+    public boolean sendTroops(MilitaryUnitContract militaryUnitContract) {
         // deduct all involved units from village army
+        var attackingVillage = villageService.recalculateVillage(militaryUnitContract.getOriginVillageId());
+        var homeLegion = attackingVillage.getHomeLegion();
+        var attackingUnits = militaryUnitContract.getUnits();
+        for (int i = 0; i < homeLegion.length; i++){
+            homeLegion[i] = homeLegion[i] - attackingUnits[i];
+        }
+        villageService.saveVillage(attackingVillage);
         // create MilitaryUnitEntity
+        var militaryUnitEntity = new MilitaryUnitEntity(militaryUnitContract.getNation(), true, EMilitaryUnitState.OUT,
+                militaryUnitContract.getMission(), militaryUnitContract.getOriginVillageId(), militaryUnitContract.getOriginVillageName(),
+                militaryUnitContract.getOriginVillageCoordinates(), militaryUnitContract.getTargetVillageId(),
+                militaryUnitContract.getTargetVillageName(), null, militaryUnitContract.getArrivalTime(),
+                2, 0, militaryUnitContract.getUnits());
+        militaryUnitRepository.save(militaryUnitEntity);
+        return true;
     }
 }

@@ -1,7 +1,8 @@
 package io.lanu.travian.game.entities;
 
+import io.lanu.travian.enums.EMilitaryUnitState;
 import io.lanu.travian.enums.ENation;
-import io.lanu.travian.game.models.responses.MilitaryUnitResponse;
+import io.lanu.travian.game.models.responses.MilitaryUnitContract;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,38 +13,41 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Document("military")
 public class MilitaryUnitEntity {
     @Id
     private String id;
     private ENation nation;
     private boolean move;
+    private EMilitaryUnitState state;
+    private String mission;
     private String originVillageId;
+    private String originVillageName;
+    private int[] originVillageCoordinates;
     private String targetVillageId;
+    private String targetVillageName;
     private String currentLocationVillageId;
     private LocalDateTime arrivalTime;
+    private int duration;
+    private int eatExpenses;
     private int[] units;
 
-    public MilitaryUnitResponse toMilitaryUnitResponse(String mission, VillageEntity origin,
-                                                       VillageEntity target, String targetPlayerName, int expenses){
-        return MilitaryUnitResponse.builder()
-                .id(id)
-                .nation(nation)
-                .move(move)
-                .mission(mission)
-                .originVillageId(originVillageId)
-                .originVillageName(origin.getName())
-                .originVillageCoordinates(new int[]{origin.getX(), origin.getY()})
-                .currentLocationVillageId(currentLocationVillageId)
-                .targetVillageId(target.getVillageId())
-                .targetVillageName(target.getName())
-                .targetPlayerName(targetPlayerName)
-                .targetVillageCoordinates(new int[]{target.getX(), target.getY()})
-                .units(units)
-                .arrivalTime(arrivalTime)
-                .duration(240)
-                .expensesPerHour(expenses)
-                .build();
+    public MilitaryUnitEntity(ENation nation, boolean move, EMilitaryUnitState state, String mission, String originVillageId, String originVillageName,
+                              int[] originVillageCoordinates, String targetVillageId, String targetVillageName,
+                              String currentLocationVillageId, LocalDateTime arrivalTime, int duration, int eatExpenses, int[] units) {
+        this.nation = nation;
+        this.move = move;
+        this.state = state;
+        this.mission = mission;
+        this.originVillageId = originVillageId;
+        this.originVillageName = originVillageName;
+        this.originVillageCoordinates = originVillageCoordinates;
+        this.targetVillageId = targetVillageId;
+        this.targetVillageName = targetVillageName;
+        this.currentLocationVillageId = currentLocationVillageId;
+        this.arrivalTime = arrivalTime;
+        this.duration = duration;
+        this.eatExpenses = eatExpenses;
+        this.units = units;
     }
 }
