@@ -23,6 +23,7 @@ public class MilitaryUnitEntity {
     private String mission;
     private String originVillageId;
     private String originVillageName;
+    private String originPlayerName;
     private int[] originVillageCoordinates;
     private String targetVillageId;
     private String targetVillageName;
@@ -32,15 +33,17 @@ public class MilitaryUnitEntity {
     private int eatExpenses;
     private int[] units;
 
-    public MilitaryUnitEntity(ENation nation, boolean move, EMilitaryUnitState state, String mission, String originVillageId, String originVillageName,
-                              int[] originVillageCoordinates, String targetVillageId, String targetVillageName,
-                              String currentLocationVillageId, LocalDateTime arrivalTime, int duration, int eatExpenses, int[] units) {
+    public MilitaryUnitEntity(ENation nation, boolean move, EMilitaryUnitState state, String mission, String originVillageId,
+                              String originVillageName, String originPlayerName, int[] originVillageCoordinates, String targetVillageId,
+                              String targetVillageName, String currentLocationVillageId, LocalDateTime arrivalTime,
+                              int duration, int eatExpenses, int[] units) {
         this.nation = nation;
         this.move = move;
         this.state = state;
         this.mission = mission;
         this.originVillageId = originVillageId;
         this.originVillageName = originVillageName;
+        this.originPlayerName = originPlayerName;
         this.originVillageCoordinates = originVillageCoordinates;
         this.targetVillageId = targetVillageId;
         this.targetVillageName = targetVillageName;

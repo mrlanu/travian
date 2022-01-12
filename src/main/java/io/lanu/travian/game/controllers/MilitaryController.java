@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,7 +26,8 @@ public class MilitaryController {
     }
 
     @GetMapping("/{villageId}/military-units")
-    public List<MilitaryUnitEntity> getAllMilitaryUnitsByVillageId(@PathVariable String villageId){
+    public Map<String, List<MilitaryUnitEntity>> getAllMilitaryUnitsByVillageId(@PathVariable String villageId){
+
         return militaryService.getAllMilitaryUnitsByVillageId(villageId);
     }
 

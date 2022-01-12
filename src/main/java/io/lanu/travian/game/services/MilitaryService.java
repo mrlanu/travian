@@ -8,12 +8,13 @@ import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.MilitaryUnitContract;
 
 import java.util.List;
+import java.util.Map;
 
 public interface MilitaryService {
     List<OrderCombatUnitEntity> getAllOrdersByVillageId(String villageId);
     OrderCombatUnitEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest);
     List<ECombatUnit> getAllResearchedUnits(String villageId);
-    List<MilitaryUnitEntity> getAllMilitaryUnitsByVillageId(String villageId);
+    Map<String, List<MilitaryUnitEntity>> getAllMilitaryUnitsByVillageId(String villageId);
     MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest);
     boolean sendTroops(MilitaryUnitContract militaryUnitContract);
 }

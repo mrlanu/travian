@@ -17,6 +17,7 @@ public class MilitaryUnitContract {
     private String mission;
     private String originVillageId;
     private String originVillageName;
+    private String originPlayerName;
     private int[] originVillageCoordinates;
     private String targetVillageId;
     private String targetVillageName;

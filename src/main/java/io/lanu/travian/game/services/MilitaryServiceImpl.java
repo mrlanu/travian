@@ -42,16 +42,27 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public List<MilitaryUnitEntity> getAllMilitaryUnitsByVillageId(String villageId) {
-        var result = new ArrayList<MilitaryUnitEntity>();
+    public Map<String, List<MilitaryUnitEntity>> getAllMilitaryUnitsByVillageId(String villageId) {
         var village = villageService.recalculateVillage(villageId);
+        var userName = usersRepository.findByUserId(village.getAccountId()).orElseThrow();
+        var unitsList = militaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(villageId, villageId)
+                .stream()
+                .peek(militaryUnitEntity -> {
+                    if (militaryUnitEntity.getOriginVillageId().equals(villageId)){
+                        militaryUnitEntity.setState(EMilitaryUnitState.OUT);
+                    }else {
+                        militaryUnitEntity.setState(EMilitaryUnitState.IN);
+                    }
+                }).collect(Collectors.toList());
+
+        Map<String, List<MilitaryUnitEntity>> militaryUnitsMap = unitsList.stream()
+                .collect(Collectors.groupingBy(militaryUnitEntity -> militaryUnitEntity.getState().getName()));
         var militaryUnitHomeArmy = new MilitaryUnitEntity(village.getNation(), false, EMilitaryUnitState.HOME,
-                EMilitaryUnitMission.HOME.getName(), villageId, village.getName(),
+                EMilitaryUnitMission.HOME.getName(), villageId, village.getName(), userName.getUsername(),
                 new int[]{village.getX(), village.getY()}, null, null, null,
                 null, 0, 0, village.getHomeLegion());
-        result.add(militaryUnitHomeArmy);
-        return result;
-
+        militaryUnitsMap.put(EMilitaryUnitState.HOME.getName(), List.of(militaryUnitHomeArmy));
+        return militaryUnitsMap;
     }
 
     @Override
@@ -101,6 +112,7 @@ public class MilitaryServiceImpl implements MilitaryService {
     @Override
     public MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest) {
         var attackingVillage = villageService.recalculateVillage(troopsSendingRequest.getVillageId());
+        var attackingUser = usersRepository.findByUserId(attackingVillage.getAccountId()).orElseThrow();
         VillageEntity attackedVillage;
         UserEntity attackedUser;
         var attackedVillageOpt = villageService
@@ -117,6 +129,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .mission(troopsSendingRequest.getKind().getName())
                 .originVillageId(attackingVillage.getVillageId())
                 .originVillageName(attackingVillage.getName())
+                .originPlayerName(attackingUser.getUsername())
                 .originVillageCoordinates(new int[]{attackingVillage.getX(), attackingVillage.getY()})
                 .targetVillageId(attackedVillage.getVillageId())
                 .targetVillageName(attackedVillage.getName())
@@ -141,9 +154,9 @@ public class MilitaryServiceImpl implements MilitaryService {
         // create MilitaryUnitEntity
         var militaryUnitEntity = new MilitaryUnitEntity(militaryUnitContract.getNation(), true, EMilitaryUnitState.OUT,
                 militaryUnitContract.getMission(), militaryUnitContract.getOriginVillageId(), militaryUnitContract.getOriginVillageName(),
-                militaryUnitContract.getOriginVillageCoordinates(), militaryUnitContract.getTargetVillageId(),
-                militaryUnitContract.getTargetVillageName(), null, militaryUnitContract.getArrivalTime(),
-                2, 0, militaryUnitContract.getUnits());
+                militaryUnitContract.getOriginPlayerName(), militaryUnitContract.getOriginVillageCoordinates(),
+                militaryUnitContract.getTargetVillageId(), militaryUnitContract.getTargetVillageName(), null,
+                militaryUnitContract.getArrivalTime(), 2, 0, militaryUnitContract.getUnits());
         militaryUnitRepository.save(militaryUnitEntity);
         return true;
     }
