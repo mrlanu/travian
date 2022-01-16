@@ -139,6 +139,9 @@ public class VillageServiceImpl implements VillageService{
         // add all units events
         allEvents.addAll(createTroopsBuildEventsFromOrders(villageEntity.getVillageId()));
 
+        // add all wars events
+        /*allEvents.addAll(createWarsFromUnits(villageEntity.getVillageId()));*/
+
         allEvents.add(new LastEvent(LocalDateTime.now()));
 
         return allEvents.stream()
