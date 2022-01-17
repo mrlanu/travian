@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface IMilitaryUnitRepository extends MongoRepository<MilitaryEvent, String> {
     List<MilitaryEvent> getAllByOriginVillageIdOrTargetVillageId(String villageId, String targetVillageId);
+    List<MilitaryEvent> getAllByOriginVillageId(String villageId);
 }
