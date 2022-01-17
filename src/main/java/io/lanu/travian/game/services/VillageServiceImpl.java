@@ -142,26 +142,19 @@ public class VillageServiceImpl implements VillageService{
         List<IEvent> allEvents = new ArrayList<>();
 
         // add all building events
-        allEvents.addAll(constructionService.findAllByVillageId(villageEntity.getVillageId())
-                .stream()
-                .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
-                .sorted(Comparator.comparing(ConstructionEvent::getExecutionTime))
-                .collect(Collectors.toList()));
+        allEvents.addAll(constructionService.findAllByVillageId(villageEntity.getVillageId()));
 
         // add all units events
         allEvents.addAll(militaryService.createCombatUnitDoneEventsFromOrders(villageEntity.getVillageId()));
 
         // add all wars events
-        /*allEvents.addAll(militaryUnitRepository.getAllByOriginVillageId(villageEntity.getVillageId())
-                .stream()
-                .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
-                .sorted(Comparator.comparing(MilitaryEvent::getExecutionTime))
-                .collect(Collectors.toList()));*/
+        allEvents.addAll(militaryService.getAllByOriginVillageId(villageEntity.getVillageId()));
 
+        // add last empty event
         allEvents.add(new LastEvent(LocalDateTime.now()));
 
         return allEvents.stream()
-                .filter(task -> task.getExecutionTime().isBefore(LocalDateTime.now()))
+                .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
                 .sorted(Comparator.comparing(IEvent::getExecutionTime))
                 .collect(Collectors.toList());
     }

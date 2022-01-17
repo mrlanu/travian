@@ -40,6 +40,11 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
+    public List<MilitaryEvent> getAllByOriginVillageId(String villageId) {
+        return militaryUnitRepository.getAllByOriginVillageId(villageId);
+    }
+
+    @Override
     public Map<String, List<MilitaryUnit>> getAllMilitaryUnitsByVillage(VillageEntity village) {
         var userName = usersRepository.findByUserId(village.getAccountId()).orElseThrow();
         var villageId = village.getVillageId();
