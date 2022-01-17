@@ -1,21 +1,22 @@
 package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.EBuilding;
+import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.ConstructionEvent;
 import io.lanu.travian.game.models.responses.NewBuilding;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface BuildingService {
+public interface IConstructionService {
 
-    ConstructionEvent createBuildEvent(String villageId, Integer fieldPosition, EBuilding kind);
+    VillageEntity createBuildEvent(VillageEntity village, Integer fieldPosition, EBuilding kind);
 
     List<ConstructionEvent> findAllByVillageId(String villageId);
 
-    void deleteBuildingEvent(String villageId, String eventId);
+    VillageEntity deleteBuildingEvent(VillageEntity village, String eventId);
 
     void deleteAllByVillageIdAndExecutionTimeBefore(String villageId, LocalDateTime time);
 
-    List<NewBuilding> getListOfAllNewBuildings(String villageId);
+    List<NewBuilding> getListOfAllNewBuildings(VillageEntity village);
 }

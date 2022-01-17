@@ -4,6 +4,7 @@ import io.lanu.travian.enums.EBuildingType;
 import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.game.entities.BuildModel;
+import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.ConstructionEvent;
 import io.lanu.travian.game.models.responses.NewBuilding;
 import io.lanu.travian.game.repositories.ConstructionEventRepository;
@@ -19,20 +20,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class BuildingServiceImpl implements BuildingService {
-    private final VillageService villageService;
+public class ConstructionServiceImpl implements IConstructionService {
     private final ConstructionEventRepository constructionEventRepository;
 
-    public BuildingServiceImpl(VillageService villageService, ConstructionEventRepository constructionEventRepository) {
-        this.villageService = villageService;
+    public ConstructionServiceImpl(ConstructionEventRepository constructionEventRepository) {
         this.constructionEventRepository = constructionEventRepository;
     }
 
     @Override
-    public ConstructionEvent createBuildEvent(String villageId, Integer buildingPosition, EBuilding kind) {
-
-        var villageEntity = villageService.recalculateVillage(villageId);
-        var events = constructionEventRepository.findAllByVillageId(villageId)
+    public VillageEntity createBuildEvent(VillageEntity village, Integer buildingPosition, EBuilding kind) {
+        var events = constructionEventRepository.findAllByVillageId(village.getVillageId())
                 .stream()
                 .sorted(Comparator.comparing(ConstructionEvent::getExecutionTime))
                 .collect(Collectors.toList());
@@ -45,9 +42,9 @@ public class BuildingServiceImpl implements BuildingService {
         //the kind of building if requested new building, and null if requested upgrade
         if (kind != null) {
             buildModel = new BuildModel(kind, 0);
-            villageEntity.getBuildings().put(buildingPosition, buildModel);
+            village.getBuildings().put(buildingPosition, buildModel);
         } else {
-            buildModel = villageEntity.getBuildings().get(buildingPosition);
+            buildModel = village.getBuildings().get(buildingPosition);
         }
         BuildingBase building = BuildingsFactory.getBuilding(buildModel.getKind(),
                 alreadyUnderUpgrade ? buildModel.getLevel() + 1 : buildModel.getLevel());
@@ -56,13 +53,13 @@ public class BuildingServiceImpl implements BuildingService {
                 events.get(events.size() - 1).getExecutionTime().plusSeconds(building.getTimeToNextLevel()) :
                 LocalDateTime.now().plusSeconds(building.getTimeToNextLevel());
 
-        villageEntity.manipulateGoods(EManipulation.SUBTRACT, building.getResourcesToNextLevel());
+        village.manipulateGoods(EManipulation.SUBTRACT, building.getResourcesToNextLevel());
 
         ConstructionEvent buildEvent = new ConstructionEvent(buildingPosition, buildModel.getKind(),
-                building.getLevel() + 1, villageId, executionTime);
+                building.getLevel() + 1, village.getVillageId(), executionTime);
 
-        villageService.saveVillage(villageEntity);
-        return this.constructionEventRepository.save(buildEvent);
+        constructionEventRepository.save(buildEvent);
+        return village;
     }
 
     @Override
@@ -71,8 +68,8 @@ public class BuildingServiceImpl implements BuildingService {
     }
 
     @Override
-    public void deleteBuildingEvent(String villageId, String eventId) {
-        var allEvents = constructionEventRepository.findAllByVillageId(villageId).stream()
+    public VillageEntity deleteBuildingEvent(VillageEntity village, String eventId) {
+        var allEvents = constructionEventRepository.findAllByVillageId(village.getVillageId()).stream()
                 .sorted(Comparator.comparing(ConstructionEvent::getExecutionTime))
                 .collect(Collectors.toList());
         var event = allEvents.stream()
@@ -83,8 +80,7 @@ public class BuildingServiceImpl implements BuildingService {
                 .filter(e -> e.getBuildingPosition() == event.getBuildingPosition())
                 .count();
 
-        var villageEntity = villageService.recalculateVillage(event.getVillageId());
-        BuildModel buildModel = villageEntity.getBuildings().get(event.getBuildingPosition());
+        BuildModel buildModel = village.getBuildings().get(event.getBuildingPosition());
         BuildingBase building = BuildingsFactory.getBuilding(buildModel.getKind(),
                 numberOfEvents == 1 ? buildModel.getLevel() : buildModel.getLevel() + 1);
         //deduct time that was needed for building from following events
@@ -100,12 +96,12 @@ public class BuildingServiceImpl implements BuildingService {
         });
         // if deleting any building construction to level 1. in this case should return empty spot (except resources fields)
         if (event.getToLevel() == 1 && event.getBuildingPosition() >= 19 && numberOfEvents == 1){
-            villageEntity.getBuildings().put(event.getBuildingPosition(), new BuildModel(EBuilding.EMPTY, 0));
+            village.getBuildings().put(event.getBuildingPosition(), new BuildModel(EBuilding.EMPTY, 0));
         }
-        villageEntity.manipulateGoods(EManipulation.ADD, building.getResourcesToNextLevel());
-        villageService.saveVillage(villageEntity);
+        village.manipulateGoods(EManipulation.ADD, building.getResourcesToNextLevel());
         constructionEventRepository.deleteByEventId(eventId);
         constructionEventRepository.saveAll(events);
+        return village;
     }
 
     @Override
@@ -115,14 +111,13 @@ public class BuildingServiceImpl implements BuildingService {
 
 
     @Override
-    public List<NewBuilding> getListOfAllNewBuildings(String villageId) {
-        var villageEntity = this.villageService.recalculateVillage(villageId);
-        var events = constructionEventRepository.findAllByVillageId(villageEntity.getVillageId());
+    public List<NewBuilding> getListOfAllNewBuildings(VillageEntity village) {
+        var events = constructionEventRepository.findAllByVillageId(village.getVillageId());
         var all = getListOfNewBuildings();
         // if events size >=2 return all buildings unavailable for build otherwise checking ability to build
         return events.size() >= 2 ? all : all.stream()
-                .filter(newBuilding -> newBuilding.isBuildingExistAndMaxLevelAndMulti(villageEntity.getBuildings()))
-                .peek(newBuilding -> newBuilding.checkAvailability(villageEntity.getBuildings().values(), villageEntity.getStorage()))
+                .filter(newBuilding -> newBuilding.isBuildingExistAndMaxLevelAndMulti(village.getBuildings()))
+                .peek(newBuilding -> newBuilding.checkAvailability(village.getBuildings().values(), village.getStorage()))
                 .collect(Collectors.toList());
     }
 

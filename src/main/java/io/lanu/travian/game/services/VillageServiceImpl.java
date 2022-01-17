@@ -10,7 +10,6 @@ import io.lanu.travian.game.models.ResearchedCombatUnitShort;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.models.responses.VillageView;
-import io.lanu.travian.game.repositories.ConstructionEventRepository;
 import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
 import io.lanu.travian.game.repositories.VillageRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
@@ -28,14 +27,15 @@ public class VillageServiceImpl implements VillageService{
     private final VillageRepository villageRepository;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
     private final MilitaryService militaryService;
-    private final ConstructionEventRepository constructionEventRepository;
+    private final IConstructionService constructionService;
     private static final MathContext mc = new MathContext(3);
 
-    public VillageServiceImpl(VillageRepository villageRepository, ResearchedCombatUnitRepository researchedCombatUnitRepository, MilitaryService militaryService, ConstructionEventRepository constructionEventRepository) {
+    public VillageServiceImpl(VillageRepository villageRepository, ResearchedCombatUnitRepository researchedCombatUnitRepository,
+                              MilitaryService militaryService, IConstructionService constructionService) {
         this.villageRepository = villageRepository;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.militaryService = militaryService;
-        this.constructionEventRepository = constructionEventRepository;
+        this.constructionService = constructionService;
     }
 
     @Override
@@ -43,6 +43,20 @@ public class VillageServiceImpl implements VillageService{
         var result = villageRepository.save(instantiateNewVillage(newVillageRequest));
         createResearchedCombatUnitEntity(result.getVillageId());
         return result;
+    }
+
+    private VillageEntity instantiateNewVillage(NewVillageRequest newVillageRequest){
+        VillageEntity newVillage = VillageEntityFactory.getVillageByType(EVillageType.SIX);
+        Objects.requireNonNull(newVillage).setAccountId(newVillageRequest.getAccountId());
+        newVillage.setX(newVillageRequest.getX());
+        newVillage.setY(newVillageRequest.getY());
+        return newVillage;
+    }
+
+    private void createResearchedCombatUnitEntity(String villageId) {
+        researchedCombatUnitRepository.save(
+                new ResearchedCombatUnitEntity(villageId,
+                        List.of(new ResearchedCombatUnitShort(ECombatUnit.PHALANX.getName(), 0))));
     }
 
     @Override
@@ -75,8 +89,8 @@ public class VillageServiceImpl implements VillageService{
     @Override
     public VillageView getVillageById(String villageId) {
         var villageEntity = recalculateVillage(villageId);
-        constructionEventRepository.deleteAllByVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
-        List<ConstructionEvent> currentBuildingEvents = constructionEventRepository.findAllByVillageId(villageId);
+        constructionService.deleteAllByVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
+        List<ConstructionEvent> currentBuildingEvents = constructionService.findAllByVillageId(villageId);
         return new VillageView(villageEntity, currentBuildingEvents);
     }
 
@@ -124,25 +138,11 @@ public class VillageServiceImpl implements VillageService{
         return saveVillage(villageEntity);
     }
 
-    private VillageEntity instantiateNewVillage(NewVillageRequest newVillageRequest){
-        VillageEntity newVillage = VillageEntityFactory.getVillageByType(EVillageType.SIX);
-        Objects.requireNonNull(newVillage).setAccountId(newVillageRequest.getAccountId());
-        newVillage.setX(newVillageRequest.getX());
-        newVillage.setY(newVillageRequest.getY());
-        return newVillage;
-    }
-
-    private void createResearchedCombatUnitEntity(String villageId) {
-        researchedCombatUnitRepository.save(
-                new ResearchedCombatUnitEntity(villageId,
-                        List.of(new ResearchedCombatUnitShort(ECombatUnit.PHALANX.getName(), 0))));
-    }
-
     private List<IEvent> combineAllEvents(VillageEntity villageEntity) {
         List<IEvent> allEvents = new ArrayList<>();
 
         // add all building events
-        allEvents.addAll(constructionEventRepository.findAllByVillageId(villageEntity.getVillageId())
+        allEvents.addAll(constructionService.findAllByVillageId(villageEntity.getVillageId())
                 .stream()
                 .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
                 .sorted(Comparator.comparing(ConstructionEvent::getExecutionTime))
