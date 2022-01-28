@@ -3,6 +3,7 @@ package io.lanu.travian.game.controllers;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.VillageView;
+import io.lanu.travian.game.services.IState;
 import io.lanu.travian.game.services.VillageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/villages")
 public class VillageController {
+    private final IState state;
     private final VillageService villageService;
 
-    public VillageController(VillageService villageService) {
+    public VillageController(IState state, VillageService villageService) {
+        this.state = state;
         this.villageService = villageService;
     }
 
@@ -26,7 +29,9 @@ public class VillageController {
 
     @GetMapping("/{villageId}")
     public VillageView getVillageById(@PathVariable String villageId){
-        return villageService.getVillageById(villageId);
+        var villageState = state.getState(villageId);
+        state.saveState(villageState);
+        return villageService.getVillageById(villageState);
     }
 
     @PutMapping("/{villageId}/update-name")

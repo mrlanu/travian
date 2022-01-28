@@ -26,16 +26,20 @@ import java.util.stream.Collectors;
 public class VillageServiceImpl implements VillageService{
     private final VillageRepository villageRepository;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
-    private final MilitaryService militaryService;
     private final IConstructionService constructionService;
     private static final MathContext mc = new MathContext(3);
 
     public VillageServiceImpl(VillageRepository villageRepository, ResearchedCombatUnitRepository researchedCombatUnitRepository,
-                              MilitaryService militaryService, IConstructionService constructionService) {
+                              IConstructionService constructionService) {
         this.villageRepository = villageRepository;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
-        this.militaryService = militaryService;
         this.constructionService = constructionService;
+    }
+
+    @Override
+    public VillageEntity findById(String villageId) {
+        return villageRepository.findById(villageId)
+                .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
     }
 
     @Override
@@ -87,75 +91,9 @@ public class VillageServiceImpl implements VillageService{
     }
 
     @Override
-    public VillageView getVillageById(String villageId) {
-        var villageEntity = recalculateVillage(villageId);
-        constructionService.deleteAllByVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
-        List<ConstructionEvent> currentBuildingEvents = constructionService.findAllByVillageId(villageId);
+    public VillageView getVillageById(VillageEntity villageEntity) {
+        List<ConstructionEvent> currentBuildingEvents = constructionService.findAllByVillageId(villageEntity.getVillageId());
         return new VillageView(villageEntity, currentBuildingEvents);
     }
 
-    public VillageEntity recalculateVillage(String villageId){
-
-        VillageEntity villageEntity = this.villageRepository.findById(villageId)
-                .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
-
-        List<IEvent> allEvents = combineAllEvents(villageEntity);
-        LocalDateTime modified = villageEntity.getModified();
-
-        // iterate over all events and execute them
-        for (IEvent event : allEvents) {
-            var cropPerHour = villageEntity.calculateProducePerHour().get(EResource.CROP);
-
-            // if crop in the village is less than 0 keep create the death event & execute them until the crop will be positive
-            while (cropPerHour.longValue() < 0) {
-                var leftCrop = villageEntity.getStorage().get(EResource.CROP);
-                var durationToDeath = leftCrop.divide(cropPerHour.negate(), mc).multiply(BigDecimal.valueOf(3_600_000), mc);
-
-                LocalDateTime deathTime = modified.plus(durationToDeath.longValue(), ChronoUnit.MILLIS);
-
-                if (deathTime.isBefore(event.getExecutionTime())) {
-                    IEvent deathBuildEvent = new DeathEvent(deathTime);
-                    villageEntity.calculateProducedGoods(modified, deathBuildEvent.getExecutionTime());
-                    deathBuildEvent.execute(villageEntity);
-                    modified = deathBuildEvent.getExecutionTime();
-                } else {
-                    break;
-                }
-                cropPerHour = villageEntity.calculateProducePerHour().get(EResource.CROP);
-            }
-            // recalculate storage leftovers
-            villageEntity.calculateProducedGoods(modified, event.getExecutionTime());
-            if (event instanceof MilitaryEvent){
-                MilitaryEvent militaryEvent = (MilitaryEvent) event;
-                var targetVillage = recalculateVillage(militaryEvent.getTargetVillageId());
-                militaryEvent.execute(targetVillage);
-            }else {
-                event.execute(villageEntity);
-            }
-            modified = event.getExecutionTime();
-        }
-        villageEntity.castStorage();
-        return saveVillage(villageEntity);
-    }
-
-    private List<IEvent> combineAllEvents(VillageEntity villageEntity) {
-        List<IEvent> allEvents = new ArrayList<>();
-
-        // add all building events
-        allEvents.addAll(constructionService.findAllByVillageId(villageEntity.getVillageId()));
-
-        // add all units events
-        allEvents.addAll(militaryService.createCombatUnitDoneEventsFromOrders(villageEntity.getVillageId()));
-
-        // add all wars events
-        allEvents.addAll(militaryService.getAllByOriginVillageId(villageEntity.getVillageId()));
-
-        // add last empty event
-        allEvents.add(new LastEvent(LocalDateTime.now()));
-
-        return allEvents.stream()
-                .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
-                .sorted(Comparator.comparing(IEvent::getExecutionTime))
-                .collect(Collectors.toList());
-    }
 }

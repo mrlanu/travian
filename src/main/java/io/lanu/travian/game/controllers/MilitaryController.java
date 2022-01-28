@@ -8,6 +8,7 @@ import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
 import io.lanu.travian.game.models.responses.MilitaryUnit;
 import io.lanu.travian.game.models.responses.MilitaryUnitContract;
+import io.lanu.travian.game.services.IState;
 import io.lanu.travian.game.services.MilitaryService;
 import io.lanu.travian.game.services.VillageService;
 import org.springframework.web.bind.annotation.*;
@@ -22,25 +23,27 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/villages")
 public class MilitaryController {
 
-    private final MilitaryService militaryService;
+    private final IState state;
     private final VillageService villageService;
+    private final MilitaryService militaryService;
 
-    public MilitaryController(MilitaryService militaryService, VillageService villageService) {
-        this.militaryService = militaryService;
+    public MilitaryController(IState state, VillageService villageService, MilitaryService militaryService) {
+        this.state = state;
         this.villageService = villageService;
+        this.militaryService = militaryService;
     }
 
     @GetMapping("/{villageId}/military-units")
     public Map<String, List<MilitaryUnit>> getAllMilitaryUnitsByVillageId(@PathVariable String villageId){
-        var village = villageService.recalculateVillage(villageId);
-        return militaryService.getAllMilitaryUnitsByVillage(village);
+        var currentState = state.getState(villageId);
+        return militaryService.getAllMilitaryUnitsByVillage(currentState);
     }
 
     @PostMapping("/military")
     public void orderCombatUnits(@RequestBody OrderCombatUnitRequest orderCombatUnitRequest) {
-        var village = villageService.recalculateVillage(orderCombatUnitRequest.getVillageId());
-        village = militaryService.orderCombatUnits(orderCombatUnitRequest, village);
-        villageService.saveVillage(village);
+        var currentState = state.getState(orderCombatUnitRequest.getVillageId());
+        currentState = militaryService.orderCombatUnits(orderCombatUnitRequest, currentState);
+        state.saveState(currentState);
     }
 
     @GetMapping("/{villageId}/military-orders")
@@ -65,23 +68,23 @@ public class MilitaryController {
 
     @PostMapping("/check-troops-send")
     public MilitaryUnitContract checkTroopsSendingRequest(@RequestBody TroopsSendingRequest troopsSendingRequest) {
-        var village = villageService.recalculateVillage(troopsSendingRequest.getVillageId());
+        var attackingVillage = state.getState(troopsSendingRequest.getVillageId());
         var attackedVillageOpt = villageService
                 .findVillageByCoordinates(troopsSendingRequest.getX(), troopsSendingRequest.getY());
         VillageEntity attackedVillage;
         if (attackedVillageOpt.isPresent()) {
-            attackedVillage = villageService.recalculateVillage(attackedVillageOpt.get().getVillageId());
+            attackedVillage = state.getState(attackedVillageOpt.get().getVillageId());
         }else {
             throw new UserErrorException("There is nothing on those coordinates");
         }
-        return militaryService.checkTroopsSendingRequest(troopsSendingRequest, village, attackedVillage);
+        return militaryService.checkTroopsSendingRequest(troopsSendingRequest, attackingVillage, attackedVillage);
     }
 
     @PostMapping("/troops-send")
     public boolean sendTroops(@RequestBody MilitaryUnitContract militaryUnitContract){
-        var village = villageService.recalculateVillage(militaryUnitContract.getOriginVillageId());
-        village = militaryService.sendTroops(militaryUnitContract, village);
-        villageService.saveVillage(village);
+        var currentState = state.getState(militaryUnitContract.getOriginVillageId());
+        currentState = militaryService.sendTroops(militaryUnitContract, currentState);
+        villageService.saveVillage(currentState);
         return true;
     }
 

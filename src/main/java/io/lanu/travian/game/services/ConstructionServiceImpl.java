@@ -64,7 +64,9 @@ public class ConstructionServiceImpl implements IConstructionService {
 
     @Override
     public List<ConstructionEvent> findAllByVillageId(String villageId) {
-        return constructionEventRepository.findAllByVillageId(villageId);
+        var result = constructionEventRepository.findAllByVillageId(villageId);
+        constructionEventRepository.deleteAllByVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
+        return result;
     }
 
     @Override
