@@ -1,24 +1,21 @@
 package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.ECombatUnit;
-import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.ResearchedCombatUnitEntity;
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.entities.events.*;
+import io.lanu.travian.game.entities.events.MilitaryUnitStatic;
 import io.lanu.travian.game.models.ResearchedCombatUnitShort;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.models.responses.VillageView;
+import io.lanu.travian.game.repositories.IMilitaryUnitRepository;
 import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
 import io.lanu.travian.game.repositories.VillageRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.math.MathContext;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,13 +24,15 @@ public class VillageServiceImpl implements VillageService{
     private final VillageRepository villageRepository;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
     private final IConstructionService constructionService;
+    private final IMilitaryUnitRepository militaryUnitRepository;
     private static final MathContext mc = new MathContext(3);
 
     public VillageServiceImpl(VillageRepository villageRepository, ResearchedCombatUnitRepository researchedCombatUnitRepository,
-                              IConstructionService constructionService) {
+                              IConstructionService constructionService, IMilitaryUnitRepository militaryUnitRepository) {
         this.villageRepository = villageRepository;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.constructionService = constructionService;
+        this.militaryUnitRepository = militaryUnitRepository;
     }
 
     @Override
@@ -92,7 +91,11 @@ public class VillageServiceImpl implements VillageService{
 
     @Override
     public VillageView getVillageById(VillageEntity villageEntity) {
-        List<ConstructionEvent> currentBuildingEvents = constructionService.findAllByVillageId(villageEntity.getVillageId());
+        var currentBuildingEvents = constructionService.findAllByVillageId(villageEntity.getVillageId());
+        var legionsInVillage = militaryUnitRepository.getAllByMove(false).stream()
+                .map(militaryUnit -> (MilitaryUnitStatic) militaryUnit)
+                .filter(militaryUnitStatic -> !militaryUnitStatic.isMove())
+                .collect(Collectors.toList());
         return new VillageView(villageEntity, currentBuildingEvents);
     }
 

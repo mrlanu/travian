@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class MilitaryUnit {
+public class MilitaryUnitView {
 
     protected String id;
     protected ENation nation;
@@ -16,7 +16,7 @@ public class MilitaryUnit {
     protected VillageBrief originVillage;
     protected int[] units;
 
-    public MilitaryUnit(String id, ENation nation, boolean move, EMilitaryUnitState state, VillageBrief originVillage, int[] units) {
+    public MilitaryUnitView(String id, ENation nation, boolean move, EMilitaryUnitState state, VillageBrief originVillage, int[] units) {
         this.id = id;
         this.nation = nation;
         this.move = move;

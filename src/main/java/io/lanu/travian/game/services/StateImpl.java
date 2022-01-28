@@ -2,10 +2,7 @@ package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.entities.events.DeathEvent;
-import io.lanu.travian.game.entities.events.IEvent;
-import io.lanu.travian.game.entities.events.LastEvent;
-import io.lanu.travian.game.entities.events.MilitaryEvent;
+import io.lanu.travian.game.entities.events.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -74,10 +71,11 @@ public class StateImpl implements IState{
             }
             // recalculate storage leftovers
             villageEntity.calculateProducedGoods(modified, event.getExecutionTime());
-            if (event instanceof MilitaryEvent){
-                /*MilitaryEvent militaryEvent = (MilitaryEvent) event;
-                var targetVillage = recalculateVillage(militaryEvent.getTargetVillageId());
-                militaryEvent.execute(targetVillage);*/
+            if (event instanceof MilitaryUnitDynamic){
+                MilitaryUnitDynamic militaryEvent = (MilitaryUnitDynamic) event;
+                var targetVillage = getState(militaryEvent.getTargetVillageId());
+                militaryEvent.execute(targetVillage);
+                saveState(targetVillage);
             }else {
                 event.execute(villageEntity);
             }

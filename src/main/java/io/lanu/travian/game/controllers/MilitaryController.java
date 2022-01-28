@@ -6,7 +6,7 @@ import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
-import io.lanu.travian.game.models.responses.MilitaryUnit;
+import io.lanu.travian.game.models.responses.MilitaryUnitView;
 import io.lanu.travian.game.models.responses.MilitaryUnitContract;
 import io.lanu.travian.game.services.IState;
 import io.lanu.travian.game.services.MilitaryService;
@@ -34,7 +34,7 @@ public class MilitaryController {
     }
 
     @GetMapping("/{villageId}/military-units")
-    public Map<String, List<MilitaryUnit>> getAllMilitaryUnitsByVillageId(@PathVariable String villageId){
+    public Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillageId(@PathVariable String villageId){
         var currentState = state.getState(villageId);
         return militaryService.getAllMilitaryUnitsByVillage(currentState);
     }

@@ -7,12 +7,12 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class MilitaryUnitStatic extends MilitaryUnit{
+public class MilitaryUnitViewStatic extends MilitaryUnitView {
     private String currentLocationVillageId;
     private int eatExpenses;
 
-    public MilitaryUnitStatic(String id, ENation nation, boolean move, EMilitaryUnitState state, VillageBrief homeVillage,
-                              int[] units, String currentLocationVillageId, int eatExpenses) {
+    public MilitaryUnitViewStatic(String id, ENation nation, boolean move, EMilitaryUnitState state, VillageBrief homeVillage,
+                                  int[] units, String currentLocationVillageId, int eatExpenses) {
         super(id, nation, move, state, homeVillage, units);
         this.currentLocationVillageId = currentLocationVillageId;
         this.eatExpenses = eatExpenses;

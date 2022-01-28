@@ -9,15 +9,15 @@ import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class MilitaryUnitDynamic extends MilitaryUnit{
+public class MilitaryUnitViewDynamic extends MilitaryUnitView {
 
     private String mission;
     private VillageBrief targetVillage;
     private LocalDateTime executionTime;
     private int duration;
 
-    public MilitaryUnitDynamic(String id, ENation nation, boolean move, EMilitaryUnitState state, VillageBrief homeVillage,
-                               int[] units, String mission, VillageBrief targetVillage, LocalDateTime executionTime, int duration) {
+    public MilitaryUnitViewDynamic(String id, ENation nation, boolean move, EMilitaryUnitState state, VillageBrief homeVillage,
+                                   int[] units, String mission, VillageBrief targetVillage, LocalDateTime executionTime, int duration) {
         super(id, nation, move, state, homeVillage, units);
         this.mission = mission;
         this.targetVillage = targetVillage;
