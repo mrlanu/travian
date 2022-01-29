@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @Document("military")
 @NoArgsConstructor
-public abstract class MilitaryUnit implements IEvent{
+public abstract class MilitaryUnitEntity {
     @Id
     protected String id;
     protected ENation nation;
@@ -27,9 +27,9 @@ public abstract class MilitaryUnit implements IEvent{
     protected int[] units;
     protected LocalDateTime executionTime;
 
-    public MilitaryUnit(ENation nation, boolean move, String mission, String originVillageId,
-                        String originVillageName, String originPlayerName, int[] originVillageCoordinates,
-                        int[] units, LocalDateTime executionTime) {
+    public MilitaryUnitEntity(ENation nation, boolean move, String mission, String originVillageId,
+                              String originVillageName, String originPlayerName, int[] originVillageCoordinates,
+                              int[] units, LocalDateTime executionTime) {
         this.nation = nation;
         this.move = move;
         this.mission = mission;

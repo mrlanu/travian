@@ -6,7 +6,7 @@ import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.entities.events.ConstructionEvent;
+import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
 import io.lanu.travian.templates.military.CombatUnitFactory;
@@ -44,7 +44,7 @@ public class VillageView {
     private Map<EResource, BigDecimal> producePerHour;
     private List<ConstructionEventView> eventsList;
 
-    public VillageView(VillageEntity villageEntity, List<ConstructionEvent> eventList) {
+    public VillageView(VillageEntity villageEntity, List<ConstructionEventEntity> eventList) {
         this.villageId = villageEntity.getVillageId();
         this.accountId = villageEntity.getAccountId();
         this.nation = villageEntity.getNation();
@@ -73,7 +73,7 @@ public class VillageView {
         return result;
     }
 
-    private List<ConstructionEventView> buildEventsView(List<ConstructionEvent> buildEventList) {
+    private List<ConstructionEventView> buildEventsView(List<ConstructionEventEntity> buildEventList) {
         /*DurationFormatUtils.formatDuration(Duration.between(LocalDateTime.now(),
                 event.getExecutionTime()).toMillis(), "H:mm:ss", true)*/
         return buildEventList.stream()
@@ -81,7 +81,7 @@ public class VillageView {
                         ChronoUnit.SECONDS.between(LocalDateTime.now(), event.getExecutionTime()))).collect(Collectors.toList());
     }
     
-    private List<BuildingBase> buildBuildingsView(Map<Integer, BuildModel> buildings, List<ConstructionEvent> eventList) {
+    private List<BuildingBase> buildBuildingsView(Map<Integer, BuildModel> buildings, List<ConstructionEventEntity> eventList) {
         return IntStream.range(1, 40)
                 .mapToObj(i -> {
                     BuildingBase building = BuildingsFactory.getBuilding(buildings.get(i).getKind(), buildings.get(i).getLevel());

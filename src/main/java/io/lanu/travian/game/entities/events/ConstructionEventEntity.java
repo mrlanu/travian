@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
         @JsonSubTypes.Type(value = TroopBuildEvent.class, name = "troopEvent")
 })*/
 @Document("construction-events")
-public class ConstructionEvent implements IEvent {
+public class ConstructionEventEntity {
 
     @Id
     private String eventId;
@@ -27,17 +27,11 @@ public class ConstructionEvent implements IEvent {
     private String villageId;
     private LocalDateTime executionTime;
 
-    public ConstructionEvent(int buildingPosition, EBuilding buildingName, int toLevel, String villageId, LocalDateTime executionTime) {
+    public ConstructionEventEntity(int buildingPosition, EBuilding buildingName, int toLevel, String villageId, LocalDateTime executionTime) {
         this.buildingPosition = buildingPosition;
         this.buildingName = buildingName;
         this.toLevel = toLevel;
         this.villageId = villageId;
         this.executionTime = executionTime;
-    }
-
-    @Override
-    public void execute(VillageEntity villageEntity) {
-        var build = villageEntity.getBuildings().get(buildingPosition);
-        build.setLevel(build.getLevel() + 1);
     }
 }

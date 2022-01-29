@@ -4,7 +4,7 @@ import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.ResearchedCombatUnitEntity;
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.entities.events.MilitaryUnitStatic;
+import io.lanu.travian.game.entities.events.MilitaryUnitEntityStatic;
 import io.lanu.travian.game.models.ResearchedCombatUnitShort;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
@@ -93,7 +93,7 @@ public class VillageServiceImpl implements VillageService{
     public VillageView getVillageById(VillageEntity villageEntity) {
         var currentBuildingEvents = constructionService.findAllByVillageId(villageEntity.getVillageId());
         var legionsInVillage = militaryUnitRepository.getAllByMove(false).stream()
-                .map(militaryUnit -> (MilitaryUnitStatic) militaryUnit)
+                .map(militaryUnit -> (MilitaryUnitEntityStatic) militaryUnit)
                 .filter(militaryUnitStatic -> !militaryUnitStatic.isMove())
                 .collect(Collectors.toList());
         return new VillageView(villageEntity, currentBuildingEvents);

@@ -5,7 +5,7 @@ import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.entities.events.ConstructionEvent;
+import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.game.models.responses.NewBuilding;
 import io.lanu.travian.game.repositories.ConstructionEventRepository;
 import io.lanu.travian.templates.buildings.BuildingBase;
@@ -31,7 +31,7 @@ public class ConstructionServiceImpl implements IConstructionService {
     public VillageEntity createBuildEvent(VillageEntity village, Integer buildingPosition, EBuilding kind) {
         var events = constructionEventRepository.findAllByVillageId(village.getVillageId())
                 .stream()
-                .sorted(Comparator.comparing(ConstructionEvent::getExecutionTime))
+                .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
 
         // if current building is already under upgrade resources & time needed for next level should be overwritten
@@ -55,7 +55,7 @@ public class ConstructionServiceImpl implements IConstructionService {
 
         village.manipulateGoods(EManipulation.SUBTRACT, building.getResourcesToNextLevel());
 
-        ConstructionEvent buildEvent = new ConstructionEvent(buildingPosition, buildModel.getKind(),
+        ConstructionEventEntity buildEvent = new ConstructionEventEntity(buildingPosition, buildModel.getKind(),
                 building.getLevel() + 1, village.getVillageId(), executionTime);
 
         constructionEventRepository.save(buildEvent);
@@ -63,7 +63,7 @@ public class ConstructionServiceImpl implements IConstructionService {
     }
 
     @Override
-    public List<ConstructionEvent> findAllByVillageId(String villageId) {
+    public List<ConstructionEventEntity> findAllByVillageId(String villageId) {
         var result = constructionEventRepository.findAllByVillageId(villageId);
         constructionEventRepository.deleteAllByVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
         return result;
@@ -72,7 +72,7 @@ public class ConstructionServiceImpl implements IConstructionService {
     @Override
     public VillageEntity deleteBuildingEvent(VillageEntity village, String eventId) {
         var allEvents = constructionEventRepository.findAllByVillageId(village.getVillageId()).stream()
-                .sorted(Comparator.comparing(ConstructionEvent::getExecutionTime))
+                .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
         var event = allEvents.stream()
                 .filter(constructionEvent -> constructionEvent.getEventId().equals(eventId))
