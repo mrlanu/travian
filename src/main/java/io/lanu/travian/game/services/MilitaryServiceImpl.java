@@ -6,6 +6,7 @@ import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.events.CombatUnitDoneStrategy;
 import io.lanu.travian.game.models.events.EventStrategy;
+import io.lanu.travian.game.models.events.MilitaryEventStrategy;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.*;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,7 +44,9 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     @Override
     public List<MilitaryUnitEntity> getAllByOriginVillageId(String villageId) {
-        return militaryUnitRepository.getAllByOriginVillageId(villageId);
+        var result = militaryUnitRepository.getAllByOriginVillageId(villageId);
+        militaryUnitRepository.deleteAllByOriginVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
+        return result;
     }
 
     @Override
@@ -138,7 +142,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .targetPlayerName(attackedUser.getUsername())
                 .targetVillageCoordinates(new int[]{attackedVillage.getX(), attackedVillage.getY()})
                 .units(troopsSendingRequest.getWaves().get(0).getTroops())
-                .arrivalTime(LocalDateTime.now().plusMinutes(2))
+                .arrivalTime(LocalDateTime.now().minusHours(6).plusMinutes(2))
                 .duration(120)
                 .build();
     }
@@ -152,10 +156,11 @@ public class MilitaryServiceImpl implements MilitaryService {
             homeLegion[i] = homeLegion[i] - attackingUnits[i];
         }
         // create MilitaryUnitEntity
-        var militaryUnitEntity = new MilitaryUnitEntityDynamic(contract.getNation(), true, contract.getMission(),
-                contract.getOriginVillageId(), contract.getOriginVillageName(), contract.getOriginPlayerName(),
-                contract.getOriginVillageCoordinates(), contract.getUnits(), contract.getArrivalTime(), contract.getTargetVillageId(),
-                contract.getTargetVillageName(), contract.getTargetPlayerName(), contract.getTargetVillageCoordinates(), 120);
+        var militaryUnitEntity = new MilitaryUnitEntity(
+                contract.getNation(), true, contract.getMission(), contract.getUnits(), contract.getOriginVillageId(),
+                new VillageBrief(contract.getOriginVillageName(), contract.getOriginPlayerName(), contract.getOriginVillageCoordinates()),
+                contract.getTargetVillageId(), new VillageBrief(contract.getTargetVillageName(), contract.getTargetPlayerName(), contract.getTargetVillageCoordinates()),
+                contract.getArrivalTime(), 60, 0);
         militaryUnitRepository.save(militaryUnitEntity);
         return village;
     }
@@ -200,4 +205,6 @@ public class MilitaryServiceImpl implements MilitaryService {
         }
         return result;
     }
+
+
 }

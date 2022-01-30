@@ -7,6 +7,7 @@ import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
+import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
 import io.lanu.travian.templates.military.CombatUnitFactory;
@@ -43,8 +44,10 @@ public class VillageView {
     private int[] homeUnits;
     private Map<EResource, BigDecimal> producePerHour;
     private List<ConstructionEventView> eventsList;
+    private List<MilitaryUnitEntity> militariesInVillage;
 
-    public VillageView(VillageEntity villageEntity, List<ConstructionEventEntity> eventList) {
+    public VillageView(VillageEntity villageEntity, List<ConstructionEventEntity> eventList,
+                       List<MilitaryUnitEntity> militariesInVillage) {
         this.villageId = villageEntity.getVillageId();
         this.accountId = villageEntity.getAccountId();
         this.nation = villageEntity.getNation();
@@ -63,6 +66,7 @@ public class VillageView {
         this.homeUnits = villageEntity.getHomeLegion();
         this.producePerHour = villageEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(eventList);
+        this.militariesInVillage = militariesInVillage;
     }
 
     private Map<String, Integer> mapHomeLegion(int[] homeLegion, ENation nation) {

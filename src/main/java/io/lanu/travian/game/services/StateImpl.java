@@ -74,14 +74,6 @@ public class StateImpl implements IState{
             villageEntity.calculateProducedGoods(modified, eventStrategy.getExecutionTime());
             executor.setStrategy(eventStrategy);
             executor.tryExecute();
-            /*if (event instanceof MilitaryUnitDynamic){
-                MilitaryUnitDynamic militaryEvent = (MilitaryUnitDynamic) event;
-                var targetVillage = getState(militaryEvent.getTargetVillageId());
-                militaryEvent.execute(targetVillage);
-                saveState(targetVillage);
-            }else {
-                event.execute(villageEntity);
-            }*/
             modified = eventStrategy.getExecutionTime();
         }
     }
@@ -94,19 +86,24 @@ public class StateImpl implements IState{
                 .collect(Collectors.toList());
 
         // add all units events
-        var militaryEventList = militaryService.createCombatUnitDoneEventsFromOrders(origin);
-        allEvents.addAll(militaryEventList);
+        var combatEventList = militaryService.createCombatUnitDoneEventsFromOrders(origin);
+        allEvents.addAll(combatEventList);
 
         // add all wars events
-        //allEvents.addAll(militaryService.getAllByOriginVillageId(villageId));
+        var militaryEventList = militaryService.getAllByOriginVillageId(origin.getVillageId()).stream()
+                .filter(militaryUnitEntity -> militaryUnitEntity.getExecutionTime().isBefore(LocalDateTime.now()))
+                .map(militaryUnitEntity -> new MilitaryEventStrategy(origin, militaryUnitEntity, getState(militaryUnitEntity.getTargetVillageId())))
+                .collect(Collectors.toList());
+        allEvents.addAll(militaryEventList);
 
         // add last empty event
         allEvents.add(new LastEventStrategy(LocalDateTime.now()));
 
-        return allEvents.stream()
+        var t = allEvents.stream()
                 .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
                 .sorted(Comparator.comparing(EventStrategy::getExecutionTime))
                 .collect(Collectors.toList());
+        return t;
     }
 
 }

@@ -14,15 +14,25 @@ public class MilitaryEventStrategy extends EventStrategy{
     private MilitaryUnitEntity militaryUnit;
     private VillageEntity targetVillage;
 
-    public MilitaryEventStrategy(VillageEntity origin, MilitaryUnitEntity attackingMilitaryUnit, VillageEntity targetVillage) {
+    public MilitaryEventStrategy(VillageEntity origin, MilitaryUnitEntity militaryUnit, VillageEntity targetVillage) {
         super(origin);
-        this.militaryUnit = attackingMilitaryUnit;
+        this.militaryUnit = militaryUnit;
         this.targetVillage = targetVillage;
     }
 
     @Override
     public void execute() {
+        getMissionStrategy().handle();
+    }
 
+    private MissionStrategy getMissionStrategy() {
+        switch (militaryUnit.getMission()){
+            case "Reinforcement":
+                return new ReinforcementMissionStrategy(origin, militaryUnit, targetVillage);
+            case "Attack":
+                return new AttackMissionStrategy(origin, militaryUnit, targetVillage);
+            default: throw new IllegalStateException();
+        }
     }
 
     @Override

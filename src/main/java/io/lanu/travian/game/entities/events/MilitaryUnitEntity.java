@@ -3,6 +3,7 @@ package io.lanu.travian.game.entities.events;
 import io.lanu.travian.enums.EMilitaryUnitState;
 import io.lanu.travian.enums.ENation;
 import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.models.responses.VillageBrief;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,30 +15,37 @@ import java.time.LocalDateTime;
 @Data
 @Document("military")
 @NoArgsConstructor
-public abstract class MilitaryUnitEntity {
+public class MilitaryUnitEntity {
     @Id
-    protected String id;
-    protected ENation nation;
-    protected boolean move;
-    protected String mission;
-    protected String originVillageId;
-    protected String originVillageName;
-    protected String originPlayerName;
-    protected int[] originVillageCoordinates;
-    protected int[] units;
-    protected LocalDateTime executionTime;
+    private String id;
+    private ENation nation;
+    private boolean move;
+    private String mission;
+    private int[] units;
 
-    public MilitaryUnitEntity(ENation nation, boolean move, String mission, String originVillageId,
-                              String originVillageName, String originPlayerName, int[] originVillageCoordinates,
-                              int[] units, LocalDateTime executionTime) {
+    private String originVillageId;
+    private VillageBrief origin;
+
+    private String targetVillageId;
+    private VillageBrief target;
+
+    private LocalDateTime executionTime;
+    private int duration;
+    private int eatExpenses;
+
+    public MilitaryUnitEntity(ENation nation, boolean move, String mission, int[] units, String originVillageId,
+                              VillageBrief origin, String targetVillageId, VillageBrief target, LocalDateTime executionTime,
+                              int duration, int eatExpenses) {
         this.nation = nation;
         this.move = move;
         this.mission = mission;
-        this.originVillageId = originVillageId;
-        this.originVillageName = originVillageName;
-        this.originPlayerName = originPlayerName;
-        this.originVillageCoordinates = originVillageCoordinates;
         this.units = units;
+        this.originVillageId = originVillageId;
+        this.origin = origin;
+        this.targetVillageId = targetVillageId;
+        this.target = target;
         this.executionTime = executionTime;
+        this.duration = duration;
+        this.eatExpenses = eatExpenses;
     }
 }
