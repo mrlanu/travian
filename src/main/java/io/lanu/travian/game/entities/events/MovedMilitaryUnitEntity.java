@@ -7,10 +7,12 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Data
-@Document("military-units")
+@Document("move-military-units")
 @NoArgsConstructor
-public class MilitaryUnitEntity {
+public class MovedMilitaryUnitEntity {
     @Id
     private String id;
     private ENation nation;
@@ -23,10 +25,13 @@ public class MilitaryUnitEntity {
     private String targetVillageId;
     private VillageBrief target;
 
+    private LocalDateTime executionTime;
+    private int duration;
     private int eatExpenses;
 
-    public MilitaryUnitEntity(ENation nation, String mission, int[] units, String originVillageId, VillageBrief origin,
-                              String targetVillageId, VillageBrief target, int eatExpenses) {
+    public MovedMilitaryUnitEntity(ENation nation, String mission, int[] units, String originVillageId,
+                                   VillageBrief origin, String targetVillageId, VillageBrief target, LocalDateTime executionTime,
+                                   int duration, int eatExpenses) {
         this.nation = nation;
         this.mission = mission;
         this.units = units;
@@ -34,6 +39,8 @@ public class MilitaryUnitEntity {
         this.origin = origin;
         this.targetVillageId = targetVillageId;
         this.target = target;
+        this.executionTime = executionTime;
+        this.duration = duration;
         this.eatExpenses = eatExpenses;
     }
 }

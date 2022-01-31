@@ -1,7 +1,8 @@
 package io.lanu.travian.game.models.events;
 
 import io.lanu.travian.game.entities.VillageEntity;
-import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
+import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
+import io.lanu.travian.game.services.MilitaryService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,18 +12,21 @@ import java.time.LocalDateTime;
 @Data
 public class MilitaryEventStrategy extends EventStrategy{
 
-    private MilitaryUnitEntity militaryUnit;
+    private MovedMilitaryUnitEntity militaryUnit;
     private VillageEntity targetVillage;
+    private MilitaryService service;
 
-    public MilitaryEventStrategy(VillageEntity origin, MilitaryUnitEntity militaryUnit, VillageEntity targetVillage) {
+    public MilitaryEventStrategy(VillageEntity origin, MovedMilitaryUnitEntity militaryUnit,
+                                 VillageEntity targetVillage, MilitaryService service) {
         super(origin);
         this.militaryUnit = militaryUnit;
         this.targetVillage = targetVillage;
+        this.service = service;
     }
 
     @Override
     public void execute() {
-        getMissionStrategy().handle();
+        getMissionStrategy().handle(service);
     }
 
     private MissionStrategy getMissionStrategy() {

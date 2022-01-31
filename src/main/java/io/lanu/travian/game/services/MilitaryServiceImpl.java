@@ -1,17 +1,23 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.*;
-import io.lanu.travian.game.entities.events.*;
+import io.lanu.travian.enums.ECombatUnit;
+import io.lanu.travian.enums.EManipulation;
+import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.events.CombatUnitDoneEventEntity;
+import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
+import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
 import io.lanu.travian.game.models.events.CombatUnitDoneStrategy;
 import io.lanu.travian.game.models.events.EventStrategy;
-import io.lanu.travian.game.models.events.MilitaryEventStrategy;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
-import io.lanu.travian.game.models.responses.*;
+import io.lanu.travian.game.models.responses.MilitaryUnitContract;
+import io.lanu.travian.game.models.responses.MilitaryUnitView;
+import io.lanu.travian.game.models.responses.VillageBrief;
 import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
-import io.lanu.travian.game.repositories.IMilitaryUnitRepository;
+import io.lanu.travian.game.repositories.MilitaryUnitRepository;
+import io.lanu.travian.game.repositories.MovedMilitaryUnitRepository;
 import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
 import io.lanu.travian.security.UsersRepository;
 import io.lanu.travian.templates.military.CombatUnitFactory;
@@ -20,7 +26,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,22 +35,44 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     private final CombatUnitOrderRepository combatUnitOrderRepository;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
-    private final IMilitaryUnitRepository militaryUnitRepository;
+    private final MilitaryUnitRepository militaryUnitRepository;
+    private final MovedMilitaryUnitRepository movedMilitaryUnitRepository;
     private final UsersRepository usersRepository;
 
     public MilitaryServiceImpl(CombatUnitOrderRepository combatUnitOrderRepository,
                                ResearchedCombatUnitRepository researchedCombatUnitRepository,
-                               IMilitaryUnitRepository militaryUnitRepository, UsersRepository usersRepository) {
+                               MilitaryUnitRepository militaryUnitRepository, MovedMilitaryUnitRepository movedMilitaryUnitRepository, UsersRepository usersRepository) {
         this.combatUnitOrderRepository = combatUnitOrderRepository;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.militaryUnitRepository = militaryUnitRepository;
+        this.movedMilitaryUnitRepository = movedMilitaryUnitRepository;
         this.usersRepository = usersRepository;
     }
 
     @Override
-    public List<MilitaryUnitEntity> getAllByOriginVillageId(String villageId) {
-        var result = militaryUnitRepository.getAllByOriginVillageId(villageId);
-        militaryUnitRepository.deleteAllByOriginVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
+    public MilitaryUnitEntity saveMilitaryUnit(MilitaryUnitEntity unit) {
+        return militaryUnitRepository.save(unit);
+    }
+
+    @Override
+    public MovedMilitaryUnitEntity saveMovedMilitaryUnit(MovedMilitaryUnitEntity unit) {
+        return null;
+    }
+
+    @Override
+    public void deleteMovedUnitById(String id) {
+        movedMilitaryUnitRepository.deleteById(id);
+    }
+
+    @Override
+    public void deleteUnitById(String id) {
+        militaryUnitRepository.deleteById(id);
+    }
+
+    @Override
+    public List<MovedMilitaryUnitEntity> getAllMovedUnitsByOriginVillageId(String villageId) {
+        var result = movedMilitaryUnitRepository.getAllByOriginVillageId(villageId);
+        //movedMilitaryUnitRepository.deleteAllByOriginVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
         return result;
     }
 
@@ -156,12 +183,12 @@ public class MilitaryServiceImpl implements MilitaryService {
             homeLegion[i] = homeLegion[i] - attackingUnits[i];
         }
         // create MilitaryUnitEntity
-        var militaryUnitEntity = new MilitaryUnitEntity(
-                contract.getNation(), true, contract.getMission(), contract.getUnits(), contract.getOriginVillageId(),
+        var moveUnit = new MovedMilitaryUnitEntity(
+                contract.getNation(), contract.getMission(), contract.getUnits(), contract.getOriginVillageId(),
                 new VillageBrief(contract.getOriginVillageName(), contract.getOriginPlayerName(), contract.getOriginVillageCoordinates()),
                 contract.getTargetVillageId(), new VillageBrief(contract.getTargetVillageName(), contract.getTargetPlayerName(), contract.getTargetVillageCoordinates()),
                 contract.getArrivalTime(), 60, 0);
-        militaryUnitRepository.save(militaryUnitEntity);
+        movedMilitaryUnitRepository.save(moveUnit);
         return village;
     }
 

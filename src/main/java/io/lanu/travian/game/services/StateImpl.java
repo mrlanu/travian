@@ -90,20 +90,19 @@ public class StateImpl implements IState{
         allEvents.addAll(combatEventList);
 
         // add all wars events
-        var militaryEventList = militaryService.getAllByOriginVillageId(origin.getVillageId()).stream()
+        var militaryEventList = militaryService.getAllMovedUnitsByOriginVillageId(origin.getVillageId()).stream()
                 .filter(militaryUnitEntity -> militaryUnitEntity.getExecutionTime().isBefore(LocalDateTime.now()))
-                .map(militaryUnitEntity -> new MilitaryEventStrategy(origin, militaryUnitEntity, getState(militaryUnitEntity.getTargetVillageId())))
+                .map(militaryUnitEntity -> new MilitaryEventStrategy(origin, militaryUnitEntity, getState(militaryUnitEntity.getTargetVillageId()), militaryService))
                 .collect(Collectors.toList());
         allEvents.addAll(militaryEventList);
 
         // add last empty event
         allEvents.add(new LastEventStrategy(LocalDateTime.now()));
 
-        var t = allEvents.stream()
+        return allEvents.stream()
                 .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
                 .sorted(Comparator.comparing(EventStrategy::getExecutionTime))
                 .collect(Collectors.toList());
-        return t;
     }
 
 }
