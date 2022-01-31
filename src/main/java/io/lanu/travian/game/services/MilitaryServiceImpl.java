@@ -2,6 +2,7 @@ package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.EManipulation;
+import io.lanu.travian.enums.EMilitaryUnitState;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.VillageEntity;
@@ -12,9 +13,7 @@ import io.lanu.travian.game.models.events.CombatUnitDoneStrategy;
 import io.lanu.travian.game.models.events.EventStrategy;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
-import io.lanu.travian.game.models.responses.MilitaryUnitContract;
-import io.lanu.travian.game.models.responses.MilitaryUnitView;
-import io.lanu.travian.game.models.responses.VillageBrief;
+import io.lanu.travian.game.models.responses.*;
 import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
 import io.lanu.travian.game.repositories.MilitaryUnitRepository;
 import io.lanu.travian.game.repositories.MovedMilitaryUnitRepository;
@@ -78,24 +77,41 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     @Override
     public Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillage(VillageEntity village) {
-        /*var userName = usersRepository.findByUserId(village.getAccountId()).orElseThrow();
+        var userName = usersRepository.findByUserId(village.getAccountId()).orElseThrow();
         var villageId = village.getVillageId();
         // other units
-        List<MilitaryUnitView> unitsList = militaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(villageId, villageId)
+        List<MilitaryUnitView> unitsList = movedMilitaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(villageId, villageId)
                 .stream()
-                .peek(militaryUnit -> {
-                    if (militaryUnit.getOriginVillageId().equals(villageId)){
-                        militaryUnit.setState(EMilitaryUnitState.OUT);
+                .map(mEv -> new MilitaryUnitViewDynamic(mEv.getId(), mEv.getNation(), true, null,
+                                new VillageBrief(mEv.getOriginVillageId(), mEv.getOrigin().getVillageName(),
+                                        mEv.getOrigin().getPlayerName(), mEv.getOrigin().getCoordinates()),
+                                mEv.getUnits(), mEv.getMission(),
+                                new VillageBrief(mEv.getTargetVillageId(), mEv.getTarget().getVillageName(),
+                                        mEv.getTarget().getPlayerName(), mEv.getTarget().getCoordinates()),
+                                mEv.getExecutionTime(), mEv.getDuration()))
+                .peek(mU -> {
+                    if (mU.getOriginVillage().getVillageId().equals(villageId)){
+                        mU.setState(EMilitaryUnitState.OUT);
                     }else {
-                        militaryUnit.setState(EMilitaryUnitState.IN);
+                        mU.setState(EMilitaryUnitState.IN);
                     }
                 })
-                .map(mEv -> new MilitaryUnitViewDynamic(mEv.getId(), mEv.getNation(), true, mEv.getState(),
-                                new VillageBrief(mEv.getOriginVillageId(), mEv.getOriginVillageName(), mEv.getOriginPlayerName(), mEv.getOriginVillageCoordinates()),
-                                mEv.getUnits(), mEv.getMission(),
-                                new VillageBrief(mEv.getTargetVillageId(), mEv.getTargetVillageName(), mEv.getTargetPlayerName(), mEv.getTargetVillageCoordinates()),
-                                mEv.getExecutionTime(), mEv.getDuration()))
                 .collect(Collectors.toList());
+
+        unitsList.addAll(
+                militaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(villageId, villageId).stream()
+                    .map(mEv -> new MilitaryUnitViewStatic(mEv.getId(), mEv.getNation(), false, null,
+                            new VillageBrief(mEv.getOriginVillageId(), mEv.getOrigin().getVillageName(),
+                                    mEv.getOrigin().getPlayerName(), mEv.getOrigin().getCoordinates()),
+                            mEv.getUnits(), mEv.getTargetVillageId(), mEv.getEatExpenses()))
+                        .peek(mU -> {
+                            if (mU.getOriginVillage().getVillageId().equals(villageId)){
+                                mU.setState(EMilitaryUnitState.AWAY);
+                            }else {
+                                mU.setState(EMilitaryUnitState.HOME);
+                            }
+                        })
+                        .collect(Collectors.toList()));
 
         Map<String, List<MilitaryUnitView>> militaryUnitsMap = unitsList.stream()
                 .collect(Collectors.groupingBy(militaryEvent -> militaryEvent.getState().getName()));
@@ -105,9 +121,10 @@ public class MilitaryServiceImpl implements MilitaryService {
                 new VillageBrief(villageId, village.getName(), userName.getUsername(), new int[]{village.getX(), village.getY()}),
                 village.getHomeLegion(), villageId, 5);
 
-        militaryUnitsMap.put(EMilitaryUnitState.HOME.getName(), List.of(homeArmy));
-        return militaryUnitsMap;*/
-        return null;
+        var homeArmies = militaryUnitsMap.getOrDefault(EMilitaryUnitState.HOME.getName(), new ArrayList<>());
+        homeArmies.add(homeArmy);
+        militaryUnitsMap.put(EMilitaryUnitState.HOME.getName(), homeArmies);
+        return militaryUnitsMap;
     }
 
     @Override

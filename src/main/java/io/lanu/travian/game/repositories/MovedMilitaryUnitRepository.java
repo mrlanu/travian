@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface MovedMilitaryUnitRepository extends MongoRepository<MovedMilitaryUnitEntity, String> {
     List<MovedMilitaryUnitEntity> getAllByOriginVillageId(String villageId);
+    List<MovedMilitaryUnitEntity> getAllByOriginVillageIdOrTargetVillageId(String originId, String targetId);
     void deleteById(String id);
 }

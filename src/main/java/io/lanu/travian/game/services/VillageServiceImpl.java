@@ -96,7 +96,8 @@ public class VillageServiceImpl implements VillageService{
     @Override
     public VillageView getVillageById(VillageEntity villageEntity) {
         var currentBuildingEvents = constructionService.findAllByVillageId(villageEntity.getVillageId());
-        return new VillageView(villageEntity, currentBuildingEvents, null);
+        var militariesInVillage = militaryUnitRepository.getAllByTargetVillageId(villageEntity.getVillageId());
+        return new VillageView(villageEntity, currentBuildingEvents, militariesInVillage);
     }
 
 }

@@ -46,8 +46,11 @@ public class VillageView {
     private List<ConstructionEventView> eventsList;
     private List<MilitaryUnitEntity> militariesInVillage;
 
-    public VillageView(VillageEntity villageEntity, List<ConstructionEventEntity> eventList,
-                       List<MilitaryUnitEntity> militariesInVillage) {
+    public VillageView(VillageEntity villageEntity, List<ConstructionEventEntity> eventList, List<MilitaryUnitEntity> militariesInVillage) {
+        createView(villageEntity, eventList, militariesInVillage);
+    }
+
+    private void createView(VillageEntity villageEntity, List<ConstructionEventEntity> eventList, List<MilitaryUnitEntity> militariesInVillage) {
         this.villageId = villageEntity.getVillageId();
         this.accountId = villageEntity.getAccountId();
         this.nation = villageEntity.getNation();
@@ -62,18 +65,23 @@ public class VillageView {
         this.warehouseCapacity = villageEntity.getWarehouseCapacity();
         this.granaryCapacity = villageEntity.getGranaryCapacity();
         this.buildings = this.buildBuildingsView(villageEntity.getBuildings(), eventList);
-        this.homeLegion = this.mapHomeLegion(villageEntity.getHomeLegion(), villageEntity.getNation());
+        this.homeLegion = this.mapHomeLegion(villageEntity.getHomeLegion(), villageEntity.getNation(), militariesInVillage);
         this.homeUnits = villageEntity.getHomeLegion();
         this.producePerHour = villageEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(eventList);
-        this.militariesInVillage = militariesInVillage;
     }
 
-    private Map<String, Integer> mapHomeLegion(int[] homeLegion, ENation nation) {
-        var result = new LinkedHashMap<String, Integer>();
+    private Map<String, Integer> mapHomeLegion(int[] homeLegion, ENation nation, List<MilitaryUnitEntity> militariesInVillage) {
+        var result = new HashMap<String, Integer>();
         for (int i = 0; i < homeLegion.length; i++){
             result.put(CombatUnitFactory.getCombatUnitFromArrayPosition(i, nation).getName(), homeLegion[i]);
         }
+        militariesInVillage.forEach(unit -> {
+            for (int i = 0; i < unit.getUnits().length; i++){
+                var key = CombatUnitFactory.getCombatUnitFromArrayPosition(i, nation).getName();
+                result.put(key, result.getOrDefault(key, 0) + unit.getUnits()[i]);
+            }
+        });
         return result;
     }
 
