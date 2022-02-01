@@ -101,13 +101,11 @@ public class StateImpl implements IState{
         var attackingVillage = recalculateCurrentState(troopsSendingRequest.getVillageId());
         var attackedVillageOpt = villageService
                 .findVillageByCoordinates(troopsSendingRequest.getX(), troopsSendingRequest.getY());
-        VillageEntity attackedVillage;
         if (attackedVillageOpt.isPresent()) {
-            attackedVillage = recalculateCurrentState(attackedVillageOpt.get().getVillageId());
+            return militaryService.checkTroopsSendingRequest(troopsSendingRequest, attackingVillage, attackedVillageOpt.get());
         }else {
             throw new UserErrorException("There is nothing on those coordinates");
         }
-        return militaryService.checkTroopsSendingRequest(troopsSendingRequest, attackingVillage, attackedVillage);
     }
 
     @Override
@@ -117,7 +115,7 @@ public class StateImpl implements IState{
         saveState(village);
     }
 
-    private VillageEntity recalculateCurrentState(String villageId) {
+    public VillageEntity recalculateCurrentState(String villageId) {
         VillageEntity villageEntity = villageService.findById(villageId);
         var allEvents = combineAllEvents(villageEntity);
         executeAllEvents(villageEntity, allEvents);
@@ -165,6 +163,7 @@ public class StateImpl implements IState{
 
         // add all building events
         List<EventStrategy> allEvents = constructionService.findAllByVillageId(origin.getVillageId()).stream()
+                .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
                 .map(cE -> new ConstructionEventStrategy(origin, cE))
                 .collect(Collectors.toList());
 
@@ -173,10 +172,12 @@ public class StateImpl implements IState{
         allEvents.addAll(combatEventList);
 
         // add all wars events
-        var militaryEventList = militaryService.getAllMovedUnitsByOriginVillageId(origin.getVillageId()).stream()
+        var militaryEventList = militaryService.getAllByOriginVillageIdOrTargetVillageId(origin.getVillageId())
+                .stream()
                 .filter(militaryUnitEntity -> militaryUnitEntity.getExecutionTime().isBefore(LocalDateTime.now()))
-                .map(militaryUnitEntity -> new MilitaryEventStrategy(origin, militaryUnitEntity,
-                        recalculateCurrentState(militaryUnitEntity.getTargetVillageId()), militaryService))
+                .map(mU -> new MilitaryEventStrategy(
+                        origin, mU, new VillageBrief(mU.getTargetVillageId(), mU.getTarget().getVillageName(),
+                        mU.getTarget().getPlayerName(), mU.getTarget().getCoordinates()), this, militaryService))
                 .collect(Collectors.toList());
         allEvents.addAll(militaryEventList);
 
@@ -184,7 +185,6 @@ public class StateImpl implements IState{
         allEvents.add(new LastEventStrategy(LocalDateTime.now()));
 
         return allEvents.stream()
-                .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
                 .sorted(Comparator.comparing(EventStrategy::getExecutionTime))
                 .collect(Collectors.toList());
     }

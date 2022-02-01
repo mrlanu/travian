@@ -11,17 +11,22 @@ public class MilitaryUnitView {
 
     protected String id;
     protected ENation nation;
+    private String mission;
     protected boolean move;
     protected EMilitaryUnitState state;
-    protected VillageBrief originVillage;
+    protected VillageBrief origin;
+    protected VillageBrief target;
     protected int[] units;
 
-    public MilitaryUnitView(String id, ENation nation, boolean move, EMilitaryUnitState state, VillageBrief originVillage, int[] units) {
+    public MilitaryUnitView(String id, ENation nation, String mission, boolean move, EMilitaryUnitState state,
+                            VillageBrief origin, VillageBrief target, int[] units) {
         this.id = id;
         this.nation = nation;
+        this.mission = mission;
         this.move = move;
         this.state = state;
-        this.originVillage = originVillage;
+        this.origin = origin;
+        this.target = target;
         this.units = units;
     }
 }

@@ -28,4 +28,5 @@ public interface MilitaryService {
     void deleteMovedUnitById(String id);
     void deleteUnitById(String id);
     List<MilitaryUnitEntity> getAllByTargetVillageId(String villageId);
+    List<MovedMilitaryUnitEntity> getAllByOriginVillageIdOrTargetVillageId(String originId);
 }

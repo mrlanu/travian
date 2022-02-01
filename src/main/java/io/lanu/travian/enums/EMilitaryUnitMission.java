@@ -7,7 +7,7 @@ public enum EMilitaryUnitMission {
     RAID("Raid"),
     REINFORCEMENT("Reinforcement");
 
-    private String name;
+    private final String name;
 
     EMilitaryUnitMission(String name) {
         this.name = name;

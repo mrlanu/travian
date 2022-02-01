@@ -14,6 +14,7 @@ import java.util.Map;
 public interface IState {
     VillageEntity newVillage(NewVillageRequest newVillageRequest);
     VillageView getVillageById(String villageId);
+    VillageEntity recalculateCurrentState(String villageId);
     void updateVillageName(String villageId, String name);
 
     List<NewBuilding> getListOfAllNewBuildings(String villageId);

@@ -11,9 +11,10 @@ public class MilitaryUnitViewStatic extends MilitaryUnitView {
     private String currentLocationVillageId;
     private int eatExpenses;
 
-    public MilitaryUnitViewStatic(String id, ENation nation, boolean move, EMilitaryUnitState state, VillageBrief homeVillage,
+    public MilitaryUnitViewStatic(String id, ENation nation, String mission, boolean move, EMilitaryUnitState state,
+                                  VillageBrief origin, VillageBrief target,
                                   int[] units, String currentLocationVillageId, int eatExpenses) {
-        super(id, nation, move, state, homeVillage, units);
+        super(id, nation, mission, move, state, origin, target, units);
         this.currentLocationVillageId = currentLocationVillageId;
         this.eatExpenses = eatExpenses;
     }

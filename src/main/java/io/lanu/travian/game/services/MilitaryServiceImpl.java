@@ -1,9 +1,6 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.ECombatUnit;
-import io.lanu.travian.enums.EManipulation;
-import io.lanu.travian.enums.EMilitaryUnitState;
-import io.lanu.travian.enums.EResource;
+import io.lanu.travian.enums.*;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.CombatUnitDoneEventEntity;
@@ -75,9 +72,7 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     @Override
     public List<MovedMilitaryUnitEntity> getAllMovedUnitsByOriginVillageId(String villageId) {
-        var result = movedMilitaryUnitRepository.getAllByOriginVillageId(villageId);
-        //movedMilitaryUnitRepository.deleteAllByOriginVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
-        return result;
+        return movedMilitaryUnitRepository.getAllByOriginVillageId(villageId);
     }
 
     @Override
@@ -87,15 +82,15 @@ public class MilitaryServiceImpl implements MilitaryService {
         // other units
         List<MilitaryUnitView> unitsList = movedMilitaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(villageId, villageId)
                 .stream()
-                .map(mEv -> new MilitaryUnitViewDynamic(mEv.getId(), mEv.getNation(), true, null,
+                .map(mEv -> new MovedMilitaryUnitView(mEv.getId(), mEv.getNation(), mEv.getMission(), true, null,
                                 new VillageBrief(mEv.getOriginVillageId(), mEv.getOrigin().getVillageName(),
                                         mEv.getOrigin().getPlayerName(), mEv.getOrigin().getCoordinates()),
-                                mEv.getUnits(), mEv.getMission(),
                                 new VillageBrief(mEv.getTargetVillageId(), mEv.getTarget().getVillageName(),
-                                        mEv.getTarget().getPlayerName(), mEv.getTarget().getCoordinates()),
+                                mEv.getTarget().getPlayerName(), mEv.getTarget().getCoordinates()),
+                                mEv.getUnits(),
                                 mEv.getExecutionTime(), mEv.getDuration()))
                 .peek(mU -> {
-                    if (mU.getOriginVillage().getVillageId().equals(villageId)){
+                    if (mU.getOrigin().getVillageId().equals(villageId)){
                         mU.setState(EMilitaryUnitState.OUT);
                     }else {
                         mU.setState(EMilitaryUnitState.IN);
@@ -105,12 +100,14 @@ public class MilitaryServiceImpl implements MilitaryService {
 
         unitsList.addAll(
                 militaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(villageId, villageId).stream()
-                    .map(mEv -> new MilitaryUnitViewStatic(mEv.getId(), mEv.getNation(), false, null,
+                    .map(mEv -> new MilitaryUnitViewStatic(mEv.getId(), mEv.getNation(), mEv.getMission(), false, null,
                             new VillageBrief(mEv.getOriginVillageId(), mEv.getOrigin().getVillageName(),
                                     mEv.getOrigin().getPlayerName(), mEv.getOrigin().getCoordinates()),
+                            new VillageBrief(mEv.getTargetVillageId(), mEv.getTarget().getVillageName(),
+                                    mEv.getTarget().getPlayerName(), mEv.getTarget().getCoordinates()),
                             mEv.getUnits(), mEv.getTargetVillageId(), mEv.getEatExpenses()))
                         .peek(mU -> {
-                            if (mU.getOriginVillage().getVillageId().equals(villageId)){
+                            if (mU.getOrigin().getVillageId().equals(villageId)){
                                 mU.setState(EMilitaryUnitState.AWAY);
                             }else {
                                 mU.setState(EMilitaryUnitState.HOME);
@@ -122,7 +119,9 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .collect(Collectors.groupingBy(militaryEvent -> militaryEvent.getState().getName()));
 
         // home army
-        MilitaryUnitView homeArmy = new MilitaryUnitViewStatic("home", village.getNation(), false, EMilitaryUnitState.HOME,
+        MilitaryUnitView homeArmy = new MilitaryUnitViewStatic("home", village.getNation(), EMilitaryUnitMission.HOME.getName(),
+                false, EMilitaryUnitState.HOME,
+                new VillageBrief(villageId, village.getName(), userName.getUsername(), new int[]{village.getX(), village.getY()}),
                 new VillageBrief(villageId, village.getName(), userName.getUsername(), new int[]{village.getX(), village.getY()}),
                 village.getHomeLegion(), villageId, 5);
 
@@ -204,8 +203,8 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .targetPlayerName(attackedUser.getUsername())
                 .targetVillageCoordinates(new int[]{attackedVillage.getX(), attackedVillage.getY()})
                 .units(troopsSendingRequest.getWaves().get(0).getTroops())
-                .arrivalTime(LocalDateTime.now().minusHours(6).plusMinutes(2))
-                .duration(120)
+                .arrivalTime(LocalDateTime.now().minusHours(6).plusMinutes(1))
+                .duration(60)
                 .build();
     }
 
@@ -220,7 +219,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         // create MilitaryUnitEntity
         var moveUnit = new MovedMilitaryUnitEntity(
                 contract.getNation(), contract.getMission(), contract.getUnits(), contract.getOriginVillageId(),
-                new VillageBrief(contract.getOriginVillageName(), contract.getOriginPlayerName(), contract.getOriginVillageCoordinates()),
+                new VillageBrief(contract.getOriginVillageId(), contract.getOriginVillageName(), contract.getOriginPlayerName(), contract.getOriginVillageCoordinates()),
                 contract.getTargetVillageId(), new VillageBrief(contract.getTargetVillageName(), contract.getTargetPlayerName(), contract.getTargetVillageCoordinates()),
                 contract.getArrivalTime(), 60, 0);
         movedMilitaryUnitRepository.save(moveUnit);
@@ -268,5 +267,8 @@ public class MilitaryServiceImpl implements MilitaryService {
         return result;
     }
 
-
+    @Override
+    public List<MovedMilitaryUnitEntity> getAllByOriginVillageIdOrTargetVillageId(String originId) {
+        return movedMilitaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(originId, originId);
+    }
 }
