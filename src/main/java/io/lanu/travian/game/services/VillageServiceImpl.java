@@ -46,7 +46,7 @@ public class VillageServiceImpl implements VillageService{
     }
 
     @Override
-    public VillageEntity createVillage(NewVillageRequest newVillageRequest) {
+    public VillageEntity newVillage(NewVillageRequest newVillageRequest) {
         var result = villageRepository.save(instantiateNewVillage(newVillageRequest));
         createResearchedCombatUnitEntity(result.getVillageId());
         return result;
@@ -75,12 +75,9 @@ public class VillageServiceImpl implements VillageService{
     }
 
     @Override
-    public String updateName(String villageId, String newName) {
-        VillageEntity villageEntity = this.villageRepository.findById(villageId)
-                .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
+    public VillageEntity updateName(VillageEntity villageEntity, String newName) {
         villageEntity.setName(newName);
-        villageRepository.save(villageEntity);
-        return newName;
+        return villageEntity;
     }
 
     @Override
@@ -91,13 +88,6 @@ public class VillageServiceImpl implements VillageService{
     @Override
     public VillageEntity saveVillage(VillageEntity villageEntity){
         return villageRepository.save(villageEntity);
-    }
-
-    @Override
-    public VillageView getVillageById(VillageEntity villageEntity) {
-        var currentBuildingEvents = constructionService.findAllByVillageId(villageEntity.getVillageId());
-        var militariesInVillage = militaryUnitRepository.getAllByTargetVillageId(villageEntity.getVillageId());
-        return new VillageView(villageEntity, currentBuildingEvents, militariesInVillage);
     }
 
 }

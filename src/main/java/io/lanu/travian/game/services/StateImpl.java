@@ -1,8 +1,15 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.enums.EBuilding;
+import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.EResource;
+import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.events.*;
+import io.lanu.travian.game.models.requests.NewVillageRequest;
+import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
+import io.lanu.travian.game.models.requests.TroopsSendingRequest;
+import io.lanu.travian.game.models.responses.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -11,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,13 +37,84 @@ public class StateImpl implements IState{
     }
 
     @Override
-    public VillageEntity getState(String villageId){
-        return recalculateCurrentState(villageId);
+    public VillageEntity newVillage(NewVillageRequest newVillageRequest) {
+        return villageService.newVillage(newVillageRequest);
     }
 
     @Override
-    public VillageEntity saveState(VillageEntity village){
-        return villageService.saveVillage(village);
+    public VillageView getVillageById(String villageId) {
+        var villageEntity = recalculateCurrentState(villageId);
+        var currentBuildingEvents = constructionService.findAllByVillageId(villageId);
+        var militariesInVillage = militaryService.getAllByTargetVillageId(villageEntity.getVillageId());
+        saveState(villageEntity);
+        return new VillageView(villageEntity, currentBuildingEvents, militariesInVillage);
+    }
+
+    @Override
+    public void updateVillageName(String villageId, String name) {
+        var village = villageService.updateName(recalculateCurrentState(villageId), name);
+        saveState(village);
+    }
+
+    @Override
+    public List<NewBuilding> getListOfAllNewBuildings(String villageId) {
+        return constructionService.getListOfAllNewBuildings(recalculateCurrentState(villageId));
+    }
+
+    @Override
+    public void createBuildEvent(String villageId, Integer position, EBuilding kind) {
+        var village = constructionService.createBuildEvent(recalculateCurrentState(villageId), position, kind);
+        saveState(village);
+    }
+
+    @Override
+    public void deleteBuildingEvent(String villageId, String eventId) {
+        var village = constructionService.deleteBuildingEvent(recalculateCurrentState(villageId), eventId);
+        saveState(village);
+    }
+
+    @Override
+    public Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillage(String villageId) {
+        return militaryService.getAllMilitaryUnitsByVillage(recalculateCurrentState(villageId));
+    }
+
+    @Override
+    public void orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest) {
+        var village = militaryService.orderCombatUnits(orderCombatUnitRequest, recalculateCurrentState(orderCombatUnitRequest.getVillageId()));
+        saveState(village);
+    }
+
+    @Override
+    public List<CombatUnitOrderResponse> getAllOrdersByVillageId(String villageId) {
+        saveState(recalculateCurrentState(villageId));
+        return militaryService.getAllOrdersByVillageId(villageId);
+    }
+
+    @Override
+    public List<ECombatUnit> getAllResearchedUnits(String villageId) {
+        saveState(recalculateCurrentState(villageId));
+        return militaryService.getAllResearchedUnits(villageId);
+    }
+
+    @Override
+    public MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest) {
+        var attackingVillage = recalculateCurrentState(troopsSendingRequest.getVillageId());
+        var attackedVillageOpt = villageService
+                .findVillageByCoordinates(troopsSendingRequest.getX(), troopsSendingRequest.getY());
+        VillageEntity attackedVillage;
+        if (attackedVillageOpt.isPresent()) {
+            attackedVillage = recalculateCurrentState(attackedVillageOpt.get().getVillageId());
+        }else {
+            throw new UserErrorException("There is nothing on those coordinates");
+        }
+        return militaryService.checkTroopsSendingRequest(troopsSendingRequest, attackingVillage, attackedVillage);
+    }
+
+    @Override
+    public void sendTroops(MilitaryUnitContract militaryUnitContract) {
+        var village = recalculateCurrentState(militaryUnitContract.getOriginVillageId());
+        village = militaryService.sendTroops(militaryUnitContract, village);
+        saveState(village);
     }
 
     private VillageEntity recalculateCurrentState(String villageId) {
@@ -44,6 +123,10 @@ public class StateImpl implements IState{
         executeAllEvents(villageEntity, allEvents);
         villageEntity.castStorage();
         return villageEntity;
+    }
+
+    private void saveState(VillageEntity village){
+        villageService.saveVillage(village);
     }
 
     private void executeAllEvents(VillageEntity villageEntity, List<EventStrategy> allEvents) {
@@ -92,7 +175,8 @@ public class StateImpl implements IState{
         // add all wars events
         var militaryEventList = militaryService.getAllMovedUnitsByOriginVillageId(origin.getVillageId()).stream()
                 .filter(militaryUnitEntity -> militaryUnitEntity.getExecutionTime().isBefore(LocalDateTime.now()))
-                .map(militaryUnitEntity -> new MilitaryEventStrategy(origin, militaryUnitEntity, getState(militaryUnitEntity.getTargetVillageId()), militaryService))
+                .map(militaryUnitEntity -> new MilitaryEventStrategy(origin, militaryUnitEntity,
+                        recalculateCurrentState(militaryUnitEntity.getTargetVillageId()), militaryService))
                 .collect(Collectors.toList());
         allEvents.addAll(militaryEventList);
 

@@ -1,13 +1,13 @@
 package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.ECombatUnit;
-import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
 import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
 import io.lanu.travian.game.models.events.EventStrategy;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
+import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
 import io.lanu.travian.game.models.responses.MilitaryUnitContract;
 import io.lanu.travian.game.models.responses.MilitaryUnitView;
 
@@ -16,7 +16,7 @@ import java.util.Map;
 
 public interface MilitaryService {
     List<EventStrategy> createCombatUnitDoneEventsFromOrders(VillageEntity origin);
-    List<OrderCombatUnitEntity> getAllOrdersByVillageId(String villageId);
+    List<CombatUnitOrderResponse> getAllOrdersByVillageId(String villageId);
     VillageEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, VillageEntity village);
     List<ECombatUnit> getAllResearchedUnits(String villageId);
     Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillage(VillageEntity village);
@@ -27,4 +27,5 @@ public interface MilitaryService {
     MovedMilitaryUnitEntity saveMovedMilitaryUnit(MovedMilitaryUnitEntity unit);
     void deleteMovedUnitById(String id);
     void deleteUnitById(String id);
+    List<MilitaryUnitEntity> getAllByTargetVillageId(String villageId);
 }

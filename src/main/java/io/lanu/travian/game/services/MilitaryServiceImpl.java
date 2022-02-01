@@ -69,6 +69,11 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
+    public List<MilitaryUnitEntity> getAllByTargetVillageId(String villageId) {
+        return militaryUnitRepository.getAllByTargetVillageId(villageId);
+    }
+
+    @Override
     public List<MovedMilitaryUnitEntity> getAllMovedUnitsByOriginVillageId(String villageId) {
         var result = movedMilitaryUnitRepository.getAllByOriginVillageId(villageId);
         //movedMilitaryUnitRepository.deleteAllByOriginVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
@@ -139,7 +144,11 @@ public class MilitaryServiceImpl implements MilitaryService {
     public VillageEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, VillageEntity village) {
 
         ECombatUnit unit = orderCombatUnitRequest.getUnitType();
-        List<OrderCombatUnitEntity> ordersList = getAllOrdersByVillageId(orderCombatUnitRequest.getVillageId());
+        List<OrderCombatUnitEntity> ordersList = combatUnitOrderRepository
+                .findAllByVillageId(orderCombatUnitRequest.getVillageId())
+                .stream()
+                .sorted(Comparator.comparing(OrderCombatUnitEntity::getCreated))
+                .collect(Collectors.toList());
 
         LocalDateTime lastTime = ordersList.size() > 0 ? ordersList.get(ordersList.size() - 1).getEndOrderTime() : LocalDateTime.now();
 
@@ -162,16 +171,25 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public List<OrderCombatUnitEntity> getAllOrdersByVillageId(String villageId){
+    public List<CombatUnitOrderResponse> getAllOrdersByVillageId(String villageId){
         return combatUnitOrderRepository
                 .findAllByVillageId(villageId)
                 .stream()
                 .sorted(Comparator.comparing(OrderCombatUnitEntity::getCreated))
+                .map(armyOrderEntity -> {
+                    var duration = Duration.between(LocalDateTime.now(), armyOrderEntity.getEndOrderTime()).toSeconds();
+                    return new CombatUnitOrderResponse(
+                            armyOrderEntity.getUnitType().getName(),
+                            armyOrderEntity.getLeftTrain(),
+                            duration,
+                            armyOrderEntity.getDurationEach(),
+                            armyOrderEntity.getEndOrderTime());})
                 .collect(Collectors.toList());
     }
 
     @Override
     public MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest, VillageEntity attackingVillage, VillageEntity attackedVillage) {
+
         var attackingUser = usersRepository.findByUserId(attackingVillage.getAccountId()).orElseThrow();
         var attackedUser = usersRepository.findByUserId(attackedVillage.getAccountId()).orElseThrow();
         return MilitaryUnitContract.builder()

@@ -16,7 +16,5 @@ public interface IConstructionService {
 
     VillageEntity deleteBuildingEvent(VillageEntity village, String eventId);
 
-    void deleteAllByVillageIdAndExecutionTimeBefore(String villageId, LocalDateTime time);
-
     List<NewBuilding> getListOfAllNewBuildings(VillageEntity village);
 }

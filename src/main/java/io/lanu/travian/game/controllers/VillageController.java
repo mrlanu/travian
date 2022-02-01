@@ -4,7 +4,6 @@ import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.VillageView;
 import io.lanu.travian.game.services.IState;
-import io.lanu.travian.game.services.VillageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,29 +12,27 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/villages")
 public class VillageController {
-    private final IState state;
-    private final VillageService villageService;
 
-    public VillageController(IState state, VillageService villageService) {
+    private final IState state;
+
+    public VillageController(IState state) {
         this.state = state;
-        this.villageService = villageService;
     }
 
     @PostMapping("/create-new-village")
     public ResponseEntity<String> newVillage(@RequestBody NewVillageRequest newVillageRequest){
-        VillageEntity villageEntity = villageService.createVillage(newVillageRequest);
+        VillageEntity villageEntity = state.newVillage(newVillageRequest);
         return ResponseEntity.status(HttpStatus.OK).body("New Village ID : " + villageEntity.getVillageId());
     }
 
     @GetMapping("/{villageId}")
     public VillageView getVillageById(@PathVariable String villageId){
-        var villageState = state.getState(villageId);
-        state.saveState(villageState);
-        return villageService.getVillageById(villageState);
+        return state.getVillageById(villageId);
     }
 
     @PutMapping("/{villageId}/update-name")
-    public ResponseEntity<String> updateName(@PathVariable String villageId, @RequestParam String name){
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.villageService.updateName(villageId, name));
+    public ResponseEntity<String> updateVillageName(@PathVariable String villageId, @RequestParam String name){
+        state.updateVillageName(villageId, name);
+        return ResponseEntity.status(HttpStatus.CREATED).body("All set");
     }
 }

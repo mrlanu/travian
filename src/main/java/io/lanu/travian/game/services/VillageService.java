@@ -12,9 +12,8 @@ import java.util.Optional;
 public interface VillageService {
     VillageEntity saveVillage(VillageEntity villageEntity);
     VillageEntity findById(String villageId);
-    VillageEntity createVillage(NewVillageRequest newVillageRequest);
-    VillageView getVillageById(VillageEntity villageEntity);
+    VillageEntity newVillage(NewVillageRequest newVillageRequest);
     List<ShortVillageInfo> getAllVillagesByUserId(String userId);
-    String updateName(String villageId, String newName);
+    VillageEntity updateName(VillageEntity villageEntity, String newName);
     Optional<VillageEntity> findVillageByCoordinates(int x, int y);
 }

@@ -1,7 +1,7 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.EBuildingType;
 import io.lanu.travian.enums.EBuilding;
+import io.lanu.travian.enums.EBuildingType;
 import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.VillageEntity;
@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ConstructionServiceImpl implements IConstructionService {
+
     private final ConstructionEventRepository constructionEventRepository;
 
     public ConstructionServiceImpl(ConstructionEventRepository constructionEventRepository) {
@@ -105,12 +106,6 @@ public class ConstructionServiceImpl implements IConstructionService {
         constructionEventRepository.saveAll(events);
         return village;
     }
-
-    @Override
-    public void deleteAllByVillageIdAndExecutionTimeBefore(String villageId, LocalDateTime time) {
-        constructionEventRepository.deleteAllByVillageIdAndExecutionTimeBefore(villageId, time);
-    }
-
 
     @Override
     public List<NewBuilding> getListOfAllNewBuildings(VillageEntity village) {
