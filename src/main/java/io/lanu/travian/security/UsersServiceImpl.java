@@ -38,7 +38,7 @@ public class UsersServiceImpl implements UsersService {
         var user = usersRepository
                 .save(new UserEntity(null, request.getEmail(), request.getUsername(), request.getPassword()));
         var villageRequest = new NewVillageRequest(user.getUserId(), EVillageType.SIX,
-                getRandomCoordinate(-100, 100), getRandomCoordinate(-100, 100));
+                getRandomCoordinate(1, 50), getRandomCoordinate(1, 50));
         villageService.newVillage(villageRequest);
         return user;
     }

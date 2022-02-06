@@ -7,11 +7,7 @@ import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.ResearchedCombatUnitShort;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
-import io.lanu.travian.game.models.responses.VillageView;
-import io.lanu.travian.game.repositories.MilitaryUnitRepository;
-import io.lanu.travian.game.repositories.MovedMilitaryUnitRepository;
-import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
-import io.lanu.travian.game.repositories.VillageRepository;
+import io.lanu.travian.game.repositories.*;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
@@ -24,19 +20,15 @@ import java.util.stream.Collectors;
 @Service
 public class VillageServiceImpl implements VillageService{
     private final VillageRepository villageRepository;
+    private final MapTileRepository worldRepo;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
-    private final IConstructionService constructionService;
-    private final MilitaryUnitRepository militaryUnitRepository;
-    private final MovedMilitaryUnitRepository movedMilitaryUnitRepository;
     private static final MathContext mc = new MathContext(3);
 
-    public VillageServiceImpl(VillageRepository villageRepository, ResearchedCombatUnitRepository researchedCombatUnitRepository,
-                              IConstructionService constructionService, MilitaryUnitRepository militaryUnitRepository, MovedMilitaryUnitRepository movedMilitaryUnitRepository) {
+    public VillageServiceImpl(VillageRepository villageRepository, MapTileRepository worldRepo,
+                              ResearchedCombatUnitRepository researchedCombatUnitRepository) {
         this.villageRepository = villageRepository;
+        this.worldRepo = worldRepo;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
-        this.constructionService = constructionService;
-        this.militaryUnitRepository = militaryUnitRepository;
-        this.movedMilitaryUnitRepository = movedMilitaryUnitRepository;
     }
 
     @Override
@@ -48,6 +40,10 @@ public class VillageServiceImpl implements VillageService{
     @Override
     public VillageEntity newVillage(NewVillageRequest newVillageRequest) {
         var result = villageRepository.save(instantiateNewVillage(newVillageRequest));
+        var tile = worldRepo.getByCorXAndCorY(result.getX(), result.getY());
+        tile.setClazz("village-galls");
+        tile.setName(result.getName());
+        worldRepo.save(tile);
         createResearchedCombatUnitEntity(result.getVillageId());
         return result;
     }
