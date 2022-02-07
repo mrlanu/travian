@@ -16,7 +16,8 @@ public class MapTile {
     private String id;
     private int corX;
     private int corY;
+    private String ownerId;
     private String name;
     private String clazz;
-    private String color;
+    private boolean empty;
 }

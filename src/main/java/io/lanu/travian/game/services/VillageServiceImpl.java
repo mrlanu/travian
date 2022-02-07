@@ -39,20 +39,28 @@ public class VillageServiceImpl implements VillageService{
 
     @Override
     public VillageEntity newVillage(NewVillageRequest newVillageRequest) {
-        var result = villageRepository.save(instantiateNewVillage(newVillageRequest));
-        var tile = worldRepo.getByCorXAndCorY(result.getX(), result.getY());
+        var result = instantiateNewVillage(newVillageRequest);
+        var availableTiles = worldRepo.getAllByEmptyTrue();
+        var tile = availableTiles.get(getRandomBetween(0, availableTiles.size()));
+        result.setX(tile.getCorX());
+        result.setY(tile.getCorY());
         tile.setClazz("village-galls");
         tile.setName(result.getName());
+        tile.setOwnerId(result.getVillageId());
+        tile.setEmpty(false);
         worldRepo.save(tile);
         createResearchedCombatUnitEntity(result.getVillageId());
-        return result;
+        return saveVillage(result);
     }
+
+    private int getRandomBetween(int min, int max){
+        return min + (int)(Math.random() * ((max - min) + 1));
+    }
+
 
     private VillageEntity instantiateNewVillage(NewVillageRequest newVillageRequest){
         VillageEntity newVillage = VillageEntityFactory.getVillageByType(EVillageType.SIX);
         Objects.requireNonNull(newVillage).setAccountId(newVillageRequest.getAccountId());
-        newVillage.setX(newVillageRequest.getX());
-        newVillage.setY(newVillageRequest.getY());
         return newVillage;
     }
 

@@ -26,10 +26,9 @@ public class MapController {
 
     @PostMapping("/map-part")
     public List<MapTile> getPartOfMap(@RequestBody MapPart mapPart){
-        var c = repository.getAllByCorXBetweenAndCorYBetween(
+        return repository.getAllByCorXBetweenAndCorYBetween(
                 mapPart.getFromX(), mapPart.getToX(),
                 mapPart.getFromY(), mapPart.getToY());
-        return c;
     }
 
 }

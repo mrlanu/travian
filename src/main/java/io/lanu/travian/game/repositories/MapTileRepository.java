@@ -8,4 +8,5 @@ import java.util.List;
 public interface MapTileRepository extends MongoRepository<MapTile, String> {
     List<MapTile> getAllByCorXBetweenAndCorYBetween(int fromX, int toX, int fromY, int toY);
     MapTile getByCorXAndCorY(int x, int y);
+    List<MapTile> getAllByEmptyTrue();
 }
