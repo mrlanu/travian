@@ -1,7 +1,10 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.enums.EOasesKind;
+import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.MapTile;
 import io.lanu.travian.game.repositories.MapTileRepository;
+import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,9 +18,11 @@ public class WorldServiceImpl implements WorldService{
     private final int WORLD_Y = 50;
     private final int OASES_AMOUNT = 50;
     private final MapTileRepository repo;
+    private final VillageService villageService;
 
-    public WorldServiceImpl(MapTileRepository repo) {
+    public WorldServiceImpl(MapTileRepository repo, VillageService villageService) {
         this.repo = repo;
+        this.villageService = villageService;
     }
 
     @Override
@@ -52,9 +57,14 @@ public class WorldServiceImpl implements WorldService{
                     .filter(MapTile::isEmpty)
                     .collect(Collectors.toList());
             var emptySpot = emptySpots.get(getRandomNumber(0, emptySpots.size()));
-            emptySpot.setName(kind.name);
-            emptySpot.setClazz(kind.clazz);
+            var entity = VillageEntityFactory.getOasis(kind);
+            entity.setX(emptySpot.getCorX());
+            entity.setY(emptySpot.getCorY());
+            entity.setName(kind.getName());
+            emptySpot.setName(kind.getName());
+            emptySpot.setClazz(kind.getClazz());
             emptySpot.setEmpty(false);
+            villageService.saveVillage(entity);
         }
     }
 
@@ -62,18 +72,4 @@ public class WorldServiceImpl implements WorldService{
         return min + (int)(Math.random() * ((max - min) + 1));
     }
 
-    private enum EOasesKind{
-        WOOD("Wood oasis", "oasis-wood-free"),
-        IRON("Iron oasis", "oasis-iron-free"),
-        CLAY("Clay oasis", "oasis-clay-free"),
-        CROP("Crop oasis", "oasis-crop-free");
-
-        private final String name;
-        private final String clazz;
-
-        EOasesKind(String name, String clazz) {
-            this.name = name;
-            this.clazz = clazz;
-        }
-    }
 }
