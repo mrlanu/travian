@@ -15,6 +15,7 @@ import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
 import io.lanu.travian.game.repositories.MilitaryUnitRepository;
 import io.lanu.travian.game.repositories.MovedMilitaryUnitRepository;
 import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
+import io.lanu.travian.security.UserEntity;
 import io.lanu.travian.security.UsersRepository;
 import io.lanu.travian.templates.military.CombatUnitFactory;
 import org.springframework.stereotype.Service;
@@ -190,7 +191,12 @@ public class MilitaryServiceImpl implements MilitaryService {
     public MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest, VillageEntity attackingVillage, VillageEntity attackedVillage) {
 
         var attackingUser = usersRepository.findByUserId(attackingVillage.getAccountId()).orElseThrow();
-        var attackedUser = usersRepository.findByUserId(attackedVillage.getAccountId()).orElseThrow();
+        UserEntity attackedUser;
+        if (attackedVillage.getAccountId() != null){
+            attackedUser = usersRepository.findByUserId(attackedVillage.getAccountId()).orElseThrow();
+        } else {
+            attackedUser = new UserEntity(null, null, "Nature", null);
+        }
         return MilitaryUnitContract.builder()
                 .nation(attackingVillage.getNation())
                 .mission(troopsSendingRequest.getKind().getName())

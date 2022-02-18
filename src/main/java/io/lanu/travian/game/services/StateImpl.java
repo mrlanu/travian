@@ -3,6 +3,7 @@ package io.lanu.travian.game.services;
 import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.EResource;
+import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.entities.VillageEntity;
 import io.lanu.travian.game.models.events.*;
@@ -113,6 +114,14 @@ public class StateImpl implements IState{
         var village = recalculateCurrentState(militaryUnitContract.getOriginVillageId());
         village = militaryService.sendTroops(militaryUnitContract, village);
         saveState(village);
+    }
+
+    @Override
+    public TileDetail getTileDetail(String id) {
+        var village = recalculateCurrentState(id);
+        return new TileDetail(village.getVillageId(), village.getNation(), "",
+                village.getName(), village.getX(), village.getY(), village.getPopulation(),
+                2.2, village.getVillageType().equals(EVillageType.SIX));
     }
 
     public VillageEntity recalculateCurrentState(String villageId) {

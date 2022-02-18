@@ -44,6 +44,7 @@ public class VillageServiceImpl implements VillageService{
         var tile = availableTiles.get(getRandomBetween(0, availableTiles.size()));
         result.setX(tile.getCorX());
         result.setY(tile.getCorY());
+        result.setVillageId(tile.getId());
         tile.setClazz("village-galls");
         tile.setName(result.getName());
         tile.setOwnerId(result.getVillageId());

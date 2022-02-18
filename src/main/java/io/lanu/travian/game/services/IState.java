@@ -31,4 +31,5 @@ public interface IState {
 
     void sendTroops(MilitaryUnitContract militaryUnitContract);
 
+    TileDetail getTileDetail(String id);
 }

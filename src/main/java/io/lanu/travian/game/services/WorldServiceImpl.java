@@ -61,10 +61,11 @@ public class WorldServiceImpl implements WorldService{
             entity.setX(emptySpot.getCorX());
             entity.setY(emptySpot.getCorY());
             entity.setName(kind.getName());
+            var id = villageService.saveVillage(entity).getVillageId();
+            emptySpot.setId(id);
             emptySpot.setName(kind.getName());
             emptySpot.setClazz(kind.getClazz());
             emptySpot.setEmpty(false);
-            villageService.saveVillage(entity);
         }
     }
 
