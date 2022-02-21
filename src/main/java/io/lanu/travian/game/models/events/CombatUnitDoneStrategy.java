@@ -1,6 +1,6 @@
 package io.lanu.travian.game.models.events;
 
-import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.CombatUnitDoneEventEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,7 +13,7 @@ public class CombatUnitDoneStrategy extends EventStrategy{
 
     private CombatUnitDoneEventEntity entity;
 
-    public CombatUnitDoneStrategy(VillageEntity origin, CombatUnitDoneEventEntity entity) {
+    public CombatUnitDoneStrategy(SettlementEntity origin, CombatUnitDoneEventEntity entity) {
         super(origin);
         this.entity = entity;
     }

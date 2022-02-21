@@ -1,6 +1,6 @@
 package io.lanu.travian.game.models.events;
 
-import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,7 +13,7 @@ public class ConstructionEventStrategy extends EventStrategy {
 
     private ConstructionEventEntity entity;
 
-    public ConstructionEventStrategy(VillageEntity origin, ConstructionEventEntity entity) {
+    public ConstructionEventStrategy(SettlementEntity origin, ConstructionEventEntity entity) {
         super(origin);
         this.entity = entity;
     }

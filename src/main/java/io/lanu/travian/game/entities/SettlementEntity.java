@@ -27,9 +27,9 @@ import java.util.stream.IntStream;
 @NoArgsConstructor
 @AllArgsConstructor
 @Slf4j
-public class VillageEntity {
+public class SettlementEntity {
     @Id
-    protected String villageId;
+    protected String id;
     private String accountId;
     private ENation nation;
     private String name;

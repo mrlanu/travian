@@ -1,9 +1,9 @@
 package io.lanu.travian.game.models.events;
 
-import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
 import io.lanu.travian.game.models.responses.VillageBrief;
-import io.lanu.travian.game.services.IState;
+import io.lanu.travian.game.services.SettlementState;
 import io.lanu.travian.game.services.MilitaryService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,11 +16,11 @@ public class MilitaryEventStrategy extends EventStrategy{
 
     private MovedMilitaryUnitEntity militaryUnit;
     private VillageBrief targetVillage;
-    private final IState service;
+    private final SettlementState service;
     private final MilitaryService militaryService;
 
-    public MilitaryEventStrategy(VillageEntity origin, MovedMilitaryUnitEntity militaryUnit,
-                                 VillageBrief targetVillage, IState service, MilitaryService militaryService) {
+    public MilitaryEventStrategy(SettlementEntity origin, MovedMilitaryUnitEntity militaryUnit,
+                                 VillageBrief targetVillage, SettlementState service, MilitaryService militaryService) {
         super(origin);
         this.militaryUnit = militaryUnit;
         this.targetVillage = targetVillage;

@@ -4,7 +4,7 @@ import io.lanu.travian.game.entities.MapTile;
 import io.lanu.travian.game.models.requests.MapPart;
 import io.lanu.travian.game.models.responses.TileDetail;
 import io.lanu.travian.game.repositories.MapTileRepository;
-import io.lanu.travian.game.services.IState;
+import io.lanu.travian.game.services.SettlementState;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,10 +14,10 @@ import java.util.List;
 @RequestMapping("/api/world")
 public class MapController {
 
-    private final IState state;
+    private final SettlementState state;
     private final MapTileRepository repository;
 
-    public MapController(IState state, MapTileRepository repository) {
+    public MapController(SettlementState state, MapTileRepository repository) {
         this.state = state;
         this.repository = repository;
     }

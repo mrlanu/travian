@@ -1,10 +1,10 @@
 package io.lanu.travian.game.models.events;
 
-import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
 import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
 import io.lanu.travian.game.models.responses.VillageBrief;
-import io.lanu.travian.game.services.IState;
+import io.lanu.travian.game.services.SettlementState;
 import io.lanu.travian.game.services.MilitaryService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,12 +12,12 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ReinforcementMissionStrategy extends MissionStrategy {
-    public ReinforcementMissionStrategy(VillageEntity origin, MovedMilitaryUnitEntity militaryUnit, VillageBrief targetVillage) {
+    public ReinforcementMissionStrategy(SettlementEntity origin, MovedMilitaryUnitEntity militaryUnit, VillageBrief targetVillage) {
         super(origin, militaryUnit, targetVillage);
     }
 
     @Override
-    void handle(IState service, MilitaryService militaryService) {
+    void handle(SettlementState service, MilitaryService militaryService) {
         System.out.println("Reinforcement has arrived");
         militaryService.deleteMovedUnitById(militaryUnit.getId());
         var unit = new MilitaryUnitEntity(

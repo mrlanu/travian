@@ -4,7 +4,7 @@ import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.EBuildingType;
 import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.game.entities.BuildModel;
-import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.game.models.responses.NewBuilding;
 import io.lanu.travian.game.repositories.ConstructionEventRepository;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ConstructionServiceImpl implements IConstructionService {
+public class ConstructionServiceImpl implements ConstructionService {
 
     private final ConstructionEventRepository constructionEventRepository;
 
@@ -29,8 +29,8 @@ public class ConstructionServiceImpl implements IConstructionService {
     }
 
     @Override
-    public VillageEntity createBuildEvent(VillageEntity village, Integer buildingPosition, EBuilding kind) {
-        var events = constructionEventRepository.findAllByVillageId(village.getVillageId())
+    public SettlementEntity createBuildEvent(SettlementEntity village, Integer buildingPosition, EBuilding kind) {
+        var events = constructionEventRepository.findAllByVillageId(village.getId())
                 .stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
@@ -57,7 +57,7 @@ public class ConstructionServiceImpl implements IConstructionService {
         village.manipulateGoods(EManipulation.SUBTRACT, building.getResourcesToNextLevel());
 
         ConstructionEventEntity buildEvent = new ConstructionEventEntity(buildingPosition, buildModel.getKind(),
-                building.getLevel() + 1, village.getVillageId(), executionTime);
+                building.getLevel() + 1, village.getId(), executionTime);
 
         constructionEventRepository.save(buildEvent);
         return village;
@@ -71,8 +71,8 @@ public class ConstructionServiceImpl implements IConstructionService {
     }
 
     @Override
-    public VillageEntity deleteBuildingEvent(VillageEntity village, String eventId) {
-        var allEvents = constructionEventRepository.findAllByVillageId(village.getVillageId()).stream()
+    public SettlementEntity deleteBuildingEvent(SettlementEntity village, String eventId) {
+        var allEvents = constructionEventRepository.findAllByVillageId(village.getId()).stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
         var event = allEvents.stream()
@@ -108,8 +108,8 @@ public class ConstructionServiceImpl implements IConstructionService {
     }
 
     @Override
-    public List<NewBuilding> getListOfAllNewBuildings(VillageEntity village) {
-        var events = constructionEventRepository.findAllByVillageId(village.getVillageId());
+    public List<NewBuilding> getListOfAllNewBuildings(SettlementEntity village) {
+        var events = constructionEventRepository.findAllByVillageId(village.getId());
         var all = getListOfNewBuildings();
         // if events size >=2 return all buildings unavailable for build otherwise checking ability to build
         return events.size() >= 2 ? all : all.stream()

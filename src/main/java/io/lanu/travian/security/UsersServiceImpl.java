@@ -3,7 +3,7 @@ package io.lanu.travian.security;
 import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
-import io.lanu.travian.game.services.VillageService;
+import io.lanu.travian.game.services.SettlementService;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,14 +19,14 @@ public class UsersServiceImpl implements UsersService {
     private final UsersRepository usersRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final Environment environment;
-    private final VillageService villageService;
+    private final SettlementService settlementService;
 
 
-    public UsersServiceImpl(UsersRepository usersRepository, BCryptPasswordEncoder bCryptPasswordEncoder, Environment environment, VillageService villageService) {
+    public UsersServiceImpl(UsersRepository usersRepository, BCryptPasswordEncoder bCryptPasswordEncoder, Environment environment, SettlementService settlementService) {
         this.usersRepository = usersRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.environment = environment;
-        this.villageService = villageService;
+        this.settlementService = settlementService;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class UsersServiceImpl implements UsersService {
                 .save(new UserEntity(null, request.getEmail(), request.getUsername(), request.getPassword()));
         var villageRequest = new NewVillageRequest(user.getUserId(), EVillageType.SIX,
                 0, 0);
-        villageService.newVillage(villageRequest);
+        settlementService.newVillage(villageRequest);
         return user;
     }
 

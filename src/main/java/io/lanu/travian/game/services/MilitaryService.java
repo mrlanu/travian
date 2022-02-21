@@ -1,7 +1,7 @@
 package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.ECombatUnit;
-import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
 import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
 import io.lanu.travian.game.models.events.EventStrategy;
@@ -15,14 +15,14 @@ import java.util.List;
 import java.util.Map;
 
 public interface MilitaryService {
-    List<EventStrategy> createCombatUnitDoneEventsFromOrders(VillageEntity origin);
+    List<EventStrategy> createCombatUnitDoneEventsFromOrders(SettlementEntity origin);
     List<CombatUnitOrderResponse> getAllOrdersByVillageId(String villageId);
-    VillageEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, VillageEntity village);
+    SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, SettlementEntity village);
     List<ECombatUnit> getAllResearchedUnits(String villageId);
-    Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillage(VillageEntity village);
+    Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillage(SettlementEntity village);
     List<MovedMilitaryUnitEntity> getAllMovedUnitsByOriginVillageId(String villageId);
-    MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest, VillageEntity village, VillageEntity attackedVillage);
-    VillageEntity sendTroops(MilitaryUnitContract militaryUnitContract, VillageEntity village);
+    MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest, SettlementEntity village, SettlementEntity attackedVillage);
+    SettlementEntity sendTroops(MilitaryUnitContract militaryUnitContract, SettlementEntity village);
     MilitaryUnitEntity saveMilitaryUnit(MilitaryUnitEntity unit);
     MovedMilitaryUnitEntity saveMovedMilitaryUnit(MovedMilitaryUnitEntity unit);
     void deleteMovedUnitById(String id);

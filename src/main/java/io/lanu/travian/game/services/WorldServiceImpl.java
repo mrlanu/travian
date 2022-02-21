@@ -1,7 +1,6 @@
 package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.EOasesKind;
-import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.MapTile;
 import io.lanu.travian.game.repositories.MapTileRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
@@ -18,11 +17,11 @@ public class WorldServiceImpl implements WorldService{
     private final int WORLD_Y = 50;
     private final int OASES_AMOUNT = 50;
     private final MapTileRepository repo;
-    private final VillageService villageService;
+    private final SettlementService settlementService;
 
-    public WorldServiceImpl(MapTileRepository repo, VillageService villageService) {
+    public WorldServiceImpl(MapTileRepository repo, SettlementService settlementService) {
         this.repo = repo;
-        this.villageService = villageService;
+        this.settlementService = settlementService;
     }
 
     @Override
@@ -61,7 +60,7 @@ public class WorldServiceImpl implements WorldService{
             entity.setX(emptySpot.getCorX());
             entity.setY(emptySpot.getCorY());
             entity.setName(kind.getName());
-            var id = villageService.saveVillage(entity).getVillageId();
+            var id = settlementService.saveVillage(entity).getId();
             emptySpot.setId(id);
             emptySpot.setName(kind.getName());
             emptySpot.setClazz(kind.getClazz());

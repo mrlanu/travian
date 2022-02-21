@@ -2,7 +2,7 @@ package io.lanu.travian.game.controllers;
 
 import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.game.models.responses.NewBuilding;
-import io.lanu.travian.game.services.IState;
+import io.lanu.travian.game.services.SettlementState;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +13,9 @@ import java.util.List;
 @RequestMapping("/api/villages")
 public class ConstructionController {
 
-    private final IState state;
+    private final SettlementState state;
 
-    public ConstructionController(IState state) {
+    public ConstructionController(SettlementState state) {
         this.state = state;
     }
 

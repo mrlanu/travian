@@ -5,7 +5,7 @@ import io.lanu.travian.enums.ENation;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.game.entities.BuildModel;
-import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
 import io.lanu.travian.templates.buildings.BuildingBase;
@@ -46,28 +46,28 @@ public class VillageView {
     private List<ConstructionEventView> eventsList;
     private List<MilitaryUnitEntity> militariesInVillage;
 
-    public VillageView(VillageEntity villageEntity, List<ConstructionEventEntity> eventList, List<MilitaryUnitEntity> militariesInVillage) {
-        createView(villageEntity, eventList, militariesInVillage);
+    public VillageView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList, List<MilitaryUnitEntity> militariesInVillage) {
+        createView(settlementEntity, eventList, militariesInVillage);
     }
 
-    private void createView(VillageEntity villageEntity, List<ConstructionEventEntity> eventList, List<MilitaryUnitEntity> militariesInVillage) {
-        this.villageId = villageEntity.getVillageId();
-        this.accountId = villageEntity.getAccountId();
-        this.nation = villageEntity.getNation();
-        this.name = villageEntity.getName();
-        this.x = villageEntity.getX();
-        this.y = villageEntity.getY();
-        this.villageType = villageEntity.getVillageType();
-        this.population = villageEntity.getPopulation();
-        this.culture = villageEntity.getCulture();
-        this.approval = villageEntity.getApproval();
-        this.storage = villageEntity.getStorage();
-        this.warehouseCapacity = villageEntity.getWarehouseCapacity();
-        this.granaryCapacity = villageEntity.getGranaryCapacity();
-        this.buildings = this.buildBuildingsView(villageEntity.getBuildings(), eventList);
-        this.homeLegion = this.mapHomeLegion(villageEntity.getHomeLegion(), villageEntity.getNation(), militariesInVillage);
-        this.homeUnits = villageEntity.getHomeLegion();
-        this.producePerHour = villageEntity.calculateProducePerHour();
+    private void createView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList, List<MilitaryUnitEntity> militariesInVillage) {
+        this.villageId = settlementEntity.getId();
+        this.accountId = settlementEntity.getAccountId();
+        this.nation = settlementEntity.getNation();
+        this.name = settlementEntity.getName();
+        this.x = settlementEntity.getX();
+        this.y = settlementEntity.getY();
+        this.villageType = settlementEntity.getVillageType();
+        this.population = settlementEntity.getPopulation();
+        this.culture = settlementEntity.getCulture();
+        this.approval = settlementEntity.getApproval();
+        this.storage = settlementEntity.getStorage();
+        this.warehouseCapacity = settlementEntity.getWarehouseCapacity();
+        this.granaryCapacity = settlementEntity.getGranaryCapacity();
+        this.buildings = this.buildBuildingsView(settlementEntity.getBuildings(), eventList);
+        this.homeLegion = this.mapHomeLegion(settlementEntity.getHomeLegion(), settlementEntity.getNation(), militariesInVillage);
+        this.homeUnits = settlementEntity.getHomeLegion();
+        this.producePerHour = settlementEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(eventList);
     }
 

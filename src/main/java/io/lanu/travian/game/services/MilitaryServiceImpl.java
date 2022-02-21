@@ -2,7 +2,7 @@ package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.*;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
-import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.CombatUnitDoneEventEntity;
 import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
 import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
@@ -77,9 +77,9 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillage(VillageEntity village) {
+    public Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillage(SettlementEntity village) {
         var userName = usersRepository.findByUserId(village.getAccountId()).orElseThrow();
-        var villageId = village.getVillageId();
+        var villageId = village.getId();
         // other units
         List<MilitaryUnitView> unitsList = movedMilitaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(villageId, villageId)
                 .stream()
@@ -141,7 +141,7 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public VillageEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, VillageEntity village) {
+    public SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, SettlementEntity village) {
 
         ECombatUnit unit = orderCombatUnitRequest.getUnitType();
         List<OrderCombatUnitEntity> ordersList = combatUnitOrderRepository
@@ -164,10 +164,10 @@ public class MilitaryServiceImpl implements MilitaryService {
         return village;
     }
 
-    private void spendResources(int unitsAmount, VillageEntity villageEntity, ECombatUnit kind) {
+    private void spendResources(int unitsAmount, SettlementEntity settlementEntity, ECombatUnit kind) {
         Map<EResource, BigDecimal> neededResources = new HashMap<>();
         kind.getCost().forEach((k, v) -> neededResources.put(k, BigDecimal.valueOf((long) v * unitsAmount)));
-        villageEntity.manipulateGoods(EManipulation.SUBTRACT, neededResources);
+        settlementEntity.manipulateGoods(EManipulation.SUBTRACT, neededResources);
     }
 
     @Override
@@ -188,7 +188,7 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest, VillageEntity attackingVillage, VillageEntity attackedVillage) {
+    public MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest, SettlementEntity attackingVillage, SettlementEntity attackedVillage) {
 
         var attackingUser = usersRepository.findByUserId(attackingVillage.getAccountId()).orElseThrow();
         UserEntity attackedUser;
@@ -200,11 +200,11 @@ public class MilitaryServiceImpl implements MilitaryService {
         return MilitaryUnitContract.builder()
                 .nation(attackingVillage.getNation())
                 .mission(troopsSendingRequest.getKind().getName())
-                .originVillageId(attackingVillage.getVillageId())
+                .originVillageId(attackingVillage.getId())
                 .originVillageName(attackingVillage.getName())
                 .originPlayerName(attackingUser.getUsername())
                 .originVillageCoordinates(new int[]{attackingVillage.getX(), attackingVillage.getY()})
-                .targetVillageId(attackedVillage.getVillageId())
+                .targetVillageId(attackedVillage.getId())
                 .targetVillageName(attackedVillage.getName())
                 .targetPlayerName(attackedUser.getUsername())
                 .targetVillageCoordinates(new int[]{attackedVillage.getX(), attackedVillage.getY()})
@@ -215,7 +215,7 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public VillageEntity sendTroops(MilitaryUnitContract contract, VillageEntity village) {
+    public SettlementEntity sendTroops(MilitaryUnitContract contract, SettlementEntity village) {
         // deduct all involved units from village army
         var homeLegion = village.getHomeLegion();
         var attackingUnits = contract.getUnits();
@@ -233,10 +233,10 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public List<EventStrategy> createCombatUnitDoneEventsFromOrders(VillageEntity origin) {
+    public List<EventStrategy> createCombatUnitDoneEventsFromOrders(SettlementEntity origin) {
 
         List<EventStrategy> result = new ArrayList<>();
-        var ordersList = combatUnitOrderRepository.findAllByVillageId(origin.getVillageId());
+        var ordersList = combatUnitOrderRepository.findAllByVillageId(origin.getId());
 
         if (ordersList.size() > 0) {
             for (OrderCombatUnitEntity order : ordersList) {
@@ -263,7 +263,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         return result;
     }
 
-    private List<EventStrategy> addCompletedCombatUnit(VillageEntity origin, OrderCombatUnitEntity order, Integer amount) {
+    private List<EventStrategy> addCompletedCombatUnit(SettlementEntity origin, OrderCombatUnitEntity order, Integer amount) {
         List<EventStrategy> result = new ArrayList<>();
         LocalDateTime exec = order.getLastTime();
         for (int i = 0; i < amount; i++) {

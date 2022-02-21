@@ -2,7 +2,7 @@ package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.ECombatUnit;
-import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
@@ -11,10 +11,10 @@ import io.lanu.travian.game.models.responses.*;
 import java.util.List;
 import java.util.Map;
 
-public interface IState {
-    VillageEntity newVillage(NewVillageRequest newVillageRequest);
+public interface SettlementState {
+    SettlementEntity newVillage(NewVillageRequest newVillageRequest);
     VillageView getVillageById(String villageId);
-    VillageEntity recalculateCurrentState(String villageId);
+    SettlementEntity recalculateCurrentState(String villageId);
     void updateVillageName(String villageId, String name);
 
     List<NewBuilding> getListOfAllNewBuildings(String villageId);

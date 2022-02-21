@@ -5,7 +5,7 @@ import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.EVillageType;
 import io.lanu.travian.errors.UserErrorException;
-import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.events.*;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
@@ -23,37 +23,37 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class StateImpl implements IState{
+public class SettlementStateImpl implements SettlementState {
 
     private static final MathContext mc = new MathContext(3);
     
-    private final VillageService villageService;
-    private final IConstructionService constructionService;
+    private final SettlementService settlementService;
+    private final ConstructionService constructionService;
     private final MilitaryService militaryService;
 
-    public StateImpl(VillageService villageService, IConstructionService constructionService, MilitaryService militaryService) {
-        this.villageService = villageService;
+    public SettlementStateImpl(SettlementService settlementService, ConstructionService constructionService, MilitaryService militaryService) {
+        this.settlementService = settlementService;
         this.constructionService = constructionService;
         this.militaryService = militaryService;
     }
 
     @Override
-    public VillageEntity newVillage(NewVillageRequest newVillageRequest) {
-        return villageService.newVillage(newVillageRequest);
+    public SettlementEntity newVillage(NewVillageRequest newVillageRequest) {
+        return settlementService.newVillage(newVillageRequest);
     }
 
     @Override
     public VillageView getVillageById(String villageId) {
         var villageEntity = recalculateCurrentState(villageId);
         var currentBuildingEvents = constructionService.findAllByVillageId(villageId);
-        var militariesInVillage = militaryService.getAllByTargetVillageId(villageEntity.getVillageId());
+        var militariesInVillage = militaryService.getAllByTargetVillageId(villageEntity.getId());
         saveState(villageEntity);
         return new VillageView(villageEntity, currentBuildingEvents, militariesInVillage);
     }
 
     @Override
     public void updateVillageName(String villageId, String name) {
-        var village = villageService.updateName(recalculateCurrentState(villageId), name);
+        var village = settlementService.updateName(recalculateCurrentState(villageId), name);
         saveState(village);
     }
 
@@ -100,7 +100,7 @@ public class StateImpl implements IState{
     @Override
     public MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest) {
         var attackingVillage = recalculateCurrentState(troopsSendingRequest.getVillageId());
-        var attackedVillageOpt = villageService
+        var attackedVillageOpt = settlementService
                 .findVillageByCoordinates(troopsSendingRequest.getX(), troopsSendingRequest.getY());
         if (attackedVillageOpt.isPresent()) {
             return militaryService.checkTroopsSendingRequest(troopsSendingRequest, attackingVillage, attackedVillageOpt.get());
@@ -119,59 +119,59 @@ public class StateImpl implements IState{
     @Override
     public TileDetail getTileDetail(String id) {
         var village = recalculateCurrentState(id);
-        return new TileDetail(village.getVillageId(), village.getNation(), "",
+        return new TileDetail(village.getId(), village.getNation(), "",
                 village.getName(), village.getX(), village.getY(), village.getPopulation(),
                 2.2, village.getVillageType().equals(EVillageType.SIX));
     }
 
-    public VillageEntity recalculateCurrentState(String villageId) {
-        VillageEntity villageEntity = villageService.findById(villageId);
-        var allEvents = combineAllEvents(villageEntity);
-        executeAllEvents(villageEntity, allEvents);
-        villageEntity.castStorage();
-        return villageEntity;
+    public SettlementEntity recalculateCurrentState(String villageId) {
+        SettlementEntity settlementEntity = settlementService.findById(villageId);
+        var allEvents = combineAllEvents(settlementEntity);
+        executeAllEvents(settlementEntity, allEvents);
+        settlementEntity.castStorage();
+        return settlementEntity;
     }
 
-    private void saveState(VillageEntity village){
-        villageService.saveVillage(village);
+    private void saveState(SettlementEntity village){
+        settlementService.saveVillage(village);
     }
 
-    private void executeAllEvents(VillageEntity villageEntity, List<EventStrategy> allEvents) {
+    private void executeAllEvents(SettlementEntity settlementEntity, List<EventStrategy> allEvents) {
         var executor = new EventExecutor();
-        var modified = villageEntity.getModified();
+        var modified = settlementEntity.getModified();
         for (EventStrategy eventStrategy : allEvents) {
-            var cropPerHour = villageEntity.calculateProducePerHour().get(EResource.CROP);
+            var cropPerHour = settlementEntity.calculateProducePerHour().get(EResource.CROP);
 
             // if crop in the village is less than 0 keep create the death event & execute them until the crop will be positive
             while (cropPerHour.longValue() < 0) {
-                var leftCrop = villageEntity.getStorage().get(EResource.CROP);
+                var leftCrop = settlementEntity.getStorage().get(EResource.CROP);
                 var durationToDeath = leftCrop.divide(cropPerHour.negate(), mc).multiply(BigDecimal.valueOf(3_600_000), mc);
 
                 LocalDateTime deathTime = modified.plus(durationToDeath.longValue(), ChronoUnit.MILLIS);
 
                 if (deathTime.isBefore(eventStrategy.getExecutionTime())) {
                     EventStrategy deathBuildStrategy = new DeathEventStrategy(deathTime);
-                    villageEntity.calculateProducedGoods(modified, deathBuildStrategy.getExecutionTime());
+                    settlementEntity.calculateProducedGoods(modified, deathBuildStrategy.getExecutionTime());
                     executor.setStrategy(deathBuildStrategy);
                     executor.tryExecute();
                     modified = deathBuildStrategy.getExecutionTime();
                 } else {
                     break;
                 }
-                cropPerHour = villageEntity.calculateProducePerHour().get(EResource.CROP);
+                cropPerHour = settlementEntity.calculateProducePerHour().get(EResource.CROP);
             }
             // recalculate storage leftovers
-            villageEntity.calculateProducedGoods(modified, eventStrategy.getExecutionTime());
+            settlementEntity.calculateProducedGoods(modified, eventStrategy.getExecutionTime());
             executor.setStrategy(eventStrategy);
             executor.tryExecute();
             modified = eventStrategy.getExecutionTime();
         }
     }
 
-    private List<EventStrategy> combineAllEvents(VillageEntity origin) {
+    private List<EventStrategy> combineAllEvents(SettlementEntity origin) {
 
         // add all building events
-        List<EventStrategy> allEvents = constructionService.findAllByVillageId(origin.getVillageId()).stream()
+        List<EventStrategy> allEvents = constructionService.findAllByVillageId(origin.getId()).stream()
                 .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
                 .map(cE -> new ConstructionEventStrategy(origin, cE))
                 .collect(Collectors.toList());
@@ -181,7 +181,7 @@ public class StateImpl implements IState{
         allEvents.addAll(combatEventList);
 
         // add all wars events
-        var militaryEventList = militaryService.getAllByOriginVillageIdOrTargetVillageId(origin.getVillageId())
+        var militaryEventList = militaryService.getAllByOriginVillageIdOrTargetVillageId(origin.getId())
                 .stream()
                 .filter(militaryUnitEntity -> militaryUnitEntity.getExecutionTime().isBefore(LocalDateTime.now()))
                 .map(mU -> new MilitaryEventStrategy(

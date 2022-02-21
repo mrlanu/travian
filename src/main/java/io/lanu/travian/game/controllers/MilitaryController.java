@@ -6,7 +6,7 @@ import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
 import io.lanu.travian.game.models.responses.MilitaryUnitContract;
 import io.lanu.travian.game.models.responses.MilitaryUnitView;
-import io.lanu.travian.game.services.IState;
+import io.lanu.travian.game.services.SettlementState;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,9 +16,9 @@ import java.util.Map;
 @RequestMapping("/api/villages")
 public class MilitaryController {
 
-    private final IState state;
+    private final SettlementState state;
 
-    public MilitaryController(IState state) {
+    public MilitaryController(SettlementState state) {
         this.state = state;
     }
 

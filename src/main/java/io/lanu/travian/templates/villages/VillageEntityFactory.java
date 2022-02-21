@@ -2,16 +2,16 @@ package io.lanu.travian.templates.villages;
 
 import io.lanu.travian.enums.*;
 import io.lanu.travian.game.entities.BuildModel;
-import io.lanu.travian.game.entities.VillageEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
 public class VillageEntityFactory {
 
-    public static VillageEntity getVillageByType(EVillageType villageType){
+    public static SettlementEntity getVillageByType(EVillageType villageType){
         switch (villageType){
-            case SIX: return new VillageEntity(null, null, ENation.GALLS, "New Village", 0, 0,
+            case SIX: return new SettlementEntity(null, null, ENation.GALLS, "New Village", 0, 0,
                     EVillageType.SIX, 100, 100, 100,
                     Map.ofEntries(
                             Map.entry(1, new BuildModel(EBuilding.WOODCUTTER, 1)),
@@ -60,7 +60,7 @@ public class VillageEntityFactory {
                             EResource.IRON, BigDecimal.valueOf(500)),
                     new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
                     null);
-            case OASIS: return new VillageEntity(null, null, ENation.GALLS, "Oasis", 0, 0,
+            case OASIS: return new SettlementEntity(null, null, ENation.GALLS, "Oasis", 0, 0,
                     EVillageType.OASIS, 0, 0, 100,
                     Map.ofEntries(
                             Map.entry(1, new BuildModel(EBuilding.WOODCUTTER, 2)),
@@ -113,7 +113,7 @@ public class VillageEntityFactory {
         }
     }
 
-    public static VillageEntity getOasis(EOasesKind oasisKind){
+    public static SettlementEntity getOasis(EOasesKind oasisKind){
         var entity = getVillageByType(EVillageType.OASIS);
         switch (oasisKind){
             case CROP: entity.setVillageType(EVillageType.OASIS_CROP);

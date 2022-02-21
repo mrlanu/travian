@@ -1,7 +1,6 @@
 package io.lanu.travian.game.entities.events;
 
 import io.lanu.travian.enums.EBuilding;
-import io.lanu.travian.game.entities.VillageEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
