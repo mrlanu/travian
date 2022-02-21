@@ -22,9 +22,11 @@ public class MapController {
         this.repository = repository;
     }
 
-    @GetMapping("/tile-detail/{id}")
-    public TileDetail getTileDetail(@PathVariable String id){
-        return state.getTileDetail(id);
+    @GetMapping("/tile-detail/{id}/{fromX}/{fromY}")
+    public TileDetail getTileDetail(@PathVariable String id,
+                                    @PathVariable int fromX,
+                                    @PathVariable int fromY){
+        return state.getTileDetail(id, fromX, fromY);
     }
 
     @PostMapping("/map-part")

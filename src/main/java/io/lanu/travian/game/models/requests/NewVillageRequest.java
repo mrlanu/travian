@@ -1,6 +1,6 @@
 package io.lanu.travian.game.models.requests;
 
-import io.lanu.travian.enums.EVillageType;
+import io.lanu.travian.enums.SettlementType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NewVillageRequest {
     private String accountId;
-    private EVillageType villageType;
+    private SettlementType settlementType;
     private Integer x;
     private Integer y;
 }

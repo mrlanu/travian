@@ -3,7 +3,7 @@ package io.lanu.travian.game.models.responses;
 import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.ENation;
 import io.lanu.travian.enums.EResource;
-import io.lanu.travian.enums.EVillageType;
+import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
@@ -32,7 +32,7 @@ public class VillageView {
     private String name;
     private int x;
     private int y;
-    private EVillageType villageType;
+    private SettlementType villageType;
     private int population;
     private int culture;
     private int approval;
@@ -57,7 +57,7 @@ public class VillageView {
         this.name = settlementEntity.getName();
         this.x = settlementEntity.getX();
         this.y = settlementEntity.getY();
-        this.villageType = settlementEntity.getVillageType();
+        this.villageType = settlementEntity.getSettlementType();
         this.population = settlementEntity.getPopulation();
         this.culture = settlementEntity.getCulture();
         this.approval = settlementEntity.getApproval();

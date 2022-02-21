@@ -1,6 +1,7 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.EOasesKind;
+import io.lanu.travian.enums.SettlementSubType;
+import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.entities.MapTile;
 import io.lanu.travian.game.repositories.MapTileRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
@@ -33,10 +34,10 @@ public class WorldServiceImpl implements WorldService{
 
     private void createNewWorld(int xLength, int yLength) {
         var world = createBlueprint(xLength, yLength);
-        insertOases(world, EOasesKind.CROP);
-        insertOases(world, EOasesKind.WOOD);
-        insertOases(world, EOasesKind.IRON);
-        insertOases(world, EOasesKind.CLAY);
+        insertOases(world, SettlementSubType.OASIS_CROP);
+        insertOases(world, SettlementSubType.OASIS_WOOD);
+        insertOases(world, SettlementSubType.OASIS_CROP);
+        insertOases(world, SettlementSubType.OASIS_CLAY);
         repo.saveAll(world);
     }
 
@@ -50,20 +51,20 @@ public class WorldServiceImpl implements WorldService{
         return world;
     }
 
-    private void insertOases(List<MapTile> world, EOasesKind kind){
+    private void insertOases(List<MapTile> world, SettlementSubType subType){
         for (int i = 0; i < OASES_AMOUNT; i++){
             var emptySpots = world.stream()
                     .filter(MapTile::isEmpty)
                     .collect(Collectors.toList());
             var emptySpot = emptySpots.get(getRandomNumber(0, emptySpots.size()));
-            var entity = VillageEntityFactory.getOasis(kind);
+            var entity = VillageEntityFactory.getVillageByType(SettlementType.OASIS, subType);
             entity.setX(emptySpot.getCorX());
             entity.setY(emptySpot.getCorY());
-            entity.setName(kind.getName());
+            entity.setName(subType.toString());
             var id = settlementService.saveVillage(entity).getId();
             emptySpot.setId(id);
-            emptySpot.setName(kind.getName());
-            emptySpot.setClazz(kind.getClazz());
+            emptySpot.setName(subType.toString());
+            emptySpot.setClazz(subType.toString().toLowerCase());
             emptySpot.setEmpty(false);
         }
     }

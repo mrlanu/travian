@@ -1,6 +1,6 @@
 package io.lanu.travian.security;
 
-import io.lanu.travian.enums.EVillageType;
+import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.services.SettlementService;
@@ -37,7 +37,7 @@ public class UsersServiceImpl implements UsersService {
         request.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
         var user = usersRepository
                 .save(new UserEntity(null, request.getEmail(), request.getUsername(), request.getPassword()));
-        var villageRequest = new NewVillageRequest(user.getUserId(), EVillageType.SIX,
+        var villageRequest = new NewVillageRequest(user.getUserId(), SettlementType.VILLAGE,
                 0, 0);
         settlementService.newVillage(villageRequest);
         return user;

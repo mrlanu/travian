@@ -30,12 +30,13 @@ import java.util.stream.IntStream;
 public class SettlementEntity {
     @Id
     protected String id;
+    private SettlementType settlementType;
+    private SettlementSubType subType;
     private String accountId;
-    private ENation nation;
-    private String name;
     private int x;
     private int y;
-    private EVillageType villageType;
+    private String name;
+    private ENation nation;
     private int population;
     private int culture;
     private int approval;

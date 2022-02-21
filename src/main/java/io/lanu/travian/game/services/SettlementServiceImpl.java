@@ -1,7 +1,8 @@
 package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.ECombatUnit;
-import io.lanu.travian.enums.EVillageType;
+import io.lanu.travian.enums.SettlementSubType;
+import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.entities.ResearchedCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.ResearchedCombatUnitShort;
@@ -60,7 +61,7 @@ public class SettlementServiceImpl implements SettlementService {
 
 
     private SettlementEntity instantiateNewVillage(NewVillageRequest newVillageRequest){
-        SettlementEntity newVillage = VillageEntityFactory.getVillageByType(EVillageType.SIX);
+        SettlementEntity newVillage = VillageEntityFactory.getVillageByType(SettlementType.VILLAGE, SettlementSubType.SIX);
         Objects.requireNonNull(newVillage).setAccountId(newVillageRequest.getAccountId());
         return newVillage;
     }

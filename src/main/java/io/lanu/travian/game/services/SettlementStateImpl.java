@@ -3,7 +3,7 @@ package io.lanu.travian.game.services;
 import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.EResource;
-import io.lanu.travian.enums.EVillageType;
+import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.events.*;
@@ -117,11 +117,17 @@ public class SettlementStateImpl implements SettlementState {
     }
 
     @Override
-    public TileDetail getTileDetail(String id) {
+    public TileDetail getTileDetail(String id, int fromX, int fromY) {
         var village = recalculateCurrentState(id);
-        return new TileDetail(village.getId(), village.getNation(), "",
+        return new TileDetail(village.getId(), village.getSettlementType(), village.getSubType(), village.getNation(), "",
                 village.getName(), village.getX(), village.getY(), village.getPopulation(),
-                2.2, village.getVillageType().equals(EVillageType.SIX));
+                getDistance(village.getX(), village.getY(), fromX, fromY));
+    }
+
+    private BigDecimal getDistance(int x, int y, int fromX, int fromY) {
+        var legX = BigDecimal.valueOf(x - fromX).pow(2);
+        var legY = BigDecimal.valueOf(y - fromY).pow(2);
+        return legX.add(legY).sqrt(new MathContext(2));
     }
 
     public SettlementEntity recalculateCurrentState(String villageId) {

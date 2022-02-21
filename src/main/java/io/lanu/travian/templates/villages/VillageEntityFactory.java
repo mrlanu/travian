@@ -9,10 +9,10 @@ import java.util.Map;
 
 public class VillageEntityFactory {
 
-    public static SettlementEntity getVillageByType(EVillageType villageType){
+    public static SettlementEntity getVillageByType(SettlementType villageType, SettlementSubType subType){
         switch (villageType){
-            case SIX: return new SettlementEntity(null, null, ENation.GALLS, "New Village", 0, 0,
-                    EVillageType.SIX, 100, 100, 100,
+            case VILLAGE: return new SettlementEntity(null, SettlementType.VILLAGE, subType, null, 0, 0 , "New Village", ENation.GALLS,
+                    100, 100, 100,
                     Map.ofEntries(
                             Map.entry(1, new BuildModel(EBuilding.WOODCUTTER, 1)),
                             Map.entry(2, new BuildModel(EBuilding.CROPLAND, 1)),
@@ -60,8 +60,8 @@ public class VillageEntityFactory {
                             EResource.IRON, BigDecimal.valueOf(500)),
                     new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
                     null);
-            case OASIS: return new SettlementEntity(null, null, ENation.GALLS, "Oasis", 0, 0,
-                    EVillageType.OASIS, 0, 0, 100,
+            case OASIS: return new SettlementEntity(null, SettlementType.OASIS, subType, null, 0, 0 , "Oasis", null,
+                    0, 0, 100,
                     Map.ofEntries(
                             Map.entry(1, new BuildModel(EBuilding.WOODCUTTER, 2)),
                             Map.entry(2, new BuildModel(EBuilding.CROPLAND, 2)),
@@ -112,21 +112,4 @@ public class VillageEntityFactory {
             default: return null;
         }
     }
-
-    public static SettlementEntity getOasis(EOasesKind oasisKind){
-        var entity = getVillageByType(EVillageType.OASIS);
-        switch (oasisKind){
-            case CROP: entity.setVillageType(EVillageType.OASIS_CROP);
-            break;
-            case WOOD: entity.setVillageType(EVillageType.OASIS_WOOD);
-                break;
-            case IRON: entity.setVillageType(EVillageType.OASIS_IRON);
-                break;
-            case CLAY: entity.setVillageType(EVillageType.OASIS_CLAY);
-                break;
-            default: return entity;
-        }
-        return entity;
-    }
-
 }
