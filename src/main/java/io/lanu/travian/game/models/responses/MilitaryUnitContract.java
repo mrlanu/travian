@@ -25,5 +25,5 @@ public class MilitaryUnitContract {
     private int[] targetVillageCoordinates;
     private int[] units;
     private LocalDateTime arrivalTime;
-    private long duration;
+    private int duration;
 }

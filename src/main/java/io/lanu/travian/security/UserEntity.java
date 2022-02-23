@@ -21,4 +21,8 @@ public class UserEntity implements Serializable {
     private String email;
     private String username;
     private String encryptedPassword;
+
+    public UserEntity(String username) {
+        this.username = username;
+    }
 }

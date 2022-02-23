@@ -21,6 +21,7 @@ import io.lanu.travian.templates.military.CombatUnitFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -197,6 +198,10 @@ public class MilitaryServiceImpl implements MilitaryService {
         } else {
             attackedUser = new UserEntity(null, null, "Nature", null);
         }
+        var duration = getDistance(attackedVillage.getX(), attackedVillage.getY(), attackingVillage.getX(), attackingVillage.getY())
+                .multiply(BigDecimal.valueOf(3600)
+                        .divide(BigDecimal.valueOf(7), MathContext.DECIMAL32)).intValue();
+        var arrivalTime = LocalDateTime.now().plusSeconds(duration);
         return MilitaryUnitContract.builder()
                 .nation(attackingVillage.getNation())
                 .mission(troopsSendingRequest.getKind().getName())
@@ -209,9 +214,15 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .targetPlayerName(attackedUser.getUsername())
                 .targetVillageCoordinates(new int[]{attackedVillage.getX(), attackedVillage.getY()})
                 .units(troopsSendingRequest.getWaves().get(0).getTroops())
-                .arrivalTime(LocalDateTime.now().minusHours(6).plusMinutes(1))
-                .duration(60)
+                .arrivalTime(arrivalTime)
+                .duration(duration)
                 .build();
+    }
+
+    public static BigDecimal getDistance(int x, int y, int fromX, int fromY) {
+        var legX = BigDecimal.valueOf(x - fromX).pow(2);
+        var legY = BigDecimal.valueOf(y - fromY).pow(2);
+        return legX.add(legY).sqrt(new MathContext(2));
     }
 
     @Override
@@ -227,7 +238,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                 contract.getNation(), contract.getMission(), contract.getUnits(), contract.getOriginVillageId(),
                 new VillageBrief(contract.getOriginVillageId(), contract.getOriginVillageName(), contract.getOriginPlayerName(), contract.getOriginVillageCoordinates()),
                 contract.getTargetVillageId(), new VillageBrief(contract.getTargetVillageName(), contract.getTargetPlayerName(), contract.getTargetVillageCoordinates()),
-                contract.getArrivalTime(), 60, 0);
+                LocalDateTime.now().plusSeconds(contract.getDuration()), contract.getDuration(), 0);
         movedMilitaryUnitRepository.save(moveUnit);
         return village;
     }

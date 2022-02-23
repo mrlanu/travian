@@ -3,7 +3,6 @@ package io.lanu.travian.game.services;
 import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.EResource;
-import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.events.*;
@@ -11,6 +10,8 @@ import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.*;
+import io.lanu.travian.security.UserEntity;
+import io.lanu.travian.security.UsersRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -30,11 +31,14 @@ public class SettlementStateImpl implements SettlementState {
     private final SettlementService settlementService;
     private final ConstructionService constructionService;
     private final MilitaryService militaryService;
+    private final UsersRepository usersRepository;
 
-    public SettlementStateImpl(SettlementService settlementService, ConstructionService constructionService, MilitaryService militaryService) {
+    public SettlementStateImpl(SettlementService settlementService, ConstructionService constructionService,
+                               MilitaryService militaryService, UsersRepository usersRepository) {
         this.settlementService = settlementService;
         this.constructionService = constructionService;
         this.militaryService = militaryService;
+        this.usersRepository = usersRepository;
     }
 
     @Override
@@ -119,15 +123,10 @@ public class SettlementStateImpl implements SettlementState {
     @Override
     public TileDetail getTileDetail(String id, int fromX, int fromY) {
         var village = recalculateCurrentState(id);
-        return new TileDetail(village.getId(), village.getSettlementType(), village.getSubType(), village.getNation(), "",
+        var user = usersRepository.findByUserId(village.getAccountId()).orElse(new UserEntity("Nature"));
+        return new TileDetail(village.getId(), village.getSettlementType(), village.getSubType(), village.getNation(), user.getUsername(),
                 village.getName(), village.getX(), village.getY(), village.getPopulation(),
-                getDistance(village.getX(), village.getY(), fromX, fromY));
-    }
-
-    private BigDecimal getDistance(int x, int y, int fromX, int fromY) {
-        var legX = BigDecimal.valueOf(x - fromX).pow(2);
-        var legY = BigDecimal.valueOf(y - fromY).pow(2);
-        return legX.add(legY).sqrt(new MathContext(2));
+                MilitaryServiceImpl.getDistance(village.getX(), village.getY(), fromX, fromY));
     }
 
     public SettlementEntity recalculateCurrentState(String villageId) {
