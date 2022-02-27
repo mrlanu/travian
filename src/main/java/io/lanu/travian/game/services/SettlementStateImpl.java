@@ -134,11 +134,11 @@ public class SettlementStateImpl implements SettlementState {
         var allEvents = combineAllEvents(settlementEntity);
         executeAllEvents(settlementEntity, allEvents);
         settlementEntity.castStorage();
-        return settlementEntity;
+        return saveState(settlementEntity);
     }
 
-    private void saveState(SettlementEntity village){
-        settlementService.saveVillage(village);
+    private SettlementEntity saveState(SettlementEntity village){
+        return settlementService.saveVillage(village);
     }
 
     private void executeAllEvents(SettlementEntity settlementEntity, List<EventStrategy> allEvents) {

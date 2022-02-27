@@ -54,7 +54,7 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     @Override
     public MovedMilitaryUnitEntity saveMovedMilitaryUnit(MovedMilitaryUnitEntity unit) {
-        return null;
+        return movedMilitaryUnitRepository.save(unit);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                                 new VillageBrief(mEv.getTargetVillageId(), mEv.getTarget().getVillageName(),
                                 mEv.getTarget().getPlayerName(), mEv.getTarget().getCoordinates()),
                                 mEv.getUnits(),
-                                mEv.getExecutionTime(), mEv.getDuration()))
+                                mEv.getExecutionTime(), (int) Duration.between(LocalDateTime.now(), mEv.getExecutionTime()).toSeconds()))
                 .peek(mU -> {
                     if (mU.getOrigin().getVillageId().equals(villageId)){
                         mU.setState(EMilitaryUnitState.OUT);
@@ -200,7 +200,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         }
         var duration = getDistance(attackedVillage.getX(), attackedVillage.getY(), attackingVillage.getX(), attackingVillage.getY())
                 .multiply(BigDecimal.valueOf(3600)
-                        .divide(BigDecimal.valueOf(7), MathContext.DECIMAL32)).intValue();
+                        .divide(BigDecimal.valueOf(100), MathContext.DECIMAL32)).intValue();
         var arrivalTime = LocalDateTime.now().plusSeconds(duration);
         return MilitaryUnitContract.builder()
                 .nation(attackingVillage.getNation())
@@ -235,7 +235,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         }
         // create MilitaryUnitEntity
         var moveUnit = new MovedMilitaryUnitEntity(
-                contract.getNation(), contract.getMission(), contract.getUnits(), contract.getOriginVillageId(),
+                contract.getNation(), contract.getMission(), contract.getUnits(), null, contract.getOriginVillageId(),
                 new VillageBrief(contract.getOriginVillageId(), contract.getOriginVillageName(), contract.getOriginPlayerName(), contract.getOriginVillageCoordinates()),
                 contract.getTargetVillageId(), new VillageBrief(contract.getTargetVillageName(), contract.getTargetPlayerName(), contract.getTargetVillageCoordinates()),
                 LocalDateTime.now().plusSeconds(contract.getDuration()), contract.getDuration(), 0);

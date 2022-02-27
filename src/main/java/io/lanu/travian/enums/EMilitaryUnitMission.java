@@ -2,6 +2,7 @@ package io.lanu.travian.enums;
 
 public enum EMilitaryUnitMission {
     HOME("Own army"),
+    BACK("Return to home"),
     CAUGHT("Caught"),
     ATTACK("Attack"),
     RAID("Raid"),

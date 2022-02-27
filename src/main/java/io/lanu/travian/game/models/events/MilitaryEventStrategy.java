@@ -39,6 +39,8 @@ public class MilitaryEventStrategy extends EventStrategy{
                 return new ReinforcementMissionStrategy(origin, militaryUnit, targetVillage);
             case "Attack":
                 return new AttackMissionStrategy(origin, militaryUnit, targetVillage);
+            case "Return to home":
+                return new ReturnHomeMissionStrategy(origin, militaryUnit, targetVillage);
             default: throw new IllegalStateException();
         }
     }
