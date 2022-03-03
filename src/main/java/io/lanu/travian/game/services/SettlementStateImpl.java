@@ -173,24 +173,24 @@ public class SettlementStateImpl implements SettlementState {
         }
     }
 
-    private List<EventStrategy> combineAllEvents(SettlementEntity origin) {
+    private List<EventStrategy> combineAllEvents(SettlementEntity currentSettlement) {
 
         // add all building events
-        List<EventStrategy> allEvents = constructionService.findAllByVillageId(origin.getId()).stream()
+        List<EventStrategy> allEvents = constructionService.findAllByVillageId(currentSettlement.getId()).stream()
                 .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
-                .map(cE -> new ConstructionEventStrategy(origin, cE))
+                .map(cE -> new ConstructionEventStrategy(currentSettlement, cE))
                 .collect(Collectors.toList());
 
         // add all units events
-        var combatEventList = militaryService.createCombatUnitDoneEventsFromOrders(origin);
+        var combatEventList = militaryService.createCombatUnitDoneEventsFromOrders(currentSettlement);
         allEvents.addAll(combatEventList);
 
         // add all wars events
-        var militaryEventList = militaryService.getAllByOriginVillageIdOrTargetVillageId(origin.getId())
+        var militaryEventList = militaryService.getAllByOriginVillageIdOrTargetVillageId(currentSettlement.getId())
                 .stream()
                 .filter(militaryUnitEntity -> militaryUnitEntity.getExecutionTime().isBefore(LocalDateTime.now()))
                 .map(mU -> new MilitaryEventStrategy(
-                        origin, mU, new VillageBrief(mU.getTargetVillageId(), mU.getTarget().getVillageName(),
+                        currentSettlement, mU, new VillageBrief(mU.getTargetVillageId(), mU.getTarget().getVillageName(),
                         mU.getTarget().getPlayerName(), mU.getTarget().getCoordinates()), this, militaryService))
                 .collect(Collectors.toList());
         allEvents.addAll(militaryEventList);

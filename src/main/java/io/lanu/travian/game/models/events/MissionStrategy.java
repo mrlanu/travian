@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public abstract class MissionStrategy {
-    protected SettlementEntity origin;
+    protected SettlementEntity currentSettlement;
     protected MovedMilitaryUnitEntity militaryUnit;
     protected VillageBrief targetVillage;
 
-    public MissionStrategy(SettlementEntity origin, MovedMilitaryUnitEntity militaryUnit, VillageBrief targetVillage) {
-        this.origin = origin;
+    public MissionStrategy(SettlementEntity currentSettlement, MovedMilitaryUnitEntity militaryUnit, VillageBrief targetVillage) {
+        this.currentSettlement = currentSettlement;
         this.militaryUnit = militaryUnit;
         this.targetVillage = targetVillage;
     }

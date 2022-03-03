@@ -26,8 +26,8 @@ public class AttackMissionStrategy extends MissionStrategy {
     public void handle(SettlementState service, MilitaryService militaryService) {
         //here is recursive recalculation of all villages involved in this attack
         // perform an attack if we are in origin village or skip and this attack will be performed in target village during recursion
-        if (origin.getId().equals(targetVillage.getVillageId())){
-            var storage = origin.getStorage();
+        if (currentSettlement.getId().equals(targetVillage.getVillageId())){
+            var storage = currentSettlement.getStorage();
 
             //here should be an algorithm of a plunder
             // just dummy implementation
@@ -35,11 +35,10 @@ public class AttackMissionStrategy extends MissionStrategy {
             militaryUnit.setPlunder(Map.of(EResource.CROP, BigDecimal.ZERO, EResource.CLAY, BigDecimal.valueOf(100),
                     EResource.IRON, BigDecimal.ZERO, EResource.WOOD, BigDecimal.ZERO));
             //----------
-
             militaryUnit.setMission(EMilitaryUnitMission.BACK.getName());
-            militaryUnit.setOriginVillageId(militaryUnit.getOriginVillageId());
-            militaryUnit.setOrigin(getMilitaryUnit().getOrigin());
             militaryUnit.setTargetVillageId(militaryUnit.getOriginVillageId());
+            militaryUnit.setOriginVillageId(currentSettlement.getId());
+            militaryUnit.setOrigin(militaryUnit.getTarget());
             militaryUnit.setExecutionTime(LocalDateTime.now().plusSeconds(militaryUnit.getDuration()));
             militaryService.saveMovedMilitaryUnit(militaryUnit);
 

@@ -13,14 +13,14 @@ public class ConstructionEventStrategy extends EventStrategy {
 
     private ConstructionEventEntity entity;
 
-    public ConstructionEventStrategy(SettlementEntity origin, ConstructionEventEntity entity) {
-        super(origin);
+    public ConstructionEventStrategy(SettlementEntity currentSettlement, ConstructionEventEntity entity) {
+        super(currentSettlement);
         this.entity = entity;
     }
 
     @Override
     public void execute() {
-        var build = origin.getBuildings().get(entity.getBuildingPosition());
+        var build = currentSettlement.getBuildings().get(entity.getBuildingPosition());
         build.setLevel(build.getLevel() + 1);
     }
 

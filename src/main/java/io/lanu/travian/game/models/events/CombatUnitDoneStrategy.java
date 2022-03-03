@@ -13,14 +13,14 @@ public class CombatUnitDoneStrategy extends EventStrategy{
 
     private CombatUnitDoneEventEntity entity;
 
-    public CombatUnitDoneStrategy(SettlementEntity origin, CombatUnitDoneEventEntity entity) {
-        super(origin);
+    public CombatUnitDoneStrategy(SettlementEntity currentSettlement, CombatUnitDoneEventEntity entity) {
+        super(currentSettlement);
         this.entity = entity;
     }
 
     @Override
     public void execute() {
-        var homeLeg = origin.getHomeLegion();
+        var homeLeg = currentSettlement.getHomeLegion();
         homeLeg[0] = homeLeg[0] + 1;
     }
 

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class EventStrategy {
-    protected SettlementEntity origin;
+    protected SettlementEntity currentSettlement;
     public abstract void execute();
     public abstract LocalDateTime getExecutionTime();
 }

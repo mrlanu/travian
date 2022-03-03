@@ -19,9 +19,9 @@ public class MilitaryEventStrategy extends EventStrategy{
     private final SettlementState service;
     private final MilitaryService militaryService;
 
-    public MilitaryEventStrategy(SettlementEntity origin, MovedMilitaryUnitEntity militaryUnit,
+    public MilitaryEventStrategy(SettlementEntity currentSettlement, MovedMilitaryUnitEntity militaryUnit,
                                  VillageBrief targetVillage, SettlementState service, MilitaryService militaryService) {
-        super(origin);
+        super(currentSettlement);
         this.militaryUnit = militaryUnit;
         this.targetVillage = targetVillage;
         this.service = service;
@@ -36,11 +36,11 @@ public class MilitaryEventStrategy extends EventStrategy{
     private MissionStrategy getMissionStrategy() {
         switch (militaryUnit.getMission()){
             case "Reinforcement":
-                return new ReinforcementMissionStrategy(origin, militaryUnit, targetVillage);
+                return new ReinforcementMissionStrategy(currentSettlement, militaryUnit, targetVillage);
             case "Attack":
-                return new AttackMissionStrategy(origin, militaryUnit, targetVillage);
+                return new AttackMissionStrategy(currentSettlement, militaryUnit, targetVillage);
             case "Return to home":
-                return new ReturnHomeMissionStrategy(origin, militaryUnit, targetVillage);
+                return new ReturnHomeMissionStrategy(currentSettlement, militaryUnit, targetVillage);
             default: throw new IllegalStateException();
         }
     }

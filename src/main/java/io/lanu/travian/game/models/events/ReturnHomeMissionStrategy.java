@@ -20,13 +20,13 @@ public class ReturnHomeMissionStrategy extends MissionStrategy{
     @Override
     void handle(SettlementState service, MilitaryService militaryService) {
         // add all returned units to village army
-        var homeLegion = origin.getHomeLegion();
+        var homeLegion = currentSettlement.getHomeLegion();
         var returnedUnits = militaryUnit.getUnits();
         for (int i = 0; i < homeLegion.length; i++){
             homeLegion[i] = homeLegion[i] + returnedUnits[i];
         }
         //add all plundered resources to storage
-        origin.manipulateGoods(EManipulation.ADD, militaryUnit.getPlunder());
+        currentSettlement.manipulateGoods(EManipulation.ADD, militaryUnit.getPlunder());
         militaryService.deleteMovedUnitById(militaryUnit.getId());
     }
 }

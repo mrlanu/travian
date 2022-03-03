@@ -23,9 +23,9 @@ public class DeathEventStrategy extends EventStrategy{
     @Override
     public void execute() {
         // dummy implementation
-        var army = origin.getHomeLegion();
+        var army = currentSettlement.getHomeLegion();
         army[0] = army[0] - 1;
-        var stor = origin.getStorage();
+        var stor = currentSettlement.getStorage();
         stor.put(EResource.CROP, stor.get(EResource.CROP).add(BigDecimal.ONE));
     }
 }
