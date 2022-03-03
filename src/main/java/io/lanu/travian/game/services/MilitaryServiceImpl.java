@@ -89,8 +89,8 @@ public class MilitaryServiceImpl implements MilitaryService {
                                         mEv.getOrigin().getPlayerName(), mEv.getOrigin().getCoordinates()),
                                 new VillageBrief(mEv.getTargetVillageId(), mEv.getTarget().getVillageName(),
                                 mEv.getTarget().getPlayerName(), mEv.getTarget().getCoordinates()),
-                                mEv.getUnits(),
-                                mEv.getExecutionTime(), (int) Duration.between(LocalDateTime.now(), mEv.getExecutionTime()).toSeconds()))
+                                mEv.getUnits(), mEv.getPlunder(), mEv.getExecutionTime(), (int) Duration.between(LocalDateTime.now(),
+                                mEv.getExecutionTime()).toSeconds()))
                 .peek(mU -> {
                     if (mU.getOrigin().getVillageId().equals(villageId)){
                         mU.setState(EMilitaryUnitState.OUT);
@@ -200,7 +200,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         }
         var duration = getDistance(attackedVillage.getX(), attackedVillage.getY(), attackingVillage.getX(), attackingVillage.getY())
                 .multiply(BigDecimal.valueOf(3600)
-                        .divide(BigDecimal.valueOf(100), MathContext.DECIMAL32)).intValue();
+                        .divide(BigDecimal.valueOf(300), MathContext.DECIMAL32)).intValue();
         var arrivalTime = LocalDateTime.now().plusSeconds(duration);
         return MilitaryUnitContract.builder()
                 .nation(attackingVillage.getNation())

@@ -40,7 +40,6 @@ public class AttackMissionStrategy extends MissionStrategy {
             militaryUnit.setOriginVillageId(militaryUnit.getOriginVillageId());
             militaryUnit.setOrigin(getMilitaryUnit().getOrigin());
             militaryUnit.setTargetVillageId(militaryUnit.getOriginVillageId());
-            militaryUnit.setTargetVillageId(militaryUnit.getOriginVillageId());
             militaryUnit.setExecutionTime(LocalDateTime.now().plusSeconds(militaryUnit.getDuration()));
             militaryService.saveMovedMilitaryUnit(militaryUnit);
 
