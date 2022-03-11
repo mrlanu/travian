@@ -6,6 +6,7 @@ import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
 import io.lanu.travian.game.models.responses.MilitaryUnitContract;
 import io.lanu.travian.game.models.responses.MilitaryUnitView;
+import io.lanu.travian.game.models.responses.TroopMovementsResponse;
 import io.lanu.travian.game.services.SettlementState;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,11 @@ public class MilitaryController {
     @GetMapping("/{villageId}/military-units")
     public Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillageId(@PathVariable String villageId){
         return state.getAllMilitaryUnitsByVillage(villageId);
+    }
+
+    @GetMapping("/{villageId}/troop-movements")
+    public List<TroopMovementsResponse> getTroopMovements(@PathVariable String villageId){
+        return state.getTroopMovements(villageId);
     }
 
     @PostMapping("/military")

@@ -32,4 +32,6 @@ public interface SettlementState {
     void sendTroops(MilitaryUnitContract militaryUnitContract);
 
     TileDetail getTileDetail(String id, int fromX, int fromY);
+
+    List<TroopMovementsResponse> getTroopMovements(String villageId);
 }

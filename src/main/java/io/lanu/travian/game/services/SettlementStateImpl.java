@@ -84,6 +84,11 @@ public class SettlementStateImpl implements SettlementState {
     }
 
     @Override
+    public List<TroopMovementsResponse> getTroopMovements(String villageId) {
+        return militaryService.getTroopMovements(recalculateCurrentState(villageId));
+    }
+
+    @Override
     public void orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest) {
         var village = militaryService.orderCombatUnits(orderCombatUnitRequest, recalculateCurrentState(orderCombatUnitRequest.getVillageId()));
         saveState(village);
