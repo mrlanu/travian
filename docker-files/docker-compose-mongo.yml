@@ -1,32 +1,32 @@
-mongo-travian:
-  image: mongo:4.0.4
-  restart: always
-  environment:
-    MONGO_INITDB_ROOT_USERNAME: root
-    MONGO_INITDB_ROOT_PASSWORD: root
-    MONGO_INITDB_DATABASE: travian
-    MONGODB_USER: mrlanu
-    MONGODB_DATABASE: travian
-    MONGODB_PASS: mrlanu
-  log_opt:
-    max-size: "10m"
-    max-file: "10"
-  ports:
-    - 27017:27017
-  volumes:
-    - ./mongo-init/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
-    - ~/development/MyProjects/volumes/travian/mongo/data:/data/db
+version: '3'
+services:
 
-mongo-express-oauth:
-  image: mongo-express:0.49
-  restart: always
-  ports:
-    - 10081:8081
-  environment:
-    ME_CONFIG_MONGODB_ADMINUSERNAME: root
-    ME_CONFIG_MONGODB_ADMINPASSWORD: root
-    ME_CONFIG_MONGODB_SERVER: mongo-travian
-    ME_CONFIG_MONGODB_PORT: 27017
-  links:
-    - mongo-travian
+  mongo-travian:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: travian
+      MONGODB_USER: mrlanu
+      MONGODB_DATABASE: travian
+      MONGODB_PASS: mrlanu
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo-init/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+      - ~/development/java/travian/volumes/mongo/data:/data/db
+
+  mongo-express-oauth:
+    image: mongo-express:latest
+    restart: always
+    ports:
+      - 10081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: root
+      ME_CONFIG_MONGODB_SERVER: mongo-travian
+      ME_CONFIG_MONGODB_PORT: 27017
+    links:
+      - mongo-travian
 
