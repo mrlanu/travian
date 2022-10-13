@@ -1,5 +1,5 @@
 # travian
-Clone of the game Travian (www.travian.com)
+A clone of the game Travian (www.travian.com)
 
 To start this server, first you need to launch mongoDB server.
 Just go to docker-files directory in this project and execute  
