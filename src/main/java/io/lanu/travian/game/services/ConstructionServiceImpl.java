@@ -7,7 +7,6 @@ import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.game.models.responses.NewBuilding;
-import io.lanu.travian.game.repositories.ConstructionEventRepository;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
 import org.springframework.stereotype.Service;
@@ -22,15 +21,9 @@ import java.util.stream.Collectors;
 @Service
 public class ConstructionServiceImpl implements ConstructionService {
 
-    private final ConstructionEventRepository constructionEventRepository;
-
-    public ConstructionServiceImpl(ConstructionEventRepository constructionEventRepository) {
-        this.constructionEventRepository = constructionEventRepository;
-    }
-
     @Override
     public SettlementEntity createBuildEvent(SettlementEntity village, Integer buildingPosition, EBuilding kind) {
-        var events = constructionEventRepository.findAllByVillageId(village.getId())
+        var events = village.getConstructionEventList()
                 .stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
@@ -59,20 +52,13 @@ public class ConstructionServiceImpl implements ConstructionService {
         ConstructionEventEntity buildEvent = new ConstructionEventEntity(buildingPosition, buildModel.getKind(),
                 building.getLevel() + 1, village.getId(), executionTime);
 
-        constructionEventRepository.save(buildEvent);
+        village.getConstructionEventList().add(buildEvent);
         return village;
     }
 
-    /*@Override
-    public List<ConstructionEventEntity> findAllByVillageId(String villageId) {
-        var result = constructionEventRepository.findAllByVillageId(villageId);
-        constructionEventRepository.deleteAllByVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
-        return result;
-    }*/
-
     @Override
     public SettlementEntity deleteBuildingEvent(SettlementEntity village, String eventId) {
-        var allEvents = constructionEventRepository.findAllByVillageId(village.getId()).stream()
+        var allEvents = village.getConstructionEventList().stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
         var event = allEvents.stream()
@@ -102,14 +88,13 @@ public class ConstructionServiceImpl implements ConstructionService {
             village.getBuildings().put(event.getBuildingPosition(), new BuildModel(EBuilding.EMPTY, 0));
         }
         village.manipulateGoods(EManipulation.ADD, building.getResourcesToNextLevel());
-        constructionEventRepository.deleteByEventId(eventId);
-        constructionEventRepository.saveAll(events);
+        village.getConstructionEventList().remove(event);
         return village;
     }
 
     @Override
     public List<NewBuilding> getListOfAllNewBuildings(SettlementEntity village) {
-        var events = constructionEventRepository.findAllByVillageId(village.getId());
+        var events = village.getConstructionEventList();
         var all = getListOfNewBuildings();
         // if events size >=2 return all buildings unavailable for build otherwise checking ability to build
         return events.size() >= 2 ? all : all.stream()

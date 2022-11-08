@@ -5,6 +5,7 @@ import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.SettlementEntity;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class VillageEntityFactory {
@@ -59,6 +60,7 @@ public class VillageEntityFactory {
                             EResource.WOOD, BigDecimal.valueOf(500),
                             EResource.IRON, BigDecimal.valueOf(500)),
                     new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                    new ArrayList<>(),
                     null);
             case OASIS: return new SettlementEntity(null, SettlementType.OASIS, subType, null, 0, 0 , "Oasis", null,
                     0, 0, 100,
@@ -108,6 +110,7 @@ public class VillageEntityFactory {
                             EResource.WOOD, BigDecimal.valueOf(1000),
                             EResource.IRON, BigDecimal.valueOf(1000)),
                     new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                    new ArrayList<>(),
                     null);
             default: return null;
         }

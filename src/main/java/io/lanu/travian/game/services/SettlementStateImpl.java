@@ -7,10 +7,8 @@ import io.lanu.travian.game.entities.events.CombatUnitDoneEventEntity;
 import io.lanu.travian.game.models.event.*;
 import io.lanu.travian.game.models.responses.VillageBrief;
 import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
-import io.lanu.travian.game.repositories.ConstructionEventRepository;
 import io.lanu.travian.game.repositories.MilitaryUnitRepository;
 import io.lanu.travian.game.repositories.MovedMilitaryUnitRepository;
-import io.lanu.travian.security.UsersRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -30,18 +28,15 @@ public class SettlementStateImpl implements SettlementState {
     
     private final SettlementRepository settlementRepository;
 
-    private final ConstructionEventRepository constructionEventRepository;
-
     private final MovedMilitaryUnitRepository movedMilitaryUnitRepository;
     private final MilitaryUnitRepository militaryUnitRepository;
 
     private final CombatUnitOrderRepository combatUnitOrderRepository;
 
-    public SettlementStateImpl(SettlementRepository settlementRepository, ConstructionEventRepository constructionEventRepository,
+    public SettlementStateImpl(SettlementRepository settlementRepository,
                                MovedMilitaryUnitRepository movedMilitaryUnitRepository, MilitaryUnitRepository militaryUnitRepository,
                                CombatUnitOrderRepository combatUnitOrderRepository) {
         this.settlementRepository = settlementRepository;
-        this.constructionEventRepository = constructionEventRepository;
         this.movedMilitaryUnitRepository = movedMilitaryUnitRepository;
         this.militaryUnitRepository = militaryUnitRepository;
         this.combatUnitOrderRepository = combatUnitOrderRepository;
@@ -103,11 +98,10 @@ public class SettlementStateImpl implements SettlementState {
     private List<Event> combineAllEvents(SettlementEntity currentSettlement) {
 
         // add all building events
-        List<Event> allEvents = constructionEventRepository.findAllByVillageId(currentSettlement.getId()).stream()
+        List<Event> allEvents = currentSettlement.getConstructionEventList().stream()
                 .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
                 .map(ConstructionEvent::new)
                 .collect(Collectors.toList());
-        constructionEventRepository.deleteAllByVillageIdAndExecutionTimeBefore(currentSettlement.getId(), LocalDateTime.now());
 
         // add all units events
         var combatEventList = createCombatUnitDoneEventsFromOrders(currentSettlement.getId());

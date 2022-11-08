@@ -1,6 +1,7 @@
 package io.lanu.travian.game.entities;
 
 import io.lanu.travian.enums.*;
+import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
 import io.lanu.travian.templates.buildings.GranaryBuilding;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -43,6 +45,7 @@ public class SettlementEntity {
     private Map<Integer, BuildModel> buildings;
     private Map<EResource, BigDecimal> storage;
     private int[] homeLegion;
+    private List<ConstructionEventEntity> constructionEventList;
     @LastModifiedDate
     private LocalDateTime modified;
 

@@ -28,18 +28,15 @@ public class SettlementServiceImpl implements SettlementRepository {
     private final MapTileRepository worldRepo;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
     private final UsersRepository usersRepository;
-    private final ConstructionEventRepository constructionEventRepository;
-
     private final MilitaryUnitRepository militaryUnitRepository;
     private static final MathContext mc = new MathContext(3);
 
     public SettlementServiceImpl(io.lanu.travian.game.repositories.SettlementRepository settlementRepository, MapTileRepository worldRepo,
-                                 ResearchedCombatUnitRepository researchedCombatUnitRepository, UsersRepository usersRepository, ConstructionEventRepository constructionEventRepository, MilitaryUnitRepository militaryUnitRepository) {
+                                 ResearchedCombatUnitRepository researchedCombatUnitRepository, UsersRepository usersRepository, MilitaryUnitRepository militaryUnitRepository) {
         this.settlementRepository = settlementRepository;
         this.worldRepo = worldRepo;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.usersRepository = usersRepository;
-        this.constructionEventRepository = constructionEventRepository;
         this.militaryUnitRepository = militaryUnitRepository;
     }
 
@@ -117,9 +114,8 @@ public class SettlementServiceImpl implements SettlementRepository {
 
     @Override
     public VillageView getVillageById(SettlementEntity settlementEntity) {
-        var currentBuildingEvents = constructionEventRepository.findAllByVillageId(settlementEntity.getId());
         var militariesInVillage = militaryUnitRepository.getAllByTargetVillageId(settlementEntity.getId());
-        return new VillageView(settlementEntity, currentBuildingEvents, militariesInVillage);
+        return new VillageView(settlementEntity, settlementEntity.getConstructionEventList(), militariesInVillage);
     }
 
 }

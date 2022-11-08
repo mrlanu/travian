@@ -17,6 +17,7 @@ public class ConstructionEvent implements Event {
     public void execute(SettlementEntity settlementEntity) {
         var build = settlementEntity.getBuildings().get(this.entity.getBuildingPosition());
         build.setLevel(build.getLevel() + 1);
+        settlementEntity.getConstructionEventList().remove(entity);
     }
 
     @Override

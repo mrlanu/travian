@@ -7,19 +7,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
-@NoArgsConstructor
-/*@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "eventType")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = FieldUpgradeBuildEvent.class, name = "fieldUpgradeEvent"),
-        @JsonSubTypes.Type(value = TroopBuildEvent.class, name = "troopEvent")
-})*/
-@Document("construction-events")
 public class ConstructionEventEntity {
 
     @Id
-    private String eventId;
+    private String eventId = UUID.randomUUID().toString();
     private int buildingPosition;
     private EBuilding buildingName;
     private int toLevel;
