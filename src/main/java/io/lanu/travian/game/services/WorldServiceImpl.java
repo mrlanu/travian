@@ -18,11 +18,11 @@ public class WorldServiceImpl implements WorldService{
     private final int WORLD_Y = 50;
     private final int OASES_AMOUNT = 50;
     private final MapTileRepository repo;
-    private final SettlementService settlementService;
+    private final SettlementRepository settlementRepository;
 
-    public WorldServiceImpl(MapTileRepository repo, SettlementService settlementService) {
+    public WorldServiceImpl(MapTileRepository repo, SettlementRepository settlementService) {
         this.repo = repo;
-        this.settlementService = settlementService;
+        this.settlementRepository = settlementService;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class WorldServiceImpl implements WorldService{
             entity.setX(emptySpot.getCorX());
             entity.setY(emptySpot.getCorY());
             entity.setName(subType.toString());
-            var id = settlementService.saveVillage(entity).getId();
+            var id = settlementRepository.saveVillage(entity).getId();
             emptySpot.setId(id);
             emptySpot.setName(subType.toString());
             emptySpot.setClazz(subType.toString().toLowerCase());

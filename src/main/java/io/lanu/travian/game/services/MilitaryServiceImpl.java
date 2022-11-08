@@ -1,13 +1,11 @@
 package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.*;
+import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
-import io.lanu.travian.game.entities.events.CombatUnitDoneEventEntity;
 import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
 import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
-import io.lanu.travian.game.models.events.CombatUnitDoneStrategy;
-import io.lanu.travian.game.models.events.EventStrategy;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.*;
@@ -37,14 +35,17 @@ public class MilitaryServiceImpl implements MilitaryService {
     private final MovedMilitaryUnitRepository movedMilitaryUnitRepository;
     private final UsersRepository usersRepository;
 
+    private final SettlementRepository settlementRepository;
+
     public MilitaryServiceImpl(CombatUnitOrderRepository combatUnitOrderRepository,
                                ResearchedCombatUnitRepository researchedCombatUnitRepository,
-                               MilitaryUnitRepository militaryUnitRepository, MovedMilitaryUnitRepository movedMilitaryUnitRepository, UsersRepository usersRepository) {
+                               MilitaryUnitRepository militaryUnitRepository, MovedMilitaryUnitRepository movedMilitaryUnitRepository, UsersRepository usersRepository, SettlementRepository settlementRepository) {
         this.combatUnitOrderRepository = combatUnitOrderRepository;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.militaryUnitRepository = militaryUnitRepository;
         this.movedMilitaryUnitRepository = movedMilitaryUnitRepository;
         this.usersRepository = usersRepository;
+        this.settlementRepository = settlementRepository;
     }
 
     @Override
@@ -62,7 +63,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         movedMilitaryUnitRepository.deleteById(id);
     }
 
-    @Override
+    /*@Override
     public void deleteUnitById(String id) {
         militaryUnitRepository.deleteById(id);
     }
@@ -76,7 +77,7 @@ public class MilitaryServiceImpl implements MilitaryService {
     public List<MovedMilitaryUnitEntity> getAllMovedUnitsByOriginVillageId(String villageId) {
         return movedMilitaryUnitRepository.getAllByOriginVillageId(villageId);
     }
-
+*/
     @Override
     public Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillage(SettlementEntity village) {
         var userName = usersRepository.findByUserId(village.getAccountId()).orElseThrow();
@@ -182,6 +183,17 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
+    public MilitaryUnitContract checkTroopsSendingRequest(SettlementEntity settlementEntity, TroopsSendingRequest troopsSendingRequest) {
+        var attackedVillageOpt = settlementRepository
+                .findVillageByCoordinates(troopsSendingRequest.getX(), troopsSendingRequest.getY());
+        if (attackedVillageOpt.isPresent()) {
+            return checkTroopsSendingRequest(troopsSendingRequest, settlementEntity, attackedVillageOpt.get());
+        }else {
+            throw new UserErrorException("There is nothing on those coordinates");
+        }
+    }
+
+    @Override
     public List<ECombatUnit> getAllResearchedUnits(String villageId) {
         return researchedCombatUnitRepository.findByVillageId(villageId).getUnits()
                 .stream()
@@ -248,7 +260,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         }
         var duration = getDistance(attackedVillage.getX(), attackedVillage.getY(), attackingVillage.getX(), attackingVillage.getY())
                 .multiply(BigDecimal.valueOf(3600)
-                        .divide(BigDecimal.valueOf(10), MathContext.DECIMAL32)).intValue();
+                        .divide(BigDecimal.valueOf(100), MathContext.DECIMAL32)).intValue();
         var arrivalTime = LocalDateTime.now().plusSeconds(duration);
         return MilitaryUnitContract.builder()
                 .nation(attackingVillage.getNation())
@@ -291,49 +303,8 @@ public class MilitaryServiceImpl implements MilitaryService {
         return village;
     }
 
-    @Override
-    public List<EventStrategy> createCombatUnitDoneEventsFromOrders(SettlementEntity origin) {
-
-        List<EventStrategy> result = new ArrayList<>();
-        var ordersList = combatUnitOrderRepository.findAllByVillageId(origin.getId());
-
-        if (ordersList.size() > 0) {
-            for (OrderCombatUnitEntity order : ordersList) {
-                long duration = Duration.between(order.getLastTime(), LocalDateTime.now()).toSeconds();
-
-                if (LocalDateTime.now().isAfter(order.getEndOrderTime())) {
-                    // add all troops from order to result list
-                    result.addAll(addCompletedCombatUnit(origin, order, order.getLeftTrain()));
-                    combatUnitOrderRepository.deleteById(order.getOrderId());
-                    continue;
-                }
-
-                int completedTroops = (int) (duration / order.getDurationEach());
-
-                if (completedTroops > 0) {
-                    // add completed troops from order to result list
-                    result.addAll(addCompletedCombatUnit(origin, order, completedTroops));
-                    order.setLeftTrain(order.getLeftTrain() - completedTroops);
-                    order.setLastTime(order.getLastTime().plus(completedTroops * order.getDurationEach(), ChronoUnit.SECONDS));
-                    combatUnitOrderRepository.save(order);
-                }
-            }
-        }
-        return result;
-    }
-
-    private List<EventStrategy> addCompletedCombatUnit(SettlementEntity origin, OrderCombatUnitEntity order, Integer amount) {
-        List<EventStrategy> result = new ArrayList<>();
-        LocalDateTime exec = order.getLastTime();
-        for (int i = 0; i < amount; i++) {
-            exec = exec.plus(order.getDurationEach(), ChronoUnit.SECONDS);
-            result.add(new CombatUnitDoneStrategy(origin, new CombatUnitDoneEventEntity(exec, order.getUnitType(), order.getEatHour())));
-        }
-        return result;
-    }
-
-    @Override
+    /*@Override
     public List<MovedMilitaryUnitEntity> getAllByOriginVillageIdOrTargetVillageId(String originId) {
         return movedMilitaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(originId, originId);
-    }
+    }*/
 }

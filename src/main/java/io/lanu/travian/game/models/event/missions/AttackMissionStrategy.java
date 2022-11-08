@@ -1,11 +1,10 @@
-package io.lanu.travian.game.models.events;
+package io.lanu.travian.game.models.event.missions;
 
 import io.lanu.travian.enums.EMilitaryUnitMission;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
 import io.lanu.travian.game.models.responses.VillageBrief;
-import io.lanu.travian.game.services.MilitaryService;
 import io.lanu.travian.game.services.SettlementState;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,12 +17,13 @@ import java.util.Map;
 @Data
 public class AttackMissionStrategy extends MissionStrategy {
 
-    public AttackMissionStrategy(SettlementEntity origin, MovedMilitaryUnitEntity militaryUnit, VillageBrief targetVillage) {
-        super(origin, militaryUnit, targetVillage);
+    public AttackMissionStrategy(SettlementEntity currentSettlement, MovedMilitaryUnitEntity militaryUnit,
+                                 VillageBrief targetVillage, SettlementState settlementState) {
+        super(currentSettlement, militaryUnit, targetVillage, settlementState);
     }
 
     @Override
-    public void handle(SettlementState service, MilitaryService militaryService) {
+    public void handle() {
         //here is recursive recalculation of all villages involved in this attack
         // perform an attack if we are in origin village or skip and this attack will be performed in target village during recursion
         if (currentSettlement.getId().equals(targetVillage.getVillageId())){
@@ -40,11 +40,11 @@ public class AttackMissionStrategy extends MissionStrategy {
             militaryUnit.setOriginVillageId(currentSettlement.getId());
             militaryUnit.setOrigin(militaryUnit.getTarget());
             militaryUnit.setExecutionTime(LocalDateTime.now().plusSeconds(militaryUnit.getDuration()));
-            militaryService.saveMovedMilitaryUnit(militaryUnit);
+            settlementState.getMovedMilitaryUnitRepository().save(militaryUnit);
 
-        }else{
+        } else{
             //just in the skip case
-            service.recalculateCurrentState(targetVillage.getVillageId());
+            settlementState.recalculateCurrentState(targetVillage.getVillageId());
         }
     }
 }

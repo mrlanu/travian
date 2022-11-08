@@ -63,12 +63,12 @@ public class ConstructionServiceImpl implements ConstructionService {
         return village;
     }
 
-    @Override
+    /*@Override
     public List<ConstructionEventEntity> findAllByVillageId(String villageId) {
         var result = constructionEventRepository.findAllByVillageId(villageId);
         constructionEventRepository.deleteAllByVillageIdAndExecutionTimeBefore(villageId, LocalDateTime.now());
         return result;
-    }
+    }*/
 
     @Override
     public SettlementEntity deleteBuildingEvent(SettlementEntity village, String eventId) {

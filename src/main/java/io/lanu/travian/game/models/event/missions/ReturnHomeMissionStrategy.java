@@ -1,10 +1,9 @@
-package io.lanu.travian.game.models.events;
+package io.lanu.travian.game.models.event.missions;
 
 import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
 import io.lanu.travian.game.models.responses.VillageBrief;
-import io.lanu.travian.game.services.MilitaryService;
 import io.lanu.travian.game.services.SettlementState;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,12 +12,13 @@ import lombok.EqualsAndHashCode;
 @Data
 public class ReturnHomeMissionStrategy extends MissionStrategy{
 
-    public ReturnHomeMissionStrategy(SettlementEntity origin, MovedMilitaryUnitEntity militaryUnit, VillageBrief targetVillage) {
-        super(origin, militaryUnit, targetVillage);
+    public ReturnHomeMissionStrategy(SettlementEntity currentSettlement, MovedMilitaryUnitEntity militaryUnit,
+                                     VillageBrief targetVillage, SettlementState settlementState) {
+        super(currentSettlement, militaryUnit, targetVillage, settlementState);
     }
 
     @Override
-    void handle(SettlementState service, MilitaryService militaryService) {
+    public void handle() {
         // add all returned units to village army
         var homeLegion = currentSettlement.getHomeLegion();
         var returnedUnits = militaryUnit.getUnits();
@@ -27,6 +27,6 @@ public class ReturnHomeMissionStrategy extends MissionStrategy{
         }
         //add all plundered resources to storage
         currentSettlement.manipulateGoods(EManipulation.ADD, militaryUnit.getPlunder());
-        militaryService.deleteMovedUnitById(militaryUnit.getId());
+        settlementState.getMovedMilitaryUnitRepository().deleteById(militaryUnit.getId());
     }
 }

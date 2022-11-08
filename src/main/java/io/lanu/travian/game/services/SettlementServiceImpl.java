@@ -8,7 +8,11 @@ import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.ResearchedCombatUnitShort;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
+import io.lanu.travian.game.models.responses.TileDetail;
+import io.lanu.travian.game.models.responses.VillageView;
 import io.lanu.travian.game.repositories.*;
+import io.lanu.travian.security.UserEntity;
+import io.lanu.travian.security.UsersRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
@@ -19,17 +23,24 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class SettlementServiceImpl implements SettlementService {
-    private final SettlementRepository settlementRepository;
+public class SettlementServiceImpl implements SettlementRepository {
+    private final io.lanu.travian.game.repositories.SettlementRepository settlementRepository;
     private final MapTileRepository worldRepo;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
+    private final UsersRepository usersRepository;
+    private final ConstructionEventRepository constructionEventRepository;
+
+    private final MilitaryUnitRepository militaryUnitRepository;
     private static final MathContext mc = new MathContext(3);
 
-    public SettlementServiceImpl(SettlementRepository settlementRepository, MapTileRepository worldRepo,
-                                 ResearchedCombatUnitRepository researchedCombatUnitRepository) {
+    public SettlementServiceImpl(io.lanu.travian.game.repositories.SettlementRepository settlementRepository, MapTileRepository worldRepo,
+                                 ResearchedCombatUnitRepository researchedCombatUnitRepository, UsersRepository usersRepository, ConstructionEventRepository constructionEventRepository, MilitaryUnitRepository militaryUnitRepository) {
         this.settlementRepository = settlementRepository;
         this.worldRepo = worldRepo;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
+        this.usersRepository = usersRepository;
+        this.constructionEventRepository = constructionEventRepository;
+        this.militaryUnitRepository = militaryUnitRepository;
     }
 
     @Override
@@ -94,6 +105,21 @@ public class SettlementServiceImpl implements SettlementService {
     @Override
     public SettlementEntity saveVillage(SettlementEntity settlementEntity){
         return settlementRepository.save(settlementEntity);
+    }
+
+    @Override
+    public TileDetail getTileDetail(SettlementEntity settlement, int fromX, int fromY) {
+        var user = usersRepository.findByUserId(settlement.getAccountId()).orElse(new UserEntity("Nature"));
+        return new TileDetail(settlement.getId(), settlement.getSettlementType(), settlement.getSubType(), settlement.getNation(), user.getUsername(),
+                settlement.getName(), settlement.getX(), settlement.getY(), settlement.getPopulation(),
+                MilitaryServiceImpl.getDistance(settlement.getX(), settlement.getY(), fromX, fromY));
+    }
+
+    @Override
+    public VillageView getVillageById(SettlementEntity settlementEntity) {
+        var currentBuildingEvents = constructionEventRepository.findAllByVillageId(settlementEntity.getId());
+        var militariesInVillage = militaryUnitRepository.getAllByTargetVillageId(settlementEntity.getId());
+        return new VillageView(settlementEntity, currentBuildingEvents, militariesInVillage);
     }
 
 }
