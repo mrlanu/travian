@@ -215,10 +215,10 @@ public class MilitaryServiceImpl implements MilitaryService {
         LocalDateTime lastTime = ordersList.size() > 0 ? ordersList.get(ordersList.size() - 1).getEndOrderTime() : LocalDateTime.now();
 
         LocalDateTime endOrderTime = lastTime.plus(
-                orderCombatUnitRequest.getAmount() * unit.getTime() * Consts.SPEED, ChronoUnit.SECONDS);
+                orderCombatUnitRequest.getAmount() * unit.getTime(), ChronoUnit.SECONDS);
 
         OrderCombatUnitEntity armyOrder = new OrderCombatUnitEntity(orderCombatUnitRequest.getVillageId(), lastTime, orderCombatUnitRequest.getUnitType(),
-                orderCombatUnitRequest.getAmount(), unit.getTime() * Consts.SPEED, unit.getEat(), endOrderTime);
+                orderCombatUnitRequest.getAmount(), unit.getTime(), unit.getEat(), endOrderTime);
 
         spendResources(orderCombatUnitRequest.getAmount(), village, unit);
 

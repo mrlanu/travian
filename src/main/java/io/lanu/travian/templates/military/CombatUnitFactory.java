@@ -1,5 +1,6 @@
 package io.lanu.travian.templates.military;
 
+import io.lanu.travian.Consts;
 import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.ENation;
 
@@ -16,7 +17,7 @@ public class CombatUnitFactory {
         }
         result.setLevel(level);
         //here should be implemented the time counting depends on level of barracks
-        result.setTime(result.getTime());
+        result.setTime(result.getTime() / Consts.SPEED);
         return result;
     }
 
