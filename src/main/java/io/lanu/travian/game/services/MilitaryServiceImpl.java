@@ -1,5 +1,6 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.Consts;
 import io.lanu.travian.enums.*;
 import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
@@ -214,10 +215,10 @@ public class MilitaryServiceImpl implements MilitaryService {
         LocalDateTime lastTime = ordersList.size() > 0 ? ordersList.get(ordersList.size() - 1).getEndOrderTime() : LocalDateTime.now();
 
         LocalDateTime endOrderTime = lastTime.plus(
-                orderCombatUnitRequest.getAmount() * unit.getTime(), ChronoUnit.SECONDS);
+                orderCombatUnitRequest.getAmount() * unit.getTime() * Consts.SPEED, ChronoUnit.SECONDS);
 
         OrderCombatUnitEntity armyOrder = new OrderCombatUnitEntity(orderCombatUnitRequest.getVillageId(), lastTime, orderCombatUnitRequest.getUnitType(),
-                orderCombatUnitRequest.getAmount(), unit.getTime(), unit.getEat(), endOrderTime);
+                orderCombatUnitRequest.getAmount(), unit.getTime() * Consts.SPEED, unit.getEat(), endOrderTime);
 
         spendResources(orderCombatUnitRequest.getAmount(), village, unit);
 
@@ -260,7 +261,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         }
         var duration = getDistance(attackedVillage.getX(), attackedVillage.getY(), attackingVillage.getX(), attackingVillage.getY())
                 .multiply(BigDecimal.valueOf(3600)
-                        .divide(BigDecimal.valueOf(100), MathContext.DECIMAL32)).intValue();
+                        .divide(BigDecimal.valueOf(10 * Consts.SPEED), MathContext.DECIMAL32)).intValue();
         var arrivalTime = LocalDateTime.now().plusSeconds(duration);
         return MilitaryUnitContract.builder()
                 .nation(attackingVillage.getNation())

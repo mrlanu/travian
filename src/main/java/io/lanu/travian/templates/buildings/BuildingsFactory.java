@@ -1,5 +1,6 @@
 package io.lanu.travian.templates.buildings;
 
+import io.lanu.travian.Consts;
 import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.EResource;
 
@@ -41,7 +42,7 @@ public class BuildingsFactory {
             result.setLevel(level);
             result.setMaxLevel(buildingKind.getMaxLevel());
             result.setDescription(buildingKind.getDescription());
-            result.setTimeToNextLevel(buildingKind.getTime().valueOf(level + 1));
+            result.setTimeToNextLevel((buildingKind.getTime().valueOf(level + 1)) / Consts.SPEED);
             result.setResourcesToNextLevel(buildingKind.getResourcesToNextLevel(level));
             result.setRequirementBuildings(new ArrayList<>());
         }

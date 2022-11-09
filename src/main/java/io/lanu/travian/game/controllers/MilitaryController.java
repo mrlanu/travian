@@ -24,12 +24,9 @@ public class MilitaryController {
 
     private final MilitaryService militaryService;
 
-    private final SettlementRepository settlementRepository;
-
-    public MilitaryController(SettlementState state, MilitaryService militaryService, SettlementRepository settlementRepository) {
+    public MilitaryController(SettlementState state, MilitaryService militaryService) {
         this.state = state;
         this.militaryService = militaryService;
-        this.settlementRepository = settlementRepository;
     }
 
     @GetMapping("/{villageId}/military-units")

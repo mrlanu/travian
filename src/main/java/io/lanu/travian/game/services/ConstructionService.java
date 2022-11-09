@@ -11,8 +11,6 @@ public interface ConstructionService {
 
     SettlementEntity createBuildEvent(SettlementEntity village, Integer fieldPosition, EBuilding kind);
 
-    //List<ConstructionEventEntity> findAllByVillageId(String villageId);
-
     SettlementEntity deleteBuildingEvent(SettlementEntity village, String eventId);
 
     List<NewBuilding> getListOfAllNewBuildings(SettlementEntity village);
