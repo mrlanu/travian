@@ -20,7 +20,7 @@ public class TroopsArrivedEvent implements Event{
     private final MovedMilitaryUnitEntity militaryUnit;
     private final VillageBrief targetVillage;
     private final SettlementState settlementState;
-    
+
     @Override
     public void execute(SettlementEntity entity) {
         getMissionStrategy(entity).handle();

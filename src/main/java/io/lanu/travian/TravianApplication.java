@@ -1,6 +1,8 @@
 package io.lanu.travian;
 
 import io.lanu.travian.game.services.WorldService;
+import io.lanu.travian.security.AuthRequest;
+import io.lanu.travian.security.UsersService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class TravianApplication {
 
     private final WorldService worldService;
+    //just for fake users, should be removed
 
     public TravianApplication(WorldService worldService) {
         this.worldService = worldService;
@@ -32,5 +35,7 @@ public class TravianApplication {
     public CommandLineRunner isWorldExist(){
         return args -> worldService.createWorld();
     }
+
+
 
 }

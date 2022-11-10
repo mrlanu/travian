@@ -30,4 +30,10 @@ public class UsersController {
     public ResponseEntity<List<ShortVillageInfo>> getAllVillagesIdByUserId(@PathVariable String userId){
         return ResponseEntity.status(HttpStatus.OK).body(settlementService.getAllVillagesByUserId(userId));
     }
+    @GetMapping("/users/fake")
+    public void createFakeUsers(){
+        usersService.registerUser(new AuthRequest("mrlanu@gmail.com", "mrlanu", "12345"));
+        usersService.registerUser(new AuthRequest("wer@yahoo.com", "wer", "12345"));
+    }
+
 }

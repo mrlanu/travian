@@ -1,5 +1,6 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.Consts;
 import io.lanu.travian.enums.SettlementSubType;
 import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.entities.MapTile;
@@ -14,9 +15,6 @@ import java.util.stream.Collectors;
 @Service
 public class WorldServiceImpl implements WorldService{
 
-    private final int WORLD_X = 50;
-    private final int WORLD_Y = 50;
-    private final int OASES_AMOUNT = 50;
     private final MapTileRepository repo;
     private final SettlementRepository settlementRepository;
 
@@ -28,7 +26,7 @@ public class WorldServiceImpl implements WorldService{
     @Override
     public void createWorld() {
         if (repo.count() == 0){
-            createNewWorld(WORLD_X, WORLD_Y);
+            createNewWorld(Consts.WORLD_X, Consts.WORLD_Y);
         }
     }
 
@@ -52,7 +50,7 @@ public class WorldServiceImpl implements WorldService{
     }
 
     private void insertOases(List<MapTile> world, SettlementSubType subType){
-        for (int i = 0; i < OASES_AMOUNT; i++){
+        for (int i = 0; i < Consts.OASES_AMOUNT; i++){
             var emptySpots = world.stream()
                     .filter(MapTile::isEmpty)
                     .collect(Collectors.toList());

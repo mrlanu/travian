@@ -9,6 +9,7 @@ import io.lanu.travian.game.models.responses.VillageBrief;
 import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
 import io.lanu.travian.game.repositories.MilitaryUnitRepository;
 import io.lanu.travian.game.repositories.MovedMilitaryUnitRepository;
+import io.lanu.travian.game.repositories.ReportRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -33,13 +34,16 @@ public class SettlementStateImpl implements SettlementState {
 
     private final CombatUnitOrderRepository combatUnitOrderRepository;
 
+    private final ReportRepository reportRepository;
+
     public SettlementStateImpl(SettlementRepository settlementRepository,
                                MovedMilitaryUnitRepository movedMilitaryUnitRepository, MilitaryUnitRepository militaryUnitRepository,
-                               CombatUnitOrderRepository combatUnitOrderRepository) {
+                               CombatUnitOrderRepository combatUnitOrderRepository, ReportRepository reportRepository) {
         this.settlementRepository = settlementRepository;
         this.movedMilitaryUnitRepository = movedMilitaryUnitRepository;
         this.militaryUnitRepository = militaryUnitRepository;
         this.combatUnitOrderRepository = combatUnitOrderRepository;
+        this.reportRepository = reportRepository;
     }
 
     @Override
@@ -55,6 +59,11 @@ public class SettlementStateImpl implements SettlementState {
     @Override
     public MilitaryUnitRepository getMilitaryUnitRepository() {
         return militaryUnitRepository;
+    }
+
+    @Override
+    public ReportRepository getReportRepository() {
+        return reportRepository;
     }
 
     public SettlementEntity recalculateCurrentState(String villageId) {

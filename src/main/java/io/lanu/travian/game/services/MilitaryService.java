@@ -20,7 +20,6 @@ public interface MilitaryService {
     List<ECombatUnit> getAllResearchedUnits(String villageId);
     Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillage(SettlementEntity village);
     //List<MovedMilitaryUnitEntity> getAllMovedUnitsByOriginVillageId(String villageId);
-    MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest, SettlementEntity village, SettlementEntity attackedVillage);
     SettlementEntity sendTroops(MilitaryUnitContract militaryUnitContract, SettlementEntity village);
     MilitaryUnitEntity saveMilitaryUnit(MilitaryUnitEntity unit);
     MovedMilitaryUnitEntity saveMovedMilitaryUnit(MovedMilitaryUnitEntity unit);

@@ -249,8 +249,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest, SettlementEntity attackingVillage, SettlementEntity attackedVillage) {
+    private MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest, SettlementEntity attackingVillage, SettlementEntity attackedVillage) {
 
         var attackingUser = usersRepository.findByUserId(attackingVillage.getAccountId()).orElseThrow();
         UserEntity attackedUser;
@@ -297,8 +296,10 @@ public class MilitaryServiceImpl implements MilitaryService {
         // create MilitaryUnitEntity
         var moveUnit = new MovedMilitaryUnitEntity(
                 contract.getNation(), contract.getMission(), contract.getUnits(), null, contract.getOriginVillageId(),
-                new VillageBrief(contract.getOriginVillageId(), contract.getOriginVillageName(), contract.getOriginPlayerName(), contract.getOriginVillageCoordinates()),
-                contract.getTargetVillageId(), new VillageBrief(contract.getTargetVillageName(), contract.getTargetPlayerName(), contract.getTargetVillageCoordinates()),
+                new VillageBrief(contract.getOriginVillageId(), contract.getOriginVillageName(), contract.getOriginPlayerName(),
+                        contract.getOriginVillageCoordinates()), contract.getTargetVillageId(),
+                new VillageBrief(contract.getTargetVillageName(), contract.getTargetPlayerName(),
+                        contract.getTargetVillageCoordinates()),
                 LocalDateTime.now().plusSeconds(contract.getDuration()), contract.getDuration(), 0);
         movedMilitaryUnitRepository.save(moveUnit);
         return village;
