@@ -22,27 +22,20 @@ public class MovedMilitaryUnitEntity {
     private String mission;
     private int[] units;
     private Map<EResource, BigDecimal> plunder;
-
-    private String originVillageId;
     private VillageBrief origin;
-
-    private String targetVillageId;
     private VillageBrief target;
-
     private LocalDateTime executionTime;
     private int duration;
     private int eatExpenses;
 
-    public MovedMilitaryUnitEntity(ENation nation, String mission, int[] units, Map<EResource, BigDecimal> plunder, String originVillageId,
-                                   VillageBrief origin, String targetVillageId, VillageBrief target, LocalDateTime executionTime,
+    public MovedMilitaryUnitEntity(ENation nation, String mission, int[] units, Map<EResource, BigDecimal> plunder,
+                                   VillageBrief origin, VillageBrief target, LocalDateTime executionTime,
                                    int duration, int eatExpenses) {
         this.nation = nation;
         this.mission = mission;
         this.units = units;
         this.plunder = plunder;
-        this.originVillageId = originVillageId;
         this.origin = origin;
-        this.targetVillageId = targetVillageId;
         this.target = target;
         this.executionTime = executionTime;
         this.duration = duration;

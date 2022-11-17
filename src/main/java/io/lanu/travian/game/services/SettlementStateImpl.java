@@ -124,7 +124,7 @@ public class SettlementStateImpl implements SettlementState {
                 .filter(militaryUnitEntity -> militaryUnitEntity.getExecutionTime().isBefore(LocalDateTime.now()))
                 .map(mU -> new TroopsArrivedEvent(
                         mU,
-                        new VillageBrief(mU.getTargetVillageId(), mU.getTarget().getVillageName(), mU.getTarget().getPlayerName(),
+                        new VillageBrief(mU.getTarget().getVillageId(), mU.getTarget().getVillageName(), mU.getTarget().getPlayerName(),
                                 mU.getTarget().getCoordinates()), this))
                 .collect(Collectors.toList());
 

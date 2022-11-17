@@ -87,9 +87,9 @@ public class MilitaryServiceImpl implements MilitaryService {
         List<MilitaryUnitView> unitsList = movedMilitaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(villageId, villageId)
                 .stream()
                 .map(mEv -> new MovedMilitaryUnitView(mEv.getId(), mEv.getNation(), mEv.getMission(), true, null,
-                                new VillageBrief(mEv.getOriginVillageId(), mEv.getOrigin().getVillageName(),
+                                new VillageBrief(mEv.getOrigin().getVillageId(), mEv.getOrigin().getVillageName(),
                                         mEv.getOrigin().getPlayerName(), mEv.getOrigin().getCoordinates()),
-                                new VillageBrief(mEv.getTargetVillageId(), mEv.getTarget().getVillageName(),
+                                new VillageBrief(mEv.getTarget().getVillageId(), mEv.getTarget().getVillageName(),
                                 mEv.getTarget().getPlayerName(), mEv.getTarget().getCoordinates()),
                                 mEv.getUnits(), mEv.getPlunder(), mEv.getExecutionTime(), (int) Duration.between(LocalDateTime.now(),
                                 mEv.getExecutionTime()).toSeconds()))
@@ -143,7 +143,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .getAllByOriginVillageIdOrTargetVillageId(settlement.getId(), settlement.getId())
                 .stream()
                 .sorted(Comparator.comparing(MovedMilitaryUnitEntity::getExecutionTime))
-                .collect(Collectors.partitioningBy(m -> m.getOriginVillageId().equals(settlement.getId()),
+                .collect(Collectors.partitioningBy(m -> m.getOrigin().getVillageId().equals(settlement.getId()),
                         // sort attacks (true) & reinforcements (false)
                         Collectors.groupingBy(m -> m.getMission().equals(EMilitaryUnitMission.ATTACK.getName()) ||
                                 m.getMission().equals(EMilitaryUnitMission.RAID.getName()))));
@@ -295,10 +295,10 @@ public class MilitaryServiceImpl implements MilitaryService {
         }
         // create MilitaryUnitEntity
         var moveUnit = new MovedMilitaryUnitEntity(
-                contract.getNation(), contract.getMission(), contract.getUnits(), null, contract.getOriginVillageId(),
+                contract.getNation(), contract.getMission(), contract.getUnits(), null,
                 new VillageBrief(contract.getOriginVillageId(), contract.getOriginVillageName(), contract.getOriginPlayerName(),
-                        contract.getOriginVillageCoordinates()), contract.getTargetVillageId(),
-                new VillageBrief(contract.getTargetVillageName(), contract.getTargetPlayerName(),
+                        contract.getOriginVillageCoordinates()),
+                new VillageBrief(contract.getTargetVillageId(), contract.getTargetPlayerName(), contract.getTargetPlayerName(),
                         contract.getTargetVillageCoordinates()),
                 LocalDateTime.now().plusSeconds(contract.getDuration()), contract.getDuration(), 0);
         movedMilitaryUnitRepository.save(moveUnit);

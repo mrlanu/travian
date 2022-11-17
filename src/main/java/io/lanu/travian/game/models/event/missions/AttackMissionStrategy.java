@@ -44,8 +44,8 @@ public class AttackMissionStrategy extends MissionStrategy {
                     EResource.IRON, BigDecimal.ZERO, EResource.WOOD, BigDecimal.ZERO));
             //----------
             militaryUnit.setMission(EMilitaryUnitMission.BACK.getName());
-            militaryUnit.setTargetVillageId(militaryUnit.getOriginVillageId());
-            militaryUnit.setOriginVillageId(currentSettlement.getId());
+            militaryUnit.setTarget(militaryUnit.getOrigin());
+            militaryUnit.setOrigin(new VillageBrief(currentSettlement.getId(), currentSettlement.getName(), new int[]{0, 0}));
             militaryUnit.setOrigin(militaryUnit.getTarget());
             militaryUnit.setExecutionTime(LocalDateTime.now().plusSeconds(militaryUnit.getDuration()));
             settlementState.getMovedMilitaryUnitRepository().save(militaryUnit);
@@ -64,11 +64,11 @@ public class AttackMissionStrategy extends MissionStrategy {
         var report = new ReportEntity(
                 EMilitaryUnitMission.ATTACK,
                 new ReportPlayer(militaryUnit.getOrigin().getPlayerName(), "attacker id",
-                        militaryUnit.getOrigin().getVillageName(), militaryUnit.getOriginVillageId(), militaryUnit.getUnits(),
+                        militaryUnit.getOrigin().getVillageName(), militaryUnit.getOrigin().getVillageId(), militaryUnit.getUnits(),
                         getMilitaryUnit().getUnits(), new HashMap<>(), 100
                         ),
                 new ReportPlayer(militaryUnit.getTarget().getPlayerName(), "defender id",
-                        militaryUnit.getTarget().getVillageName(), militaryUnit.getTargetVillageId(), currentSettlement.getHomeLegion(),
+                        militaryUnit.getTarget().getVillageName(), militaryUnit.getTarget().getVillageId(), currentSettlement.getHomeLegion(),
                         currentSettlement.getHomeLegion(), null, 0), LocalDateTime.now()
         );
         settlementState.getReportRepository().save(report);

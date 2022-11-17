@@ -24,9 +24,9 @@ public class ReinforcementMissionStrategy extends MissionStrategy {
                 militaryUnit.getNation(),
                 militaryUnit.getMission(),
                 militaryUnit.getUnits(),
-                militaryUnit.getOriginVillageId(),
+                militaryUnit.getOrigin().getVillageId(),
                 militaryUnit.getOrigin(),
-                militaryUnit.getTargetVillageId(),
+                militaryUnit.getTarget().getVillageId(),
                 militaryUnit.getTarget(),
                 militaryUnit.getEatExpenses()
         );
