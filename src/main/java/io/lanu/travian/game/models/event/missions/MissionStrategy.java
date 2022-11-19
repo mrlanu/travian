@@ -1,8 +1,7 @@
 package io.lanu.travian.game.models.event.missions;
 
+import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
-import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
-import io.lanu.travian.game.models.responses.VillageBrief;
 import io.lanu.travian.game.services.SettlementState;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,17 +10,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public abstract class MissionStrategy {
     protected SettlementEntity currentSettlement;
-    protected MovedMilitaryUnitEntity militaryUnit;
-    protected VillageBrief targetVillage;
+    protected CombatGroupEntity combatGroup;
     protected SettlementState settlementState;
 
     public MissionStrategy(SettlementEntity currentSettlement,
-                           MovedMilitaryUnitEntity militaryUnit,
-                           VillageBrief targetVillage,
+                           CombatGroupEntity combatGroup,
                            SettlementState settlementState) {
         this.currentSettlement = currentSettlement;
-        this.militaryUnit = militaryUnit;
-        this.targetVillage = targetVillage;
+        this.combatGroup = combatGroup;
         this.settlementState = settlementState;
     }
 

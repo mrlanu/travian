@@ -12,7 +12,7 @@ public class VillageEntityFactory {
 
     public static SettlementEntity getVillageByType(SettlementType villageType, SettlementSubType subType){
         switch (villageType){
-            case VILLAGE: return new SettlementEntity(null, SettlementType.VILLAGE, subType, null, 0, 0 , "New Village", ENation.GALLS,
+            case VILLAGE: return new SettlementEntity(null, SettlementType.VILLAGE, subType, null, null, 0, 0 , "New Village", ENation.GALLS,
                     100, 100, 100,
                     Map.ofEntries(
                             Map.entry(1, new BuildModel(EBuilding.WOODCUTTER, 1)),
@@ -62,7 +62,7 @@ public class VillageEntityFactory {
                     new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
                     new ArrayList<>(),
                     null);
-            case OASIS: return new SettlementEntity(null, SettlementType.OASIS, subType, null, 0, 0 , "Oasis", null,
+            case OASIS: return new SettlementEntity(null, SettlementType.OASIS, subType, null, null, 0, 0 , "Oasis", null,
                     0, 0, 100,
                     Map.ofEntries(
                             Map.entry(1, new BuildModel(EBuilding.WOODCUTTER, 2)),

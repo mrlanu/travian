@@ -26,18 +26,19 @@ import java.util.stream.Collectors;
 public class SettlementServiceImpl implements SettlementRepository {
     private final io.lanu.travian.game.repositories.SettlementRepository settlementRepository;
     private final MapTileRepository worldRepo;
+    private final CombatGroupRepository combatGroupRepository;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
     private final UsersRepository usersRepository;
-    private final MilitaryUnitRepository militaryUnitRepository;
     private static final MathContext mc = new MathContext(3);
 
-    public SettlementServiceImpl(io.lanu.travian.game.repositories.SettlementRepository settlementRepository, MapTileRepository worldRepo,
-                                 ResearchedCombatUnitRepository researchedCombatUnitRepository, UsersRepository usersRepository, MilitaryUnitRepository militaryUnitRepository) {
+    public SettlementServiceImpl(io.lanu.travian.game.repositories.SettlementRepository settlementRepository,
+                                 MapTileRepository worldRepo,
+                                 CombatGroupRepository combatGroupRepository, ResearchedCombatUnitRepository researchedCombatUnitRepository, UsersRepository usersRepository) {
         this.settlementRepository = settlementRepository;
         this.worldRepo = worldRepo;
+        this.combatGroupRepository = combatGroupRepository;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.usersRepository = usersRepository;
-        this.militaryUnitRepository = militaryUnitRepository;
     }
 
     @Override
@@ -54,6 +55,7 @@ public class SettlementServiceImpl implements SettlementRepository {
         result.setX(tile.getCorX());
         result.setY(tile.getCorY());
         result.setId(tile.getId());
+        result.setOwnerUserName(newVillageRequest.getOwnerUserName());
         tile.setClazz("village-galls");
         tile.setName(result.getName());
         tile.setOwnerId(result.getId());
@@ -114,7 +116,8 @@ public class SettlementServiceImpl implements SettlementRepository {
 
     @Override
     public VillageView getVillageById(SettlementEntity settlementEntity) {
-        var militariesInVillage = militaryUnitRepository.getAllByTargetVillageId(settlementEntity.getId());
+        var militariesInVillage =
+                combatGroupRepository.getAllByToSettlementIdAndMoved(settlementEntity.getId(), false);
         return new VillageView(settlementEntity, settlementEntity.getConstructionEventList(), militariesInVillage);
     }
 

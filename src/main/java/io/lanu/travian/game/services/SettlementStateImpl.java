@@ -6,10 +6,7 @@ import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.CombatUnitDoneEventEntity;
 import io.lanu.travian.game.models.event.*;
 import io.lanu.travian.game.models.responses.VillageBrief;
-import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
-import io.lanu.travian.game.repositories.MilitaryUnitRepository;
-import io.lanu.travian.game.repositories.MovedMilitaryUnitRepository;
-import io.lanu.travian.game.repositories.ReportRepository;
+import io.lanu.travian.game.repositories.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,22 +23,16 @@ import java.util.stream.Collectors;
 public class SettlementStateImpl implements SettlementState {
 
     private static final MathContext mc = new MathContext(3);
-    
     private final SettlementRepository settlementRepository;
-
-    private final MovedMilitaryUnitRepository movedMilitaryUnitRepository;
-    private final MilitaryUnitRepository militaryUnitRepository;
-
+    private final CombatGroupRepository combatGroupRepository;
     private final CombatUnitOrderRepository combatUnitOrderRepository;
 
     private final ReportRepository reportRepository;
 
-    public SettlementStateImpl(SettlementRepository settlementRepository,
-                               MovedMilitaryUnitRepository movedMilitaryUnitRepository, MilitaryUnitRepository militaryUnitRepository,
+    public SettlementStateImpl(SettlementRepository settlementRepository, CombatGroupRepository combatGroupRepository,
                                CombatUnitOrderRepository combatUnitOrderRepository, ReportRepository reportRepository) {
         this.settlementRepository = settlementRepository;
-        this.movedMilitaryUnitRepository = movedMilitaryUnitRepository;
-        this.militaryUnitRepository = militaryUnitRepository;
+        this.combatGroupRepository = combatGroupRepository;
         this.combatUnitOrderRepository = combatUnitOrderRepository;
         this.reportRepository = reportRepository;
     }
@@ -52,13 +43,8 @@ public class SettlementStateImpl implements SettlementState {
     }
 
     @Override
-    public MovedMilitaryUnitRepository getMovedMilitaryUnitRepository() {
-        return movedMilitaryUnitRepository;
-    }
-
-    @Override
-    public MilitaryUnitRepository getMilitaryUnitRepository() {
-        return militaryUnitRepository;
+    public CombatGroupRepository getCombatGroupRepository() {
+        return combatGroupRepository;
     }
 
     @Override
@@ -118,14 +104,11 @@ public class SettlementStateImpl implements SettlementState {
 
 
         // add all wars events
-        var militaryEventList = movedMilitaryUnitRepository
-                .getAllByOriginVillageIdOrTargetVillageId(currentSettlement.getId(), currentSettlement.getId())
+        var militaryEventList = combatGroupRepository
+                .getCombatGroupByOwnerSettlementIdOrToSettlementId(currentSettlement.getId(), currentSettlement.getId())
                 .stream()
-                .filter(militaryUnitEntity -> militaryUnitEntity.getExecutionTime().isBefore(LocalDateTime.now()))
-                .map(mU -> new TroopsArrivedEvent(
-                        mU,
-                        new VillageBrief(mU.getTarget().getVillageId(), mU.getTarget().getVillageName(), mU.getTarget().getPlayerName(),
-                                mU.getTarget().getCoordinates()), this))
+                .filter(cG -> cG.getExecutionTime().isBefore(LocalDateTime.now()))
+                .map(cG -> new TroopsArrivedEvent(cG, this))
                 .collect(Collectors.toList());
 
         allEvents.addAll(militaryEventList);

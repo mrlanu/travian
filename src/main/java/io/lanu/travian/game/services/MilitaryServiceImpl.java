@@ -3,6 +3,7 @@ package io.lanu.travian.game.services;
 import io.lanu.travian.Consts;
 import io.lanu.travian.enums.*;
 import io.lanu.travian.errors.UserErrorException;
+import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
@@ -10,10 +11,7 @@ import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.*;
-import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
-import io.lanu.travian.game.repositories.MilitaryUnitRepository;
-import io.lanu.travian.game.repositories.MovedMilitaryUnitRepository;
-import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
+import io.lanu.travian.game.repositories.*;
 import io.lanu.travian.security.UserEntity;
 import io.lanu.travian.security.UsersRepository;
 import io.lanu.travian.templates.military.CombatUnitFactory;
@@ -32,92 +30,75 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     private final CombatUnitOrderRepository combatUnitOrderRepository;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
-    private final MilitaryUnitRepository militaryUnitRepository;
-    private final MovedMilitaryUnitRepository movedMilitaryUnitRepository;
+    private final CombatGroupRepository combatGroupRepository;
     private final UsersRepository usersRepository;
-
     private final SettlementRepository settlementRepository;
 
     public MilitaryServiceImpl(CombatUnitOrderRepository combatUnitOrderRepository,
                                ResearchedCombatUnitRepository researchedCombatUnitRepository,
-                               MilitaryUnitRepository militaryUnitRepository, MovedMilitaryUnitRepository movedMilitaryUnitRepository, UsersRepository usersRepository, SettlementRepository settlementRepository) {
+                               CombatGroupRepository combatGroupRepository, UsersRepository usersRepository,
+                               SettlementRepository settlementRepository) {
         this.combatUnitOrderRepository = combatUnitOrderRepository;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
-        this.militaryUnitRepository = militaryUnitRepository;
-        this.movedMilitaryUnitRepository = movedMilitaryUnitRepository;
+        this.combatGroupRepository = combatGroupRepository;
         this.usersRepository = usersRepository;
         this.settlementRepository = settlementRepository;
     }
 
     @Override
-    public MilitaryUnitEntity saveMilitaryUnit(MilitaryUnitEntity unit) {
-        return militaryUnitRepository.save(unit);
-    }
-
-    @Override
-    public MovedMilitaryUnitEntity saveMovedMilitaryUnit(MovedMilitaryUnitEntity unit) {
-        return movedMilitaryUnitRepository.save(unit);
-    }
-
-    @Override
-    public void deleteMovedUnitById(String id) {
-        movedMilitaryUnitRepository.deleteById(id);
-    }
-
-    /*@Override
-    public void deleteUnitById(String id) {
-        militaryUnitRepository.deleteById(id);
-    }
-
-    @Override
-    public List<MilitaryUnitEntity> getAllByTargetVillageId(String villageId) {
-        return militaryUnitRepository.getAllByTargetVillageId(villageId);
-    }
-
-    @Override
-    public List<MovedMilitaryUnitEntity> getAllMovedUnitsByOriginVillageId(String villageId) {
-        return movedMilitaryUnitRepository.getAllByOriginVillageId(villageId);
-    }
-*/
-    @Override
     public Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillage(SettlementEntity village) {
         var userName = usersRepository.findByUserId(village.getAccountId()).orElseThrow();
-        var villageId = village.getId();
+        var cache = new HashMap<String, SettlementEntity>();
+
         // other units
-        List<MilitaryUnitView> unitsList = movedMilitaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(villageId, villageId)
+        List<MilitaryUnitView> unitsList = combatGroupRepository
+                .getCombatGroupByOwnerSettlementIdOrToSettlementId(village.getId(), village.getId())
                 .stream()
-                .map(mEv -> new MovedMilitaryUnitView(mEv.getId(), mEv.getNation(), mEv.getMission(), true, null,
-                                new VillageBrief(mEv.getOrigin().getVillageId(), mEv.getOrigin().getVillageName(),
-                                        mEv.getOrigin().getPlayerName(), mEv.getOrigin().getCoordinates()),
-                                new VillageBrief(mEv.getTarget().getVillageId(), mEv.getTarget().getVillageName(),
-                                mEv.getTarget().getPlayerName(), mEv.getTarget().getCoordinates()),
-                                mEv.getUnits(), mEv.getPlunder(), mEv.getExecutionTime(), (int) Duration.between(LocalDateTime.now(),
-                                mEv.getExecutionTime()).toSeconds()))
-                .peek(mU -> {
-                    if (mU.getOrigin().getVillageId().equals(villageId)){
-                        mU.setState(EMilitaryUnitLocation.OUT);
+                .map(cG -> {
+                    SettlementEntity from;
+                    SettlementEntity to;
+                    if (cache.containsKey(cG.getOwnerSettlementId())) {
+                        from = cache.get(cG.getOwnerSettlementId());
+                    } else {
+                        from = settlementRepository.findById(cG.getOwnerSettlementId());
+                        cache.put(from.getId(), from);
+                    }
+                    if (cache.containsKey(cG.getToSettlementId())) {
+                        to = cache.get(cG.getToSettlementId());
+                    } else {
+                        to = settlementRepository.findById(cG.getToSettlementId());
+                        cache.put(to.getId(), to);
+                    }
+
+                    if (cG.isMoved()) {
+                        return new MovedMilitaryUnitView(cG.getId(), cG.getNation(), cG.getMission(), true, null,
+                                new VillageBrief(from.getId(), from.getName(), cG.getOwnerUserName(), new int[]{from.getX(), from.getY()}),
+                                new VillageBrief(to.getId(), to.getName(), village.getOwnerUserName(), new int[]{to.getX(), to.getY()}),
+                                cG.getUnits(), cG.getPlunder(), cG.getExecutionTime(),
+                                (int) Duration.between(LocalDateTime.now(), cG.getExecutionTime()).toSeconds());
+                    } else {
+                        return new MilitaryUnitViewStatic(cG.getId(), cG.getNation(), cG.getMission(), false, null,
+                                new VillageBrief(from.getId(), from.getName(), cG.getOwnerUserName(), new int[]{from.getX(), from.getY()}),
+                                new VillageBrief(to.getId(), to.getName(), village.getOwnerUserName(), new int[]{to.getX(), to.getY()}),
+                                cG.getUnits(), to.getId(), 5);
+                    }
+                })
+                .peek(cG -> {
+                    if (cG.getOrigin().getVillageId().equals(village.getId())){
+                        if (cG.isMove()) {
+                            cG.setState(EMilitaryUnitLocation.OUT);
+                        } else {
+                            cG.setState(EMilitaryUnitLocation.AWAY);
+                        }
                     }else {
-                        mU.setState(EMilitaryUnitLocation.IN);
+                        if (cG.isMove()){
+                            cG.setState(EMilitaryUnitLocation.IN);
+                        }else {
+                            cG.setState(EMilitaryUnitLocation.HOME);
+                        }
                     }
                 })
                 .collect(Collectors.toList());
-
-        unitsList.addAll(
-                militaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(villageId, villageId).stream()
-                    .map(mEv -> new MilitaryUnitViewStatic(mEv.getId(), mEv.getNation(), mEv.getMission(), false, null,
-                            new VillageBrief(mEv.getOriginVillageId(), mEv.getOrigin().getVillageName(),
-                                    mEv.getOrigin().getPlayerName(), mEv.getOrigin().getCoordinates()),
-                            new VillageBrief(mEv.getTargetVillageId(), mEv.getTarget().getVillageName(),
-                                    mEv.getTarget().getPlayerName(), mEv.getTarget().getCoordinates()),
-                            mEv.getUnits(), mEv.getTargetVillageId(), mEv.getEatExpenses()))
-                        .peek(mU -> {
-                            if (mU.getOrigin().getVillageId().equals(villageId)){
-                                mU.setState(EMilitaryUnitLocation.AWAY);
-                            }else {
-                                mU.setState(EMilitaryUnitLocation.HOME);
-                            }
-                        })
-                        .collect(Collectors.toList()));
 
         Map<String, List<MilitaryUnitView>> militaryUnitsMap = unitsList.stream()
                 .collect(Collectors.groupingBy(militaryEvent -> militaryEvent.getState().getName()));
@@ -125,9 +106,9 @@ public class MilitaryServiceImpl implements MilitaryService {
         // home army
         MilitaryUnitView homeArmy = new MilitaryUnitViewStatic("home", village.getNation(), EMilitaryUnitMission.HOME.getName(),
                 false, EMilitaryUnitLocation.HOME,
-                new VillageBrief(villageId, village.getName(), userName.getUsername(), new int[]{village.getX(), village.getY()}),
-                new VillageBrief(villageId, village.getName(), userName.getUsername(), new int[]{village.getX(), village.getY()}),
-                village.getHomeLegion(), villageId, 5);
+                new VillageBrief(village.getId(), village.getName(), userName.getUsername(), new int[]{village.getX(), village.getY()}),
+                new VillageBrief(village.getId(), village.getName(), userName.getUsername(), new int[]{village.getX(), village.getY()}),
+                village.getHomeLegion(), village.getId(), 5);
 
         var homeArmies = militaryUnitsMap.getOrDefault(EMilitaryUnitLocation.HOME.getName(), new ArrayList<>());
         homeArmies.add(homeArmy);
@@ -139,11 +120,11 @@ public class MilitaryServiceImpl implements MilitaryService {
     public List<TroopMovementsResponse> getTroopMovements(SettlementEntity settlement) {
         List<TroopMovementsResponse> result = new ArrayList<>();
         //sort outgoing (true) & incoming (false)
-        var movedUnits = movedMilitaryUnitRepository
-                .getAllByOriginVillageIdOrTargetVillageId(settlement.getId(), settlement.getId())
+        var movedUnits = combatGroupRepository
+                .getCombatGroupByOwnerSettlementIdOrToSettlementId(settlement.getId(), settlement.getId())
                 .stream()
-                .sorted(Comparator.comparing(MovedMilitaryUnitEntity::getExecutionTime))
-                .collect(Collectors.partitioningBy(m -> m.getOrigin().getVillageId().equals(settlement.getId()),
+                .sorted(Comparator.comparing(CombatGroupEntity::getExecutionTime))
+                .collect(Collectors.partitioningBy(m -> m.getOwnerSettlementId().equals(settlement.getId()),
                         // sort attacks (true) & reinforcements (false)
                         Collectors.groupingBy(m -> m.getMission().equals(EMilitaryUnitMission.ATTACK.getName()) ||
                                 m.getMission().equals(EMilitaryUnitMission.RAID.getName()))));
@@ -251,13 +232,8 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     private MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest, SettlementEntity attackingVillage, SettlementEntity attackedVillage) {
 
-        var attackingUser = usersRepository.findByUserId(attackingVillage.getAccountId()).orElseThrow();
-        UserEntity attackedUser;
-        if (attackedVillage.getAccountId() != null){
-            attackedUser = usersRepository.findByUserId(attackedVillage.getAccountId()).orElseThrow();
-        } else {
-            attackedUser = new UserEntity(null, null, "Nature", null);
-        }
+        String attackedUser = attackedVillage.getOwnerUserName() == null ? "Nature" : attackedVillage.getOwnerUserName();
+
         var duration = getDistance(attackedVillage.getX(), attackedVillage.getY(), attackingVillage.getX(), attackingVillage.getY())
                 .multiply(BigDecimal.valueOf(3600)
                         .divide(BigDecimal.valueOf(10 * Consts.SPEED), MathContext.DECIMAL32)).intValue();
@@ -267,11 +243,11 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .mission(troopsSendingRequest.getKind().getName())
                 .originVillageId(attackingVillage.getId())
                 .originVillageName(attackingVillage.getName())
-                .originPlayerName(attackingUser.getUsername())
+                .originPlayerName(attackingVillage.getOwnerUserName())
                 .originVillageCoordinates(new int[]{attackingVillage.getX(), attackingVillage.getY()})
                 .targetVillageId(attackedVillage.getId())
                 .targetVillageName(attackedVillage.getName())
-                .targetPlayerName(attackedUser.getUsername())
+                .targetPlayerName(attackedUser)
                 .targetVillageCoordinates(new int[]{attackedVillage.getX(), attackedVillage.getY()})
                 .units(troopsSendingRequest.getWaves().get(0).getTroops())
                 .arrivalTime(arrivalTime)
@@ -293,20 +269,23 @@ public class MilitaryServiceImpl implements MilitaryService {
         for (int i = 0; i < homeLegion.length; i++){
             homeLegion[i] = homeLegion[i] - attackingUnits[i];
         }
-        // create MilitaryUnitEntity
-        var moveUnit = new MovedMilitaryUnitEntity(
-                contract.getNation(), contract.getMission(), contract.getUnits(), null,
-                new VillageBrief(contract.getOriginVillageId(), contract.getOriginVillageName(), contract.getOriginPlayerName(),
-                        contract.getOriginVillageCoordinates()),
-                new VillageBrief(contract.getTargetVillageId(), contract.getTargetPlayerName(), contract.getTargetPlayerName(),
-                        contract.getTargetVillageCoordinates()),
-                LocalDateTime.now().plusSeconds(contract.getDuration()), contract.getDuration(), 0);
-        movedMilitaryUnitRepository.save(moveUnit);
+
+        var combatGroup = CombatGroupEntity.builder()
+                .moved(true)
+                .nation(village.getNation())
+                .ownerAccountId(village.getAccountId())
+                .ownerUserName(village.getOwnerUserName())
+                .ownerSettlementId(village.getId())
+                .ownerSettlementName(village.getName())
+                .toSettlementId(contract.getTargetVillageId())
+                .executionTime(LocalDateTime.now().plusSeconds(contract.getDuration()))
+                .duration(contract.getDuration())
+                .mission(contract.getMission())
+                .units(contract.getUnits())
+                .build();
+
+        combatGroupRepository.save(combatGroup);
+
         return village;
     }
-
-    /*@Override
-    public List<MovedMilitaryUnitEntity> getAllByOriginVillageIdOrTargetVillageId(String originId) {
-        return movedMilitaryUnitRepository.getAllByOriginVillageIdOrTargetVillageId(originId, originId);
-    }*/
 }

@@ -5,6 +5,7 @@ import io.lanu.travian.enums.ENation;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.entities.BuildModel;
+import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
@@ -28,6 +29,7 @@ import java.util.stream.IntStream;
 public class VillageView {
     private String villageId;
     private String accountId;
+    private String ownerUserName;
     private ENation nation;
     private String name;
     private int x;
@@ -46,13 +48,14 @@ public class VillageView {
     private List<ConstructionEventView> eventsList;
     private List<MilitaryUnitEntity> militariesInVillage;
 
-    public VillageView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList, List<MilitaryUnitEntity> militariesInVillage) {
+    public VillageView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList, List<CombatGroupEntity> militariesInVillage) {
         createView(settlementEntity, eventList, militariesInVillage);
     }
 
-    private void createView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList, List<MilitaryUnitEntity> militariesInVillage) {
+    private void createView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList, List<CombatGroupEntity> militariesInVillage) {
         this.villageId = settlementEntity.getId();
         this.accountId = settlementEntity.getAccountId();
+        this.ownerUserName = settlementEntity.getOwnerUserName();
         this.nation = settlementEntity.getNation();
         this.name = settlementEntity.getName();
         this.x = settlementEntity.getX();
@@ -71,7 +74,7 @@ public class VillageView {
         this.eventsList = this.buildEventsView(eventList);
     }
 
-    private Map<String, Integer> mapHomeLegion(int[] homeLegion, ENation nation, List<MilitaryUnitEntity> militariesInVillage) {
+    private Map<String, Integer> mapHomeLegion(int[] homeLegion, ENation nation, List<CombatGroupEntity> militariesInVillage) {
         var result = new HashMap<String, Integer>();
         for (int i = 0; i < homeLegion.length; i++){
             result.put(CombatUnitFactory.getCombatUnitFromArrayPosition(i, nation).getName(), homeLegion[i]);

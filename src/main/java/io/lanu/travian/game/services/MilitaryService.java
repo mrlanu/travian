@@ -21,9 +21,6 @@ public interface MilitaryService {
     Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillage(SettlementEntity village);
     //List<MovedMilitaryUnitEntity> getAllMovedUnitsByOriginVillageId(String villageId);
     SettlementEntity sendTroops(MilitaryUnitContract militaryUnitContract, SettlementEntity village);
-    MilitaryUnitEntity saveMilitaryUnit(MilitaryUnitEntity unit);
-    MovedMilitaryUnitEntity saveMovedMilitaryUnit(MovedMilitaryUnitEntity unit);
-    void deleteMovedUnitById(String id);
     //void deleteUnitById(String id);
     //List<MilitaryUnitEntity> getAllByTargetVillageId(String villageId);
     //List<MovedMilitaryUnitEntity> getAllByOriginVillageIdOrTargetVillageId(String originId);

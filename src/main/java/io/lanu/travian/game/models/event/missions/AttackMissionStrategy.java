@@ -2,12 +2,10 @@ package io.lanu.travian.game.models.event.missions;
 
 import io.lanu.travian.enums.EMilitaryUnitMission;
 import io.lanu.travian.enums.EResource;
+import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.ReportEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
-import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
 import io.lanu.travian.game.models.ReportPlayer;
-import io.lanu.travian.game.models.responses.VillageBrief;
-import io.lanu.travian.game.repositories.ReportRepository;
 import io.lanu.travian.game.services.SettlementState;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,16 +19,15 @@ import java.util.Map;
 @Data
 public class AttackMissionStrategy extends MissionStrategy {
 
-    public AttackMissionStrategy(SettlementEntity currentSettlement, MovedMilitaryUnitEntity militaryUnit,
-                                 VillageBrief targetVillage, SettlementState settlementState) {
-        super(currentSettlement, militaryUnit, targetVillage, settlementState);
+    public AttackMissionStrategy(SettlementEntity currentSettlement, CombatGroupEntity combatGroup, SettlementState settlementState) {
+        super(currentSettlement, combatGroup, settlementState);
     }
 
     @Override
     public void handle() {
         //here is recursive recalculation of all villages involved in this attack
         // perform an attack if we are in origin village or skip and this attack will be performed in target village during recursion
-        if (currentSettlement.getId().equals(targetVillage.getVillageId())){
+        if (currentSettlement.getId().equals(combatGroup.getToSettlementId())){
 
             createReport();
             System.out.println("Report created " + currentSettlement.getId());
@@ -40,22 +37,20 @@ public class AttackMissionStrategy extends MissionStrategy {
             //here should be an algorithm of a plunder
             // just dummy implementation
             storage.put(EResource.CLAY, storage.get(EResource.CLAY).subtract(BigDecimal.valueOf(100)));
-            militaryUnit.setPlunder(Map.of(EResource.CROP, BigDecimal.ZERO, EResource.CLAY, BigDecimal.valueOf(100),
+            combatGroup.setPlunder(Map.of(EResource.CROP, BigDecimal.ZERO, EResource.CLAY, BigDecimal.valueOf(100),
                     EResource.IRON, BigDecimal.ZERO, EResource.WOOD, BigDecimal.ZERO));
             //----------
-            militaryUnit.setMission(EMilitaryUnitMission.BACK.getName());
-            militaryUnit.setTarget(militaryUnit.getOrigin());
-            militaryUnit.setOrigin(new VillageBrief(currentSettlement.getId(), currentSettlement.getName(), new int[]{0, 0}));
-            militaryUnit.setOrigin(militaryUnit.getTarget());
-            militaryUnit.setExecutionTime(LocalDateTime.now().plusSeconds(militaryUnit.getDuration()));
-            settlementState.getMovedMilitaryUnitRepository().save(militaryUnit);
+            combatGroup.setMission(EMilitaryUnitMission.BACK.getName());
+            combatGroup.setToSettlementId(combatGroup.getOwnerSettlementId());
+            combatGroup.setExecutionTime(LocalDateTime.now().plusSeconds(combatGroup.getDuration()));
+            settlementState.getCombatGroupRepository().save(combatGroup);
 
 
         } else{
 
             System.out.println("Skipped " + currentSettlement.getId());
             //just in the skip case
-            settlementState.recalculateCurrentState(targetVillage.getVillageId());
+            settlementState.recalculateCurrentState(combatGroup.getToSettlementId());
 
         }
     }
@@ -63,14 +58,12 @@ public class AttackMissionStrategy extends MissionStrategy {
     private void createReport() {
         var report = new ReportEntity(
                 EMilitaryUnitMission.ATTACK,
-                new ReportPlayer(militaryUnit.getOrigin().getPlayerName(), "attacker id",
-                        militaryUnit.getOrigin().getVillageName(), militaryUnit.getOrigin().getVillageId(), militaryUnit.getUnits(),
-                        getMilitaryUnit().getUnits(), new HashMap<>(), 100
-                        ),
-                new ReportPlayer(militaryUnit.getTarget().getPlayerName(), "defender id",
-                        militaryUnit.getTarget().getVillageName(), militaryUnit.getTarget().getVillageId(), currentSettlement.getHomeLegion(),
-                        currentSettlement.getHomeLegion(), null, 0), LocalDateTime.now()
-        );
+                new ReportPlayer(combatGroup.getOwnerUserName(), combatGroup.getOwnerAccountId(),
+                        combatGroup.getOwnerSettlementName(), combatGroup.getOwnerSettlementId(), combatGroup.getUnits(),
+                        combatGroup.getUnits(), new HashMap<>(), 100),
+                new ReportPlayer(currentSettlement.getOwnerUserName(), currentSettlement.getAccountId(), currentSettlement.getName(),
+                        getCombatGroup().getId(), currentSettlement.getHomeLegion(),
+                        currentSettlement.getHomeLegion(), null, 0), LocalDateTime.now());
         settlementState.getReportRepository().save(report);
     }
 }

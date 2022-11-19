@@ -37,7 +37,7 @@ public class UsersServiceImpl implements UsersService {
         request.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
         var user = usersRepository
                 .save(new UserEntity(null, request.getEmail(), request.getUsername(), request.getPassword()));
-        var villageRequest = new NewVillageRequest(user.getUserId(), SettlementType.VILLAGE,
+        var villageRequest = new NewVillageRequest(user.getUserId(), user.getUsername(), SettlementType.VILLAGE,
                 0, 0);
         settlementService.newVillage(villageRequest);
         return user;

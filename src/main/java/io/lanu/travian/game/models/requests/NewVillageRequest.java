@@ -1,6 +1,7 @@
 package io.lanu.travian.game.models.requests;
 
 import io.lanu.travian.enums.SettlementType;
+import io.lanu.travian.game.services.SettlementRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NewVillageRequest {
     private String accountId;
+    private String ownerUserName;
     private SettlementType settlementType;
     private Integer x;
     private Integer y;

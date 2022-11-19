@@ -35,6 +35,7 @@ public class SettlementEntity {
     private SettlementType settlementType;
     private SettlementSubType subType;
     private String accountId;
+    private String ownerUserName;
     private int x;
     private int y;
     private String name;
