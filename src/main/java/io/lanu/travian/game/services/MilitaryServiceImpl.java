@@ -6,13 +6,10 @@ import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
-import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
-import io.lanu.travian.game.entities.events.MovedMilitaryUnitEntity;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.*;
 import io.lanu.travian.game.repositories.*;
-import io.lanu.travian.security.UserEntity;
 import io.lanu.travian.security.UsersRepository;
 import io.lanu.travian.templates.military.CombatUnitFactory;
 import org.springframework.stereotype.Service;
@@ -104,7 +101,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .collect(Collectors.groupingBy(militaryEvent -> militaryEvent.getState().getName()));
 
         // home army
-        MilitaryUnitView homeArmy = new MilitaryUnitViewStatic("home", village.getNation(), EMilitaryUnitMission.HOME.getName(),
+        MilitaryUnitView homeArmy = new MilitaryUnitViewStatic("home", village.getNation(), ECombatUnitMission.HOME,
                 false, EMilitaryUnitLocation.HOME,
                 new VillageBrief(village.getId(), village.getName(), userName.getUsername(), new int[]{village.getX(), village.getY()}),
                 new VillageBrief(village.getId(), village.getName(), userName.getUsername(), new int[]{village.getX(), village.getY()}),
@@ -126,20 +123,20 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .sorted(Comparator.comparing(CombatGroupEntity::getExecutionTime))
                 .collect(Collectors.partitioningBy(m -> m.getOwnerSettlementId().equals(settlement.getId()),
                         // sort attacks (true) & reinforcements (false)
-                        Collectors.groupingBy(m -> m.getMission().equals(EMilitaryUnitMission.ATTACK.getName()) ||
-                                m.getMission().equals(EMilitaryUnitMission.RAID.getName()))));
+                        Collectors.groupingBy(m -> m.getMission().equals(ECombatUnitMission.ATTACK.getName()) ||
+                                m.getMission().equals(ECombatUnitMission.RAID.getName()))));
 
         // outgoing
         // attacks & raids
         if (movedUnits.get(true).getOrDefault(true, new ArrayList<>()).size() > 0) {
-            result.add(new TroopMovementsResponse(movedUnits.get(true).get(true).size(), EMilitaryUnitMission.ATTACK.getName(),
+            result.add(new TroopMovementsResponse(movedUnits.get(true).get(true).size(), ECombatUnitMission.ATTACK.getName(),
                     (int) Duration.between(LocalDateTime.now(), movedUnits.get(true).get(true).get(0).getExecutionTime()).toSeconds()));
         } else {
             result.add(new TroopMovementsResponse());
         }
         //reinforcements
         if (movedUnits.get(true).getOrDefault(false, new ArrayList<>()).size() > 0){
-            result.add(new TroopMovementsResponse(movedUnits.get(true).get(false).size(), EMilitaryUnitMission.REINFORCEMENT.getName(),
+            result.add(new TroopMovementsResponse(movedUnits.get(true).get(false).size(), ECombatUnitMission.REINFORCEMENT.getName(),
                     (int) Duration.between(LocalDateTime.now(), movedUnits.get(true).get(false).get(0).getExecutionTime()).toSeconds()));
         } else {
             result.add(new TroopMovementsResponse());
@@ -148,7 +145,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         //incoming
         // attacks & raids
         if (movedUnits.get(false).getOrDefault(true, new ArrayList<>()).size() > 0) {
-            result.add(new TroopMovementsResponse(movedUnits.get(false).get(true).size(), EMilitaryUnitMission.ATTACK.getName(),
+            result.add(new TroopMovementsResponse(movedUnits.get(false).get(true).size(), ECombatUnitMission.ATTACK.getName(),
                     (int) Duration.between(LocalDateTime.now(), movedUnits.get(false).get(true).get(0).getExecutionTime()).toSeconds()));
         } else {
             result.add(new TroopMovementsResponse());
@@ -156,7 +153,7 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     //reinforcements
         if (movedUnits.get(false).getOrDefault(false, new ArrayList<>()).size() > 0){
-            result.add(new TroopMovementsResponse(movedUnits.get(false).get(false).size(), EMilitaryUnitMission.REINFORCEMENT.getName(),
+            result.add(new TroopMovementsResponse(movedUnits.get(false).get(false).size(), ECombatUnitMission.REINFORCEMENT.getName(),
                     (int) Duration.between(LocalDateTime.now(), movedUnits.get(false).get(false).get(0).getExecutionTime()).toSeconds()));
         } else {
             result.add(new TroopMovementsResponse());
@@ -240,7 +237,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         var arrivalTime = LocalDateTime.now().plusSeconds(duration);
         return MilitaryUnitContract.builder()
                 .nation(attackingVillage.getNation())
-                .mission(troopsSendingRequest.getKind().getName())
+                .mission(troopsSendingRequest.getMission())
                 .originVillageId(attackingVillage.getId())
                 .originVillageName(attackingVillage.getName())
                 .originPlayerName(attackingVillage.getOwnerUserName())

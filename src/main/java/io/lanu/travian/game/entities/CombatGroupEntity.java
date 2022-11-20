@@ -1,5 +1,6 @@
 package io.lanu.travian.game.entities;
 
+import io.lanu.travian.enums.ECombatUnitMission;
 import io.lanu.travian.enums.ENation;
 import io.lanu.travian.enums.EResource;
 import lombok.Builder;
@@ -26,7 +27,7 @@ public class CombatGroupEntity {
     private String toSettlementId;
     private LocalDateTime executionTime;
     private int duration;
-    private String mission;
+    private ECombatUnitMission mission;
     private int[] units;
     private Map<EResource, BigDecimal> plunder;
 }

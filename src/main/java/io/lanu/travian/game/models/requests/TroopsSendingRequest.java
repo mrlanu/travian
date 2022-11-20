@@ -1,6 +1,6 @@
 package io.lanu.travian.game.models.requests;
 
-import io.lanu.travian.enums.EMilitaryUnitMission;
+import io.lanu.travian.enums.ECombatUnitMission;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +15,6 @@ public class TroopsSendingRequest {
     private String villageId;
     private int x;
     private int y;
-    private EMilitaryUnitMission kind;
+    private ECombatUnitMission mission;
     private List<AttackWaveRequest> waves;
 }

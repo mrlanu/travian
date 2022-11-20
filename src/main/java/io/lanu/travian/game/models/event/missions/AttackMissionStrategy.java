@@ -1,6 +1,6 @@
 package io.lanu.travian.game.models.event.missions;
 
-import io.lanu.travian.enums.EMilitaryUnitMission;
+import io.lanu.travian.enums.ECombatUnitMission;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.ReportEntity;
@@ -40,7 +40,7 @@ public class AttackMissionStrategy extends MissionStrategy {
             combatGroup.setPlunder(Map.of(EResource.CROP, BigDecimal.ZERO, EResource.CLAY, BigDecimal.valueOf(100),
                     EResource.IRON, BigDecimal.ZERO, EResource.WOOD, BigDecimal.ZERO));
             //----------
-            combatGroup.setMission(EMilitaryUnitMission.BACK.getName());
+            combatGroup.setMission(ECombatUnitMission.BACK);
             combatGroup.setToSettlementId(combatGroup.getOwnerSettlementId());
             combatGroup.setExecutionTime(LocalDateTime.now().plusSeconds(combatGroup.getDuration()));
             settlementState.getCombatGroupRepository().save(combatGroup);
@@ -57,7 +57,7 @@ public class AttackMissionStrategy extends MissionStrategy {
 
     private void createReport() {
         var report = new ReportEntity(
-                EMilitaryUnitMission.ATTACK,
+                ECombatUnitMission.ATTACK,
                 new ReportPlayer(combatGroup.getOwnerUserName(), combatGroup.getOwnerAccountId(),
                         combatGroup.getOwnerSettlementName(), combatGroup.getOwnerSettlementId(), combatGroup.getUnits(),
                         combatGroup.getUnits(), new HashMap<>(), 100),

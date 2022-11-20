@@ -31,11 +31,11 @@ public class TroopsArrivedEvent implements Event{
     
     private MissionStrategy getMissionStrategy(SettlementEntity settlementEntity) {
         switch (combatGroup.getMission()){
-            case "Reinforcement":
+            case REINFORCEMENT:
                 return new ReinforcementMissionStrategy(settlementEntity, combatGroup, settlementState);
-            case "Attack":
+            case ATTACK:
                 return new AttackMissionStrategy(settlementEntity, combatGroup, settlementState);
-            case "Return to home":
+            case BACK:
                 return new ReturnHomeMissionStrategy(settlementEntity, combatGroup, settlementState);
             default: throw new IllegalStateException();
         }
