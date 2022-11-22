@@ -1,6 +1,6 @@
 package io.lanu.travian.enums;
 
-public enum EMilitaryUnitLocation {
+public enum ECombatGroupLocation {
     HOME("Armies in this village"),
     IN("Incoming armies"),
     OUT("Outgoing armies"),
@@ -8,7 +8,7 @@ public enum EMilitaryUnitLocation {
 
     private String name;
 
-    EMilitaryUnitLocation(String name) {
+    ECombatGroupLocation(String name) {
         this.name = name;
     }
 

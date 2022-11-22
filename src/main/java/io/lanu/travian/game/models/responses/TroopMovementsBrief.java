@@ -7,8 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TroopMovementsResponse {
+public class TroopMovementsBrief {
     private int count;
-    private String mission;
     private long timeToArrive;
+
+    public void incrementCount(){
+        count++;
+    }
 }

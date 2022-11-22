@@ -1,6 +1,6 @@
 package io.lanu.travian.game.models.responses;
 
-import io.lanu.travian.enums.ECombatUnitMission;
+import io.lanu.travian.enums.ECombatGroupMission;
 import io.lanu.travian.enums.ENation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class MilitaryUnitContract {
     private ENation nation;
-    private ECombatUnitMission mission;
+    private ECombatGroupMission mission;
     private String originVillageId;
     private String originVillageName;
     private String originPlayerName;

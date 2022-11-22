@@ -1,6 +1,6 @@
 package io.lanu.travian.game.entities;
 
-import io.lanu.travian.enums.ECombatUnitMission;
+import io.lanu.travian.enums.ECombatGroupMission;
 import io.lanu.travian.game.models.ReportPlayer;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Data
 public class ReportEntity {
 
-    public ReportEntity(ECombatUnitMission mission, ReportPlayer attacker, ReportPlayer defender, LocalDateTime dateTime) {
+    public ReportEntity(ECombatGroupMission mission, ReportPlayer attacker, ReportPlayer defender, LocalDateTime dateTime) {
         this.mission = mission;
         this.attacker = attacker;
         this.defender = defender;
@@ -21,7 +21,7 @@ public class ReportEntity {
 
     @Id
     private String id;
-    private ECombatUnitMission mission;
+    private ECombatGroupMission mission;
     private ReportPlayer attacker;
     private ReportPlayer defender;
     private LocalDateTime dateTime;

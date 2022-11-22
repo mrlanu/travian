@@ -1,15 +1,13 @@
 package io.lanu.travian.game.controllers;
 
 import io.lanu.travian.enums.ECombatUnit;
-import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.TroopsSendingRequest;
 import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
 import io.lanu.travian.game.models.responses.MilitaryUnitContract;
-import io.lanu.travian.game.models.responses.MilitaryUnitView;
-import io.lanu.travian.game.models.responses.TroopMovementsResponse;
+import io.lanu.travian.game.models.responses.CombatGroupView;
+import io.lanu.travian.game.models.responses.TroopMovementsBrief;
 import io.lanu.travian.game.services.MilitaryService;
-import io.lanu.travian.game.services.SettlementRepository;
 import io.lanu.travian.game.services.SettlementState;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,15 +28,15 @@ public class MilitaryController {
     }
 
     @GetMapping("/{villageId}/military-units")
-    public Map<String, List<MilitaryUnitView>> getAllMilitaryUnitsByVillageId(@PathVariable String villageId){
+    public Map<String, List<CombatGroupView>> getAllMilitaryUnitsByVillageId(@PathVariable String villageId){
         var settlementState = state.recalculateCurrentState(villageId);
         return militaryService.getAllMilitaryUnitsByVillage(settlementState);
     }
 
     @GetMapping("/{villageId}/troop-movements")
-    public List<TroopMovementsResponse> getTroopMovements(@PathVariable String villageId){
+    public Map<String, TroopMovementsBrief> getTroopMovements(@PathVariable String villageId){
         var settlementState = state.recalculateCurrentState(villageId);
-        return militaryService.getTroopMovements(settlementState);
+        return militaryService.getTroopMovementsBrief(settlementState.getId());
     }
 
     @PostMapping("/military")

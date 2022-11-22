@@ -1,9 +1,7 @@
 package io.lanu.travian.enums;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public enum ECombatUnitMission {
+//@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+public enum ECombatGroupMission {
     HOME("Own army"),
     BACK("Return to home"),
     CAUGHT("Caught"),
@@ -13,7 +11,7 @@ public enum ECombatUnitMission {
 
     private final String name;
 
-    ECombatUnitMission(String name) {
+    ECombatGroupMission(String name) {
         this.name = name;
     }
 

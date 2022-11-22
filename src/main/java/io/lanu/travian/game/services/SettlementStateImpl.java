@@ -5,8 +5,9 @@ import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.CombatUnitDoneEventEntity;
 import io.lanu.travian.game.models.event.*;
-import io.lanu.travian.game.models.responses.VillageBrief;
-import io.lanu.travian.game.repositories.*;
+import io.lanu.travian.game.repositories.CombatGroupRepository;
+import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
+import io.lanu.travian.game.repositories.ReportRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
