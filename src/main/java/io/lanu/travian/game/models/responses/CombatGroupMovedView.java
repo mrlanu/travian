@@ -20,10 +20,10 @@ public class CombatGroupMovedView extends CombatGroupView {
     private int duration;
 
     public CombatGroupMovedView(String id, ENation nation, ECombatGroupMission mission, boolean move, ECombatGroupLocation state,
-                                VillageBrief origin, VillageBrief target,
+                                VillageBrief from, VillageBrief to,
                                 int[] units, Map<EResource, BigDecimal> plunder, LocalDateTime executionTime, int duration) {
-        super(id, nation, mission, move, state, origin, target, units);
-        this.target = target;
+        super(id, nation, mission, move, state, from, to, units);
+        this.to = to;
         this.plunder = plunder;
         this.executionTime = executionTime;
         this.duration = duration;

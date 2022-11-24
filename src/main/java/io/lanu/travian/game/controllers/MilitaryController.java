@@ -2,9 +2,9 @@ package io.lanu.travian.game.controllers;
 
 import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
-import io.lanu.travian.game.models.requests.TroopsSendingRequest;
+import io.lanu.travian.game.models.requests.CombatGroupSendingRequest;
 import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
-import io.lanu.travian.game.models.responses.MilitaryUnitContract;
+import io.lanu.travian.game.models.responses.CombatGroupSendingContract;
 import io.lanu.travian.game.models.responses.CombatGroupView;
 import io.lanu.travian.game.models.responses.TroopMovementsBrief;
 import io.lanu.travian.game.services.MilitaryService;
@@ -33,10 +33,10 @@ public class MilitaryController {
         return militaryService.getAllMilitaryUnitsByVillage(settlementState);
     }
 
+    //can't be called alone(getVillageBtId should be called first for recalculation)
     @GetMapping("/{villageId}/troop-movements")
     public Map<String, TroopMovementsBrief> getTroopMovements(@PathVariable String villageId){
-        var settlementState = state.recalculateCurrentState(villageId);
-        return militaryService.getTroopMovementsBrief(settlementState.getId());
+        return militaryService.getTroopMovementsBrief(villageId);
     }
 
     @PostMapping("/military")
@@ -59,15 +59,15 @@ public class MilitaryController {
     }
 
     @PostMapping("/check-troops-send")
-    public MilitaryUnitContract checkTroopsSendingRequest(@RequestBody TroopsSendingRequest troopsSendingRequest) {
-        var settlementState = state.recalculateCurrentState(troopsSendingRequest.getVillageId());
-       return militaryService.checkTroopsSendingRequest(settlementState, troopsSendingRequest);
+    public CombatGroupSendingContract checkTroopsSendingRequest(@RequestBody CombatGroupSendingRequest combatGroupSendingRequest) {
+        var settlementState = state.recalculateCurrentState(combatGroupSendingRequest.getVillageId());
+       return militaryService.checkTroopsSendingRequest(settlementState, combatGroupSendingRequest);
     }
 
     @PostMapping("/troops-send")
-    public boolean sendTroops(@RequestBody MilitaryUnitContract militaryUnitContract){
-        var settlementState = state.recalculateCurrentState(militaryUnitContract.getOriginVillageId());
-        settlementState = militaryService.sendTroops(militaryUnitContract, settlementState);
+    public boolean sendTroops(@RequestBody CombatGroupSendingContract combatGroupSendingContract){
+        var settlementState = state.recalculateCurrentState(combatGroupSendingContract.getOriginVillageId());
+        settlementState = militaryService.sendTroops(combatGroupSendingContract, settlementState);
         state.save(settlementState);
         return true;
     }

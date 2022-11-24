@@ -7,10 +7,11 @@ import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
-import io.lanu.travian.game.models.requests.TroopsSendingRequest;
+import io.lanu.travian.game.models.requests.CombatGroupSendingRequest;
 import io.lanu.travian.game.models.responses.*;
-import io.lanu.travian.game.repositories.*;
-import io.lanu.travian.security.UsersRepository;
+import io.lanu.travian.game.repositories.CombatGroupRepository;
+import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
+import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
 import io.lanu.travian.templates.military.CombatUnitFactory;
 import org.springframework.stereotype.Service;
 
@@ -28,17 +29,15 @@ public class MilitaryServiceImpl implements MilitaryService {
     private final CombatUnitOrderRepository combatUnitOrderRepository;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
     private final CombatGroupRepository combatGroupRepository;
-    private final UsersRepository usersRepository;
     private final SettlementRepository settlementRepository;
 
     public MilitaryServiceImpl(CombatUnitOrderRepository combatUnitOrderRepository,
                                ResearchedCombatUnitRepository researchedCombatUnitRepository,
-                               CombatGroupRepository combatGroupRepository, UsersRepository usersRepository,
+                               CombatGroupRepository combatGroupRepository,
                                SettlementRepository settlementRepository) {
         this.combatUnitOrderRepository = combatUnitOrderRepository;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.combatGroupRepository = combatGroupRepository;
-        this.usersRepository = usersRepository;
         this.settlementRepository = settlementRepository;
     }
 
@@ -84,12 +83,12 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     @Override
     public Map<String, List<CombatGroupView>> getAllMilitaryUnitsByVillage(SettlementEntity village) {
-        var userName = usersRepository.findByUserId(village.getAccountId()).orElseThrow();
         var cache = new HashMap<String, SettlementEntity>();
 
         // other units
-        List<CombatGroupView> unitsList = combatGroupRepository
-                .getCombatGroupByOwnerSettlementIdOrToSettlementId(village.getId(), village.getId())
+        var debug = combatGroupRepository
+                .getCombatGroupByOwnerSettlementIdOrToSettlementId(village.getId(), village.getId());
+        List<CombatGroupView> unitsList = debug
                 .stream()
                 .map(cG -> {
                     SettlementEntity from;
@@ -121,17 +120,17 @@ public class MilitaryServiceImpl implements MilitaryService {
                     }
                 })
                 .peek(cG -> {
-                    if (cG.getOrigin().getVillageId().equals(village.getId())) {
-                        if (cG.isMove()) {
-                            cG.setState(ECombatGroupLocation.OUT);
-                        } else {
-                            cG.setState(ECombatGroupLocation.AWAY);
-                        }
-                    } else {
+                    if (cG.getTo().getVillageId().equals(village.getId())) {
                         if (cG.isMove()) {
                             cG.setState(ECombatGroupLocation.IN);
                         } else {
                             cG.setState(ECombatGroupLocation.HOME);
+                        }
+                    } else {
+                        if (cG.isMove()) {
+                            cG.setState(ECombatGroupLocation.OUT);
+                        } else {
+                            cG.setState(ECombatGroupLocation.AWAY);
                         }
                     }
                 })
@@ -143,8 +142,8 @@ public class MilitaryServiceImpl implements MilitaryService {
         // home army
         CombatGroupView homeArmy = new CombatGroupStaticView("home", village.getNation(), ECombatGroupMission.HOME,
                 false, ECombatGroupLocation.HOME,
-                new VillageBrief(village.getId(), village.getName(), userName.getUsername(), new int[]{village.getX(), village.getY()}),
-                new VillageBrief(village.getId(), village.getName(), userName.getUsername(), new int[]{village.getX(), village.getY()}),
+                new VillageBrief(village.getId(), village.getName(), village.getOwnerUserName(), new int[]{village.getX(), village.getY()}),
+                new VillageBrief(village.getId(), village.getName(), village.getOwnerUserName(), new int[]{village.getX(), village.getY()}),
                 village.getHomeLegion(), village.getId(), 5);
 
         var homeArmies = militaryUnitsMap.getOrDefault(ECombatGroupLocation.HOME.getName(), new ArrayList<>());
@@ -154,11 +153,11 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public MilitaryUnitContract checkTroopsSendingRequest(SettlementEntity settlementEntity, TroopsSendingRequest troopsSendingRequest) {
+    public CombatGroupSendingContract checkTroopsSendingRequest(SettlementEntity settlementEntity, CombatGroupSendingRequest combatGroupSendingRequest) {
         var attackedVillageOpt = settlementRepository
-                .findVillageByCoordinates(troopsSendingRequest.getX(), troopsSendingRequest.getY());
+                .findVillageByCoordinates(combatGroupSendingRequest.getX(), combatGroupSendingRequest.getY());
         if (attackedVillageOpt.isPresent()) {
-            return checkTroopsSendingRequest(troopsSendingRequest, settlementEntity, attackedVillageOpt.get());
+            return checkTroopsSendingRequest(combatGroupSendingRequest, settlementEntity, attackedVillageOpt.get());
         } else {
             throw new UserErrorException("There is nothing on those coordinates");
         }
@@ -220,7 +219,9 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .collect(Collectors.toList());
     }
 
-    private MilitaryUnitContract checkTroopsSendingRequest(TroopsSendingRequest troopsSendingRequest, SettlementEntity attackingVillage, SettlementEntity attackedVillage) {
+    private CombatGroupSendingContract checkTroopsSendingRequest(CombatGroupSendingRequest combatGroupSendingRequest,
+                                                                 SettlementEntity attackingVillage,
+                                                                 SettlementEntity attackedVillage) {
 
         String attackedUser = attackedVillage.getOwnerUserName() == null ? "Nature" : attackedVillage.getOwnerUserName();
 
@@ -228,9 +229,9 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .multiply(BigDecimal.valueOf(3600)
                         .divide(BigDecimal.valueOf(10 * Consts.SPEED), MathContext.DECIMAL32)).intValue();
         var arrivalTime = LocalDateTime.now().plusSeconds(duration);
-        return MilitaryUnitContract.builder()
+        return CombatGroupSendingContract.builder()
                 .nation(attackingVillage.getNation())
-                .mission(troopsSendingRequest.getMission())
+                .mission(combatGroupSendingRequest.getMission())
                 .originVillageId(attackingVillage.getId())
                 .originVillageName(attackingVillage.getName())
                 .originPlayerName(attackingVillage.getOwnerUserName())
@@ -239,7 +240,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .targetVillageName(attackedVillage.getName())
                 .targetPlayerName(attackedUser)
                 .targetVillageCoordinates(new int[]{attackedVillage.getX(), attackedVillage.getY()})
-                .units(troopsSendingRequest.getWaves().get(0).getTroops())
+                .units(combatGroupSendingRequest.getWaves().get(0).getTroops())
                 .arrivalTime(arrivalTime)
                 .duration(duration)
                 .build();
@@ -252,7 +253,7 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public SettlementEntity sendTroops(MilitaryUnitContract contract, SettlementEntity village) {
+    public SettlementEntity sendTroops(CombatGroupSendingContract contract, SettlementEntity village) {
         // deduct all involved units from village army
         var homeLegion = village.getHomeLegion();
         var attackingUnits = contract.getUnits();

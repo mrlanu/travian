@@ -15,8 +15,8 @@ public class CombatGroupView {
     private ECombatGroupMission mission;
     protected boolean move;
     protected ECombatGroupLocation state;
-    protected VillageBrief origin;
-    protected VillageBrief target;
+    protected VillageBrief from;
+    protected VillageBrief to;
     protected int[] units;
 
     public CombatGroupView(String id, ENation nation, ECombatGroupMission mission, boolean move, ECombatGroupLocation state,
@@ -26,8 +26,8 @@ public class CombatGroupView {
         this.mission = mission;
         this.move = move;
         this.state = state;
-        this.origin = origin;
-        this.target = target;
+        this.from = origin;
+        this.to = target;
         this.units = units;
     }
 }

@@ -13,9 +13,9 @@ public class CombatGroupStaticView extends CombatGroupView {
     private int eatExpenses;
 
     public CombatGroupStaticView(String id, ENation nation, ECombatGroupMission mission, boolean move, ECombatGroupLocation state,
-                                 VillageBrief origin, VillageBrief target,
+                                 VillageBrief from, VillageBrief to,
                                  int[] units, String currentLocationVillageId, int eatExpenses) {
-        super(id, nation, mission, move, state, origin, target, units);
+        super(id, nation, mission, move, state, from, to, units);
         this.currentLocationVillageId = currentLocationVillageId;
         this.eatExpenses = eatExpenses;
     }

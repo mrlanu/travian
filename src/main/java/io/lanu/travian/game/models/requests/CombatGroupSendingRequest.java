@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TroopsSendingRequest {
+public class CombatGroupSendingRequest {
 
     private String villageId;
     private int x;

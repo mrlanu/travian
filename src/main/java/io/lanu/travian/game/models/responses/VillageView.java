@@ -8,7 +8,6 @@ import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
-import io.lanu.travian.game.entities.events.MilitaryUnitEntity;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
 import io.lanu.travian.templates.military.CombatUnitFactory;
@@ -46,7 +45,6 @@ public class VillageView {
     private int[] homeUnits;
     private Map<EResource, BigDecimal> producePerHour;
     private List<ConstructionEventView> eventsList;
-    private List<MilitaryUnitEntity> militariesInVillage;
 
     public VillageView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList, List<CombatGroupEntity> militariesInVillage) {
         createView(settlementEntity, eventList, militariesInVillage);
