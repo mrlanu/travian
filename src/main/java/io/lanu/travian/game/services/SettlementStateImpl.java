@@ -108,7 +108,7 @@ public class SettlementStateImpl implements SettlementState {
         var militaryEventList = combatGroupRepository
                 .getCombatGroupByOwnerSettlementIdOrToSettlementId(currentSettlement.getId(), currentSettlement.getId())
                 .stream()
-                .filter(cG -> cG.getExecutionTime().isBefore(LocalDateTime.now()))
+                .filter(cG -> cG.isMoved() && cG.getExecutionTime().isBefore(LocalDateTime.now()))
                 .map(cG -> new TroopsArrivedEvent(cG, this))
                 .collect(Collectors.toList());
 

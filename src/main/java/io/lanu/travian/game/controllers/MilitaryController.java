@@ -27,8 +27,8 @@ public class MilitaryController {
         this.militaryService = militaryService;
     }
 
-    @GetMapping("/{villageId}/military-units")
-    public Map<String, List<CombatGroupView>> getAllMilitaryUnitsByVillageId(@PathVariable String villageId){
+    @GetMapping("/{villageId}/combat-group")
+    public Map<String, List<CombatGroupView>> getAllCombatGroupsByVillageId(@PathVariable String villageId){
         var settlementState = state.recalculateCurrentState(villageId);
         return militaryService.getAllMilitaryUnitsByVillage(settlementState);
     }
