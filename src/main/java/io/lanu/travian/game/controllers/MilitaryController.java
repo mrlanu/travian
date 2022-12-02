@@ -1,5 +1,6 @@
 package io.lanu.travian.game.controllers;
 
+import io.lanu.travian.enums.ECombatGroupLocation;
 import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.CombatGroupSendingRequest;
@@ -31,9 +32,9 @@ public class MilitaryController {
     }
 
     @GetMapping("/{villageId}/combat-group")
-    public Map<String, List<CombatGroupView>> getAllCombatGroupsByVillageId(@PathVariable String villageId){
+    public Map<ECombatGroupLocation, List<CombatGroupView>> getAllCombatGroupsByVillageId(@PathVariable String villageId){
         var settlementState = state.recalculateCurrentState(villageId);
-        return militaryService.getAllMilitaryUnitsByVillage(settlementState);
+        return militaryService.getAllCombatGroupsByVillage(settlementState);
     }
 
     //can't be called alone(getVillageBtId should be called first for recalculation)

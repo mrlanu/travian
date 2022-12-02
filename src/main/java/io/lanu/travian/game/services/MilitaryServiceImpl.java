@@ -82,7 +82,7 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public Map<String, List<CombatGroupView>> getAllMilitaryUnitsByVillage(SettlementEntity village) {
+    public Map<ECombatGroupLocation, List<CombatGroupView>> getAllCombatGroupsByVillage(SettlementEntity village) {
         var cache = new HashMap<String, SettlementEntity>();
 
         // other units
@@ -136,8 +136,8 @@ public class MilitaryServiceImpl implements MilitaryService {
                 })
                 .collect(Collectors.toList());
 
-        Map<String, List<CombatGroupView>> militaryUnitsMap = unitsList.stream()
-                .collect(Collectors.groupingBy(militaryEvent -> militaryEvent.getState().getName()));
+        Map<ECombatGroupLocation, List<CombatGroupView>> militaryUnitsMap = unitsList.stream()
+                .collect(Collectors.groupingBy(CombatGroupView::getState));
 
         // home army
         CombatGroupView homeArmy = new CombatGroupStaticView("home", village.getNation(), ECombatGroupMission.HOME,
@@ -146,9 +146,20 @@ public class MilitaryServiceImpl implements MilitaryService {
                 new VillageBrief(village.getId(), village.getName(), village.getOwnerUserName(), new int[]{village.getX(), village.getY()}),
                 village.getHomeLegion(), village.getId(), 5);
 
-        var homeArmies = militaryUnitsMap.getOrDefault(ECombatGroupLocation.HOME.getName(), new ArrayList<>());
+        var homeArmies = militaryUnitsMap.getOrDefault(ECombatGroupLocation.HOME, new ArrayList<>());
         homeArmies.add(homeArmy);
-        militaryUnitsMap.put(ECombatGroupLocation.HOME.getName(), homeArmies);
+        militaryUnitsMap.put(ECombatGroupLocation.HOME, homeArmies);
+
+        if (!militaryUnitsMap.containsKey(ECombatGroupLocation.IN)){
+            militaryUnitsMap.put(ECombatGroupLocation.IN, new ArrayList<>());
+        }
+        if (!militaryUnitsMap.containsKey(ECombatGroupLocation.OUT)){
+            militaryUnitsMap.put(ECombatGroupLocation.OUT, new ArrayList<>());
+        }
+        if (!militaryUnitsMap.containsKey(ECombatGroupLocation.AWAY)){
+            militaryUnitsMap.put(ECombatGroupLocation.AWAY, new ArrayList<>());
+        }
+
         return militaryUnitsMap;
     }
 
