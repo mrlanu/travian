@@ -3,11 +3,12 @@ package io.lanu.travian.game.controllers;
 import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.CombatGroupSendingRequest;
-import io.lanu.travian.game.models.responses.CombatUnitOrderResponse;
 import io.lanu.travian.game.models.responses.CombatGroupSendingContract;
 import io.lanu.travian.game.models.responses.CombatGroupView;
 import io.lanu.travian.game.models.responses.TroopMovementsBrief;
+import io.lanu.travian.game.models.responses.VillageView;
 import io.lanu.travian.game.services.MilitaryService;
+import io.lanu.travian.game.services.SettlementRepository;
 import io.lanu.travian.game.services.SettlementState;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,10 +22,12 @@ public class MilitaryController {
     private final SettlementState state;
 
     private final MilitaryService militaryService;
+    private final SettlementRepository settlementRepository;
 
-    public MilitaryController(SettlementState state, MilitaryService militaryService) {
+    public MilitaryController(SettlementState state, MilitaryService militaryService, SettlementRepository settlementRepository) {
         this.state = state;
         this.militaryService = militaryService;
+        this.settlementRepository = settlementRepository;
     }
 
     @GetMapping("/{villageId}/combat-group")
@@ -40,16 +43,11 @@ public class MilitaryController {
     }
 
     @PostMapping("/military")
-    public void orderCombatUnits(@RequestBody OrderCombatUnitRequest orderCombatUnitRequest) {
+    public VillageView orderCombatUnits(@RequestBody OrderCombatUnitRequest orderCombatUnitRequest) {
         var settlementState = state.recalculateCurrentState(orderCombatUnitRequest.getVillageId());
         settlementState = militaryService.orderCombatUnits(orderCombatUnitRequest, settlementState);
         state.save(settlementState);
-    }
-
-    @GetMapping("/{villageId}/military-orders")
-    public List<CombatUnitOrderResponse> getAllMilitaryOrders(@PathVariable String villageId){
-        state.recalculateCurrentState(villageId);
-        return militaryService.getAllOrdersByVillageId(villageId);
+        return settlementRepository.getVillageById(settlementState);
     }
 
     @GetMapping("/{villageId}/military/researched")

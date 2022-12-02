@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CombatUnitOrderResponse {
+public class CombatUnitOrderView {
     private String unit;
     private int amount;
     private long duration;

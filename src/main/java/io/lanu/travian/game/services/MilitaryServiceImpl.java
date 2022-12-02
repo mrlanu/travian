@@ -172,11 +172,10 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, SettlementEntity village) {
+    public SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, SettlementEntity settlement) {
 
         ECombatUnit unit = orderCombatUnitRequest.getUnitType();
-        List<OrderCombatUnitEntity> ordersList = combatUnitOrderRepository
-                .findAllByVillageId(orderCombatUnitRequest.getVillageId())
+        List<OrderCombatUnitEntity> ordersList = settlement.getCombatUnitOrders()
                 .stream()
                 .sorted(Comparator.comparing(OrderCombatUnitEntity::getCreated))
                 .collect(Collectors.toList());
@@ -189,34 +188,19 @@ public class MilitaryServiceImpl implements MilitaryService {
         OrderCombatUnitEntity armyOrder = new OrderCombatUnitEntity(orderCombatUnitRequest.getVillageId(), lastTime, orderCombatUnitRequest.getUnitType(),
                 orderCombatUnitRequest.getAmount(), unit.getTime(), unit.getEat(), endOrderTime);
 
-        spendResources(orderCombatUnitRequest.getAmount(), village, unit);
+        spendResources(orderCombatUnitRequest.getAmount(), settlement, unit);
 
-        combatUnitOrderRepository.save(armyOrder);
-        return village;
+        armyOrder.setCreated(LocalDateTime.now());
+        ordersList.add(armyOrder);
+        settlement.setCombatUnitOrders(ordersList);
+
+        return settlement;
     }
 
     private void spendResources(int unitsAmount, SettlementEntity settlementEntity, ECombatUnit kind) {
         Map<EResource, BigDecimal> neededResources = new HashMap<>();
         kind.getCost().forEach((k, v) -> neededResources.put(k, BigDecimal.valueOf((long) v * unitsAmount)));
         settlementEntity.manipulateGoods(EManipulation.SUBTRACT, neededResources);
-    }
-
-    @Override
-    public List<CombatUnitOrderResponse> getAllOrdersByVillageId(String villageId) {
-        return combatUnitOrderRepository
-                .findAllByVillageId(villageId)
-                .stream()
-                .sorted(Comparator.comparing(OrderCombatUnitEntity::getCreated))
-                .map(armyOrderEntity -> {
-                    var duration = Duration.between(LocalDateTime.now(), armyOrderEntity.getEndOrderTime()).toSeconds();
-                    return new CombatUnitOrderResponse(
-                            armyOrderEntity.getUnitType().getName(),
-                            armyOrderEntity.getLeftTrain(),
-                            duration,
-                            armyOrderEntity.getDurationEach(),
-                            armyOrderEntity.getEndOrderTime());
-                })
-                .collect(Collectors.toList());
     }
 
     private CombatGroupSendingContract checkTroopsSendingRequest(CombatGroupSendingRequest combatGroupSendingRequest,

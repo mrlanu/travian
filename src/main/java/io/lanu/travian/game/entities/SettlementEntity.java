@@ -47,6 +47,7 @@ public class SettlementEntity {
     private Map<EResource, BigDecimal> storage;
     private int[] homeLegion;
     private List<ConstructionEventEntity> constructionEventList;
+    private List<OrderCombatUnitEntity> combatUnitOrders;
     @LastModifiedDate
     private LocalDateTime modified;
 

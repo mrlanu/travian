@@ -100,7 +100,7 @@ public class SettlementStateImpl implements SettlementState {
                 .collect(Collectors.toList());
 
         // add all units events
-        var combatEventList = createCombatUnitDoneEventsFromOrders(currentSettlement.getId());
+        var combatEventList = createCombatUnitDoneEventsFromOrders(currentSettlement);
         allEvents.addAll(combatEventList);
 
 
@@ -122,10 +122,11 @@ public class SettlementStateImpl implements SettlementState {
                 .collect(Collectors.toList());
     }
 
-    private List<Event> createCombatUnitDoneEventsFromOrders(String settlementId) {
+    private List<Event> createCombatUnitDoneEventsFromOrders(SettlementEntity settlement) {
 
         List<Event> result = new ArrayList<>();
-        var ordersList = combatUnitOrderRepository.findAllByVillageId(settlementId);
+        var ordersList = settlement.getCombatUnitOrders();
+        List<OrderCombatUnitEntity> newOrdersList = new ArrayList<>();
 
         if (ordersList.size() > 0) {
             for (OrderCombatUnitEntity order : ordersList) {
@@ -134,7 +135,6 @@ public class SettlementStateImpl implements SettlementState {
                 if (LocalDateTime.now().isAfter(order.getEndOrderTime())) {
                     // add all troops from order to result list
                     result.addAll(addCompletedCombatUnit(order, order.getLeftTrain()));
-                    combatUnitOrderRepository.deleteById(order.getOrderId());
                     continue;
                 }
 
@@ -145,10 +145,11 @@ public class SettlementStateImpl implements SettlementState {
                     result.addAll(addCompletedCombatUnit(order, completedTroops));
                     order.setLeftTrain(order.getLeftTrain() - completedTroops);
                     order.setLastTime(order.getLastTime().plus(completedTroops * order.getDurationEach(), ChronoUnit.SECONDS));
-                    combatUnitOrderRepository.save(order);
                 }
+                newOrdersList.add(order);
             }
         }
+        settlement.setCombatUnitOrders(newOrdersList);
         return result;
     }
 

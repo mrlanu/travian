@@ -55,11 +55,12 @@ public class VillageEntityFactory {
                             Map.entry(37, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(38, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(39, new BuildModel(EBuilding.EMPTY, 0))),
-                    Map.of(EResource.CROP, BigDecimal.valueOf(500),
-                            EResource.CLAY, BigDecimal.valueOf(500),
-                            EResource.WOOD, BigDecimal.valueOf(500),
-                            EResource.IRON, BigDecimal.valueOf(500)),
+                    Map.of(EResource.CROP, BigDecimal.valueOf(1000),
+                            EResource.CLAY, BigDecimal.valueOf(1000),
+                            EResource.WOOD, BigDecimal.valueOf(1000),
+                            EResource.IRON, BigDecimal.valueOf(1000)),
                     new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                    new ArrayList<>(),
                     new ArrayList<>(),
                     null);
             case OASIS: return new SettlementEntity(null, SettlementType.OASIS, subType, null, null, 0, 0 , "Oasis", null,
@@ -110,6 +111,7 @@ public class VillageEntityFactory {
                             EResource.WOOD, BigDecimal.valueOf(1000),
                             EResource.IRON, BigDecimal.valueOf(1000)),
                     new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                    new ArrayList<>(),
                     new ArrayList<>(),
                     null);
             default: return null;

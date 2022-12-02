@@ -6,6 +6,7 @@ import io.lanu.travian.enums.EResource;
 import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.CombatGroupEntity;
+import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.templates.buildings.BuildingBase;
@@ -16,6 +17,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -45,6 +47,7 @@ public class VillageView {
     private int[] homeUnits;
     private Map<EResource, BigDecimal> producePerHour;
     private List<ConstructionEventView> eventsList;
+    private List<CombatUnitOrderView> unitOrders;
 
     public VillageView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList, List<CombatGroupEntity> militariesInVillage) {
         createView(settlementEntity, eventList, militariesInVillage);
@@ -70,6 +73,7 @@ public class VillageView {
         this.homeUnits = settlementEntity.getHomeLegion();
         this.producePerHour = settlementEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(eventList);
+        this.unitOrders = this.buildUnitOrdersView(settlementEntity.getCombatUnitOrders());
     }
 
     private Map<String, Integer> mapHomeLegion(int[] homeLegion, ENation nation, List<CombatGroupEntity> militariesInVillage) {
@@ -92,6 +96,22 @@ public class VillageView {
         return buildEventList.stream()
                 .map(event -> new ConstructionEventView(event.getEventId(), event.getBuildingPosition(), event.getBuildingName().getName(), event.getToLevel(), event.getExecutionTime(),
                         ChronoUnit.SECONDS.between(LocalDateTime.now(), event.getExecutionTime()))).collect(Collectors.toList());
+    }
+
+    private List<CombatUnitOrderView> buildUnitOrdersView(List<OrderCombatUnitEntity> orders) {
+        return orders
+                .stream()
+                .sorted(Comparator.comparing(OrderCombatUnitEntity::getCreated))
+                .map(order -> {
+                    var duration = Duration.between(LocalDateTime.now(), order.getEndOrderTime()).toSeconds();
+                    return new CombatUnitOrderView(
+                            order.getUnitType().getName(),
+                            order.getLeftTrain(),
+                            duration,
+                            order.getDurationEach(),
+                            order.getEndOrderTime());
+                })
+                .collect(Collectors.toList());
     }
     
     private List<BuildingBase> buildBuildingsView(Map<Integer, BuildModel> buildings, List<ConstructionEventEntity> eventList) {

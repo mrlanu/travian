@@ -3,20 +3,14 @@ package io.lanu.travian.game.entities;
 import io.lanu.travian.enums.ECombatUnit;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
-@Document("combat-unit-orders")
 @NoArgsConstructor
 public class OrderCombatUnitEntity {
-    @Id
-    private String orderId;
-    @CreatedDate
+    private String orderId = UUID.randomUUID().toString();
     private LocalDateTime created;
     private String villageId;
     private LocalDateTime lastTime;
