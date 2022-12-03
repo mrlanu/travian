@@ -13,6 +13,7 @@ import io.lanu.travian.game.repositories.CombatGroupRepository;
 import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
 import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
 import io.lanu.travian.templates.military.CombatUnitFactory;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -186,6 +187,11 @@ public class MilitaryServiceImpl implements MilitaryService {
     public SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, SettlementEntity settlement) {
 
         ECombatUnit unit = orderCombatUnitRequest.getUnitType();
+        ModelMapper mapper = new ModelMapper();
+        CombatUnitResponse mappedUnit = mapper.map(unit, CombatUnitResponse.class);
+        mappedUnit.setSpeed(mappedUnit.getSpeed() / Consts.SPEED);
+        mappedUnit.setTime(mappedUnit.getTime() / Consts.SPEED);
+
         List<OrderCombatUnitEntity> ordersList = settlement.getCombatUnitOrders()
                 .stream()
                 .sorted(Comparator.comparing(OrderCombatUnitEntity::getCreated))
@@ -194,12 +200,13 @@ public class MilitaryServiceImpl implements MilitaryService {
         LocalDateTime lastTime = ordersList.size() > 0 ? ordersList.get(ordersList.size() - 1).getEndOrderTime() : LocalDateTime.now();
 
         LocalDateTime endOrderTime = lastTime.plus(
-                orderCombatUnitRequest.getAmount() * unit.getTime(), ChronoUnit.SECONDS);
+                orderCombatUnitRequest.getAmount() * mappedUnit.getTime(), ChronoUnit.SECONDS);
 
-        OrderCombatUnitEntity armyOrder = new OrderCombatUnitEntity(orderCombatUnitRequest.getVillageId(), lastTime, orderCombatUnitRequest.getUnitType(),
-                orderCombatUnitRequest.getAmount(), unit.getTime(), unit.getEat(), endOrderTime);
+        OrderCombatUnitEntity armyOrder = new OrderCombatUnitEntity(orderCombatUnitRequest.getVillageId(), lastTime,
+                orderCombatUnitRequest.getUnitType(), orderCombatUnitRequest.getAmount(), mappedUnit.getTime(), mappedUnit.getEat(),
+                endOrderTime);
 
-        spendResources(orderCombatUnitRequest.getAmount(), settlement, unit);
+        spendResources(orderCombatUnitRequest.getAmount(), settlement, mappedUnit);
 
         armyOrder.setCreated(LocalDateTime.now());
         ordersList.add(armyOrder);
@@ -208,7 +215,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         return settlement;
     }
 
-    private void spendResources(int unitsAmount, SettlementEntity settlementEntity, ECombatUnit kind) {
+    private void spendResources(int unitsAmount, SettlementEntity settlementEntity, CombatUnitResponse kind) {
         Map<EResource, BigDecimal> neededResources = new HashMap<>();
         kind.getCost().forEach((k, v) -> neededResources.put(k, BigDecimal.valueOf((long) v * unitsAmount)));
         settlementEntity.manipulateGoods(EManipulation.SUBTRACT, neededResources);
