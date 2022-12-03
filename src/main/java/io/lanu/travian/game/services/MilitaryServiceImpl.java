@@ -175,7 +175,7 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public List<ECombatUnit> getAllResearchedUnits(String villageId) {
+    public List<CombatUnitResponse> getAllResearchedUnits(String villageId) {
         return researchedCombatUnitRepository.findByVillageId(villageId).getUnits()
                 .stream()
                 .map(shortUnit -> CombatUnitFactory.getUnit(shortUnit.getName(), shortUnit.getLevel()))

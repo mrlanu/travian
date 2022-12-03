@@ -4,10 +4,7 @@ import io.lanu.travian.enums.ECombatGroupLocation;
 import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.CombatGroupSendingRequest;
-import io.lanu.travian.game.models.responses.CombatGroupSendingContract;
-import io.lanu.travian.game.models.responses.CombatGroupView;
-import io.lanu.travian.game.models.responses.TroopMovementsBrief;
-import io.lanu.travian.game.models.responses.VillageView;
+import io.lanu.travian.game.models.responses.*;
 import io.lanu.travian.game.services.MilitaryService;
 import io.lanu.travian.game.services.SettlementRepository;
 import io.lanu.travian.game.services.SettlementState;
@@ -52,7 +49,7 @@ public class MilitaryController {
     }
 
     @GetMapping("/{villageId}/military/researched")
-    public List<ECombatUnit> getAllResearchedUnits(@PathVariable String villageId){
+    public List<CombatUnitResponse> getAllResearchedUnits(@PathVariable String villageId){
         state.recalculateCurrentState(villageId);
         return militaryService.getAllResearchedUnits(villageId);
     }

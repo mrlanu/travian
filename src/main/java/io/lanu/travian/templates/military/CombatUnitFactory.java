@@ -3,22 +3,26 @@ package io.lanu.travian.templates.military;
 import io.lanu.travian.Consts;
 import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.ENation;
+import io.lanu.travian.game.models.responses.CombatUnitResponse;
+import org.modelmapper.ModelMapper;
 
 import java.util.Map;
 
 public class CombatUnitFactory {
 
-    public static ECombatUnit getUnit(String name, int level){
+    public static CombatUnitResponse getUnit(String name, int level){
         ECombatUnit result;
         switch (name){
             case "Phalanx": result = ECombatUnit.PHALANX;
                 break;
             default: return null;
         }
-        result.setLevel(level);
+        ModelMapper mapper = new ModelMapper();
+        CombatUnitResponse combatUnit = mapper.map(result, CombatUnitResponse.class);
+        combatUnit.setLevel(level);
         //here should be implemented the time counting depends on level of barracks
-        result.setTime(result.getTime() / Consts.SPEED);
-        return result;
+        combatUnit.setTime(result.getTime() / Consts.SPEED);
+        return combatUnit;
     }
 
     public static int[] mapHomeArmyToIntArray(Map<ECombatUnit, Integer> armyMap){
