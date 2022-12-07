@@ -29,7 +29,7 @@ public class AttackMissionStrategy extends MissionStrategy {
         // perform an attack if we are in origin village or skip and this attack will be performed in target village during recursion
         if (currentSettlement.getId().equals(combatGroup.getToSettlementId())){
 
-            createReport();
+            createReports();
             System.out.println("Report created " + currentSettlement.getId());
 
             var storage = currentSettlement.getStorage();
@@ -55,15 +55,18 @@ public class AttackMissionStrategy extends MissionStrategy {
         }
     }
 
-    private void createReport() {
+    private void createReports() {
         var report = new ReportEntity(
+                combatGroup.getOwnerSettlementId(),
                 ECombatGroupMission.ATTACK,
-                new ReportPlayer(combatGroup.getOwnerUserName(), combatGroup.getOwnerAccountId(),
-                        combatGroup.getOwnerSettlementName(), combatGroup.getOwnerSettlementId(), combatGroup.getUnits(),
+                new ReportPlayer(combatGroup.getOwnerSettlementId(), combatGroup.getUnits(),
                         combatGroup.getUnits(), new HashMap<>(), 100),
-                new ReportPlayer(currentSettlement.getOwnerUserName(), currentSettlement.getAccountId(), currentSettlement.getName(),
-                        getCombatGroup().getId(), currentSettlement.getHomeLegion(),
+                new ReportPlayer(currentSettlement.getId(), currentSettlement.getHomeLegion(),
                         currentSettlement.getHomeLegion(), null, 0), LocalDateTime.now());
-        settlementState.getReportRepository().save(report);
+        var repo = settlementState.getReportRepository();
+        repo.save(report);
+        report.setReportOwner(currentSettlement.getId());
+        report.setId(null);
+        repo.save(report);
     }
 }

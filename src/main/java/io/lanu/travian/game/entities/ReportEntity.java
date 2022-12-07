@@ -11,19 +11,22 @@ import java.time.LocalDateTime;
 @Document("reports")
 @Data
 public class ReportEntity {
-
-    public ReportEntity(ECombatGroupMission mission, ReportPlayer attacker, ReportPlayer defender, LocalDateTime dateTime) {
-        this.mission = mission;
-        this.attacker = attacker;
-        this.defender = defender;
-        this.dateTime = dateTime;
-    }
-
     @Id
     private String id;
+    //since we create two reports (one for from, and one for to )
+    private String reportOwner;
     private ECombatGroupMission mission;
-    private ReportPlayer attacker;
-    private ReportPlayer defender;
+    private ReportPlayer from;
+    private ReportPlayer to;
     private LocalDateTime dateTime;
     private boolean read;
+
+    public ReportEntity(String reportOwner, ECombatGroupMission mission, ReportPlayer from, ReportPlayer to,
+                        LocalDateTime dateTime) {
+        this.reportOwner = reportOwner;
+        this.mission = mission;
+        this.from = from;
+        this.to = to;
+        this.dateTime = dateTime;
+    }
 }

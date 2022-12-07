@@ -6,5 +6,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface ReportRepository extends MongoRepository<ReportEntity, String> {
-    List<ReportEntity> findAllByAttackerIdOrDefenderId(String attackerId, String defenderId);
+    /*List<ReportEntity> findAllByAttackerIdOrDefenderId(String attackerId, String defenderId);*/
+    List<ReportEntity> findAllByReportOwner(String settlementId);
 }

@@ -9,10 +9,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 public class ReportPlayer {
-    private String name;
-    private String id;
-    private String villageName;
-    private String villageId;
+    private String settlementId;
     private int[] troops;
     private int[] dead;
     private Map<EResource, Integer> bounty;
