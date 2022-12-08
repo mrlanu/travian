@@ -11,10 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CombatGroupSendingRequest {
-
-    private String villageId;
-    private int x;
-    private int y;
+    private String targetSettlementId;
     private ECombatGroupMission mission;
     private List<AttackWaveRequest> waves;
 }

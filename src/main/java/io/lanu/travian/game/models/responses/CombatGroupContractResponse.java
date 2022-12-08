@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CombatGroupSendingContract {
+public class CombatGroupContractResponse {
     private ENation nation;
     private ECombatGroupMission mission;
     private String originVillageId;

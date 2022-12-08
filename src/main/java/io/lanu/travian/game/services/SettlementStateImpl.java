@@ -6,8 +6,8 @@ import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.CombatUnitDoneEventEntity;
 import io.lanu.travian.game.models.event.*;
 import io.lanu.travian.game.repositories.CombatGroupRepository;
-import io.lanu.travian.game.repositories.CombatUnitOrderRepository;
 import io.lanu.travian.game.repositories.ReportRepository;
+import io.lanu.travian.game.repositories.SettlementRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,21 +26,18 @@ public class SettlementStateImpl implements SettlementState {
     private static final MathContext mc = new MathContext(3);
     private final SettlementRepository settlementRepository;
     private final CombatGroupRepository combatGroupRepository;
-    private final CombatUnitOrderRepository combatUnitOrderRepository;
-
     private final ReportRepository reportRepository;
 
     public SettlementStateImpl(SettlementRepository settlementRepository, CombatGroupRepository combatGroupRepository,
-                               CombatUnitOrderRepository combatUnitOrderRepository, ReportRepository reportRepository) {
+                               ReportRepository reportRepository) {
         this.settlementRepository = settlementRepository;
         this.combatGroupRepository = combatGroupRepository;
-        this.combatUnitOrderRepository = combatUnitOrderRepository;
         this.reportRepository = reportRepository;
     }
 
     @Override
     public SettlementEntity save(SettlementEntity settlement){
-        return settlementRepository.saveVillage(settlement);
+        return settlementRepository.save(settlement);
     }
 
     @Override
@@ -54,11 +51,11 @@ public class SettlementStateImpl implements SettlementState {
     }
 
     public SettlementEntity recalculateCurrentState(String villageId) {
-        SettlementEntity settlementEntity = settlementRepository.findById(villageId);
+        SettlementEntity settlementEntity = settlementRepository.findById(villageId).orElseThrow();
         var allEvents = combineAllEvents(settlementEntity);
         executeAllEvents(settlementEntity, allEvents);
         settlementEntity.castStorage();
-        return settlementRepository.saveVillage(settlementEntity);
+        return settlementRepository.save(settlementEntity);
     }
 
     private void executeAllEvents(SettlementEntity settlementEntity, List<Event> allEvents) {

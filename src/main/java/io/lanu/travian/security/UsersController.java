@@ -1,7 +1,7 @@
 package io.lanu.travian.security;
 
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
-import io.lanu.travian.game.services.SettlementRepository;
+import io.lanu.travian.game.services.SettlementService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +13,9 @@ import java.util.List;
 public class UsersController {
 
     private final UsersService usersService;
-    private final SettlementRepository settlementService;
+    private final SettlementService settlementService;
 
-    public UsersController(UsersService usersService, SettlementRepository settlementService) {
+    public UsersController(UsersService usersService, SettlementService settlementService) {
         this.usersService = usersService;
         this.settlementService = settlementService;
     }

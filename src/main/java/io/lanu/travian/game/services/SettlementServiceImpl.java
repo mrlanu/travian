@@ -10,26 +10,25 @@ import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.models.responses.TileDetail;
 import io.lanu.travian.game.models.responses.VillageView;
-import io.lanu.travian.game.repositories.*;
-import io.lanu.travian.security.UserEntity;
+import io.lanu.travian.game.repositories.CombatGroupRepository;
+import io.lanu.travian.game.repositories.MapTileRepository;
+import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
+import io.lanu.travian.game.repositories.SettlementRepository;
 import io.lanu.travian.security.UsersRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
-import java.math.MathContext;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class SettlementServiceImpl implements SettlementRepository {
-    private final io.lanu.travian.game.repositories.SettlementRepository settlementRepository;
+public class SettlementServiceImpl implements SettlementService {
+    private final SettlementRepository settlementRepository;
     private final MapTileRepository worldRepo;
     private final CombatGroupRepository combatGroupRepository;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
-    private final UsersRepository usersRepository;
-    private static final MathContext mc = new MathContext(3);
 
     public SettlementServiceImpl(io.lanu.travian.game.repositories.SettlementRepository settlementRepository,
                                  MapTileRepository worldRepo,
@@ -38,7 +37,6 @@ public class SettlementServiceImpl implements SettlementRepository {
         this.worldRepo = worldRepo;
         this.combatGroupRepository = combatGroupRepository;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
-        this.usersRepository = usersRepository;
     }
 
     @Override

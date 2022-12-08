@@ -4,7 +4,7 @@ import io.lanu.travian.game.entities.MapTile;
 import io.lanu.travian.game.models.requests.MapPart;
 import io.lanu.travian.game.models.responses.TileDetail;
 import io.lanu.travian.game.repositories.MapTileRepository;
-import io.lanu.travian.game.services.SettlementRepository;
+import io.lanu.travian.game.services.SettlementService;
 import io.lanu.travian.game.services.SettlementState;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,12 +18,12 @@ public class MapController {
     private final SettlementState state;
     private final MapTileRepository repository;
 
-    private final SettlementRepository settlementRepository;
+    private final SettlementService settlementService;
 
-    public MapController(SettlementState state, MapTileRepository repository, SettlementRepository settlementRepository) {
+    public MapController(SettlementState state, MapTileRepository repository, SettlementService settlementService) {
         this.state = state;
         this.repository = repository;
-        this.settlementRepository = settlementRepository;
+        this.settlementService = settlementService;
     }
 
     @GetMapping("/tile-detail/{id}/{fromX}/{fromY}")
@@ -31,7 +31,7 @@ public class MapController {
                                     @PathVariable int fromX,
                                     @PathVariable int fromY){
         var settlementState = state.recalculateCurrentState(id);
-        return settlementRepository.getTileDetail(settlementState, fromX, fromY);
+        return settlementService.getTileDetail(settlementState, fromX, fromY);
     }
 
     @PostMapping("/map-part")

@@ -11,6 +11,7 @@ import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.responses.*;
 import io.lanu.travian.game.repositories.CombatGroupRepository;
 import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
+import io.lanu.travian.game.repositories.SettlementRepository;
 import io.lanu.travian.templates.military.CombatUnitFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -91,13 +92,13 @@ public class MilitaryServiceImpl implements MilitaryService {
                     if (cache.containsKey(cG.getOwnerSettlementId())) {
                         from = cache.get(cG.getOwnerSettlementId());
                     } else {
-                        from = settlementRepository.findById(cG.getOwnerSettlementId());
+                        from = settlementRepository.findById(cG.getOwnerSettlementId()).orElseThrow();
                         cache.put(from.getId(), from);
                     }
                     if (cache.containsKey(cG.getToSettlementId())) {
                         to = cache.get(cG.getToSettlementId());
                     } else {
-                        to = settlementRepository.findById(cG.getToSettlementId());
+                        to = settlementRepository.findById(cG.getToSettlementId()).orElseThrow();
                         cache.put(to.getId(), to);
                     }
 
@@ -163,14 +164,28 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public CombatGroupSendingContract checkTroopsSendingRequest(SettlementEntity settlementEntity, CombatGroupSendingRequest combatGroupSendingRequest) {
-        var attackedVillageOpt = settlementRepository
-                .findVillageByCoordinates(combatGroupSendingRequest.getX(), combatGroupSendingRequest.getY());
-        if (attackedVillageOpt.isPresent()) {
-            return checkTroopsSendingRequest(combatGroupSendingRequest, settlementEntity, attackedVillageOpt.get());
-        } else {
-            throw new UserErrorException("There is nothing on those coordinates");
-        }
+    public CombatGroupContractResponse checkTroopsSendingRequest(SettlementEntity settlementState,
+                                                                 SettlementEntity targetState,
+                                                                 CombatGroupSendingRequest combatGroupSendingRequest) {
+        var duration = getDistance(targetState.getX(), targetState.getY(),
+                settlementState.getX(), settlementState.getY()).multiply(BigDecimal.valueOf(3600)
+                        .divide(BigDecimal.valueOf(10 * Consts.SPEED), MathContext.DECIMAL32)).intValue();
+        var arrivalTime = LocalDateTime.now().plusSeconds(duration);
+        return CombatGroupContractResponse.builder()
+                .nation(settlementState.getNation()) //delete
+                .mission(combatGroupSendingRequest.getMission())
+                .originVillageId(settlementState.getId())  //delete
+                .originVillageName(settlementState.getName())  //delete
+                .originPlayerName(settlementState.getOwnerUserName())  //delete
+                .originVillageCoordinates(new int[]{settlementState.getX(), settlementState.getY()})  //delete
+                .targetVillageId(targetState.getId())
+                .targetVillageName(targetState.getName())
+                .targetPlayerName(targetState.getOwnerUserName())
+                .targetVillageCoordinates(new int[]{targetState.getX(), targetState.getY()})
+                .units(combatGroupSendingRequest.getWaves().get(0).getTroops()) //delete ?
+                .arrivalTime(arrivalTime)
+                .duration(duration)
+                .build();
     }
 
     @Override
@@ -219,33 +234,6 @@ public class MilitaryServiceImpl implements MilitaryService {
         settlementEntity.manipulateGoods(EManipulation.SUBTRACT, neededResources);
     }
 
-    private CombatGroupSendingContract checkTroopsSendingRequest(CombatGroupSendingRequest combatGroupSendingRequest,
-                                                                 SettlementEntity attackingVillage,
-                                                                 SettlementEntity attackedVillage) {
-
-        String attackedUser = attackedVillage.getOwnerUserName() == null ? "Nature" : attackedVillage.getOwnerUserName();
-
-        var duration = getDistance(attackedVillage.getX(), attackedVillage.getY(), attackingVillage.getX(), attackingVillage.getY())
-                .multiply(BigDecimal.valueOf(3600)
-                        .divide(BigDecimal.valueOf(10 * Consts.SPEED), MathContext.DECIMAL32)).intValue();
-        var arrivalTime = LocalDateTime.now().plusSeconds(duration);
-        return CombatGroupSendingContract.builder()
-                .nation(attackingVillage.getNation())
-                .mission(combatGroupSendingRequest.getMission())
-                .originVillageId(attackingVillage.getId())
-                .originVillageName(attackingVillage.getName())
-                .originPlayerName(attackingVillage.getOwnerUserName())
-                .originVillageCoordinates(new int[]{attackingVillage.getX(), attackingVillage.getY()})
-                .targetVillageId(attackedVillage.getId())
-                .targetVillageName(attackedVillage.getName())
-                .targetPlayerName(attackedUser)
-                .targetVillageCoordinates(new int[]{attackedVillage.getX(), attackedVillage.getY()})
-                .units(combatGroupSendingRequest.getWaves().get(0).getTroops())
-                .arrivalTime(arrivalTime)
-                .duration(duration)
-                .build();
-    }
-
     public static BigDecimal getDistance(int x, int y, int fromX, int fromY) {
         var legX = BigDecimal.valueOf(x - fromX).pow(2);
         var legY = BigDecimal.valueOf(y - fromY).pow(2);
@@ -253,7 +241,7 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public SettlementEntity sendTroops(CombatGroupSendingContract contract, SettlementEntity village) {
+    public SettlementEntity sendTroops(CombatGroupContractResponse contract, SettlementEntity village) {
         // deduct all involved units from village army
         var homeLegion = village.getHomeLegion();
         var attackingUnits = contract.getUnits();

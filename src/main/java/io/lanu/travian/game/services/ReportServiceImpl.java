@@ -8,6 +8,7 @@ import io.lanu.travian.game.models.ReportPlayer;
 import io.lanu.travian.game.models.responses.ReportBriefResponse;
 import io.lanu.travian.game.models.responses.ReportResponse;
 import io.lanu.travian.game.repositories.ReportRepository;
+import io.lanu.travian.game.repositories.SettlementRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -37,8 +38,8 @@ public class ReportServiceImpl implements ReportService{
     public ReportResponse getById(String reportId) {
 
         var entity = reportRepository.findById(reportId).orElseThrow();
-        var fromSettlement = settlementRepository.findById(entity.getFrom().getSettlementId());
-        var toSettlement = settlementRepository.findById(entity.getTo().getSettlementId());
+        var fromSettlement = settlementRepository.findById(entity.getFrom().getSettlementId()).orElseThrow();
+        var toSettlement = settlementRepository.findById(entity.getTo().getSettlementId()).orElseThrow();
 
         var result = new ReportResponse(entity.getId(), entity.getReportOwner(), entity.getMission(),
                 new ReportPlayer(entity.getFrom().getSettlementId(), fromSettlement.getName(), fromSettlement.getAccountId(),
@@ -57,13 +58,13 @@ public class ReportServiceImpl implements ReportService{
         if (cache.containsKey(reportEntity.getFrom().getSettlementId())) {
             from = cache.get(reportEntity.getFrom().getSettlementId());
         } else {
-            from = settlementRepository.findById(reportEntity.getFrom().getSettlementId());
+            from = settlementRepository.findById(reportEntity.getFrom().getSettlementId()).orElseThrow();
             cache.put(from.getId(), from);
         }
         if (cache.containsKey(reportEntity.getTo().getSettlementId())) {
             to = cache.get(reportEntity.getTo().getSettlementId());
         } else {
-            to = settlementRepository.findById(reportEntity.getTo().getSettlementId());
+            to = settlementRepository.findById(reportEntity.getTo().getSettlementId()).orElseThrow();
             cache.put(to.getId(), to);
         }
         var briefSubject = new StringBuilder();

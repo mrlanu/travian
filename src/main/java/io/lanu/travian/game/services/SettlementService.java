@@ -9,7 +9,7 @@ import io.lanu.travian.game.models.responses.VillageView;
 import java.util.List;
 import java.util.Optional;
 
-public interface SettlementRepository {
+public interface SettlementService {
     SettlementEntity saveVillage(SettlementEntity settlementEntity);
 
     SettlementEntity findById(String villageId);
