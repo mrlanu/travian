@@ -5,7 +5,7 @@ import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.ReportEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
-import io.lanu.travian.game.models.ReportPlayer;
+import io.lanu.travian.game.entities.ReportPlayerEntity;
 import io.lanu.travian.game.services.SettlementState;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -59,9 +59,9 @@ public class AttackMissionStrategy extends MissionStrategy {
         var report = new ReportEntity(
                 combatGroup.getOwnerSettlementId(),
                 ECombatGroupMission.ATTACK,
-                new ReportPlayer(combatGroup.getOwnerSettlementId(), combatGroup.getUnits(),
+                new ReportPlayerEntity(combatGroup.getOwnerSettlementId(), combatGroup.getOwnerNation(), combatGroup.getUnits(),
                         combatGroup.getUnits(), new HashMap<>(), 100),
-                new ReportPlayer(currentSettlement.getId(), currentSettlement.getHomeLegion(),
+                new ReportPlayerEntity(currentSettlement.getId(), currentSettlement.getNation(), currentSettlement.getHomeLegion(),
                         currentSettlement.getHomeLegion(), null, 0), LocalDateTime.now());
         var repo = settlementState.getReportRepository();
         repo.save(report);

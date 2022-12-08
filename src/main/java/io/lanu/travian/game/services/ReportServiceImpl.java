@@ -4,10 +4,10 @@ import io.lanu.travian.enums.ECombatGroupMission;
 import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.entities.ReportEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
+import io.lanu.travian.game.models.ReportPlayer;
 import io.lanu.travian.game.models.responses.ReportBriefResponse;
 import io.lanu.travian.game.models.responses.ReportResponse;
 import io.lanu.travian.game.repositories.ReportRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -35,9 +35,20 @@ public class ReportServiceImpl implements ReportService{
 
     @Override
     public ReportResponse getById(String reportId) {
-        var mapper = new ModelMapper();
+
         var entity = reportRepository.findById(reportId).orElseThrow();
-        return mapper.map(entity, ReportResponse.class);
+        var fromSettlement = settlementRepository.findById(entity.getFrom().getSettlementId());
+        var toSettlement = settlementRepository.findById(entity.getTo().getSettlementId());
+
+        var result = new ReportResponse(entity.getId(), entity.getReportOwner(), entity.getMission(),
+                new ReportPlayer(entity.getFrom().getSettlementId(), fromSettlement.getName(), fromSettlement.getAccountId(),
+                        fromSettlement.getOwnerUserName(), entity.getFrom().getNation(), entity.getFrom().getTroops(), entity.getFrom().getDead(),
+                        entity.getFrom().getBounty(), entity.getFrom().getCarry()),
+                new ReportPlayer(entity.getTo().getSettlementId(), toSettlement.getName(), toSettlement.getAccountId(),
+                        toSettlement.getOwnerUserName(), entity.getTo().getNation(), entity.getTo().getTroops(), entity.getTo().getDead(),
+                        entity.getTo().getBounty(), entity.getTo().getCarry()),
+                entity.getDateTime(), entity.isRead());
+        return result;
     }
 
     private ReportBriefResponse buildBrief(Map<String, SettlementEntity> cache, ReportEntity reportEntity){

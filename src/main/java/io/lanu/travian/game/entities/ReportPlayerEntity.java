@@ -1,4 +1,4 @@
-package io.lanu.travian.game.models;
+package io.lanu.travian.game.entities;
 
 import io.lanu.travian.enums.ENation;
 import io.lanu.travian.enums.EResource;
@@ -9,11 +9,8 @@ import java.util.Map;
 
 @Data
 @AllArgsConstructor
-public class ReportPlayer {
+public class ReportPlayerEntity {
     private String settlementId;
-    private String settlementName;
-    private String accountId;
-    private String playerName;
     private ENation nation;
     private int[] troops;
     private int[] dead;

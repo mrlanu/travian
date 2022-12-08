@@ -108,10 +108,10 @@ public class SettlementServiceImpl implements SettlementRepository {
 
     @Override
     public TileDetail getTileDetail(SettlementEntity settlement, int fromX, int fromY) {
-        var user = usersRepository.findByUserId(settlement.getAccountId()).orElse(new UserEntity("Nature"));
-        return new TileDetail(settlement.getId(), settlement.getSettlementType(), settlement.getSubType(), settlement.getNation(), user.getUsername(),
-                settlement.getName(), settlement.getX(), settlement.getY(), settlement.getPopulation(),
-                MilitaryServiceImpl.getDistance(settlement.getX(), settlement.getY(), fromX, fromY));
+        return new TileDetail(settlement.getId(), settlement.getSettlementType(), settlement.getSubType(),
+                settlement.getNation(), settlement.getOwnerUserName(), settlement.getName(), settlement.getX(), settlement.getY(),
+                settlement.getPopulation(), MilitaryServiceImpl.getDistance(settlement.getX(), settlement.getY(),
+                fromX, fromY));
     }
 
     @Override

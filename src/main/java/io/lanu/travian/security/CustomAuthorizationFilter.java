@@ -41,7 +41,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest req) {
         String authorizationHeader = req.getHeader(environment.getProperty("authorization.token.header.name"));
-
+        System.out.println("Request: " + req.getRequestURI() + " Method: " + req.getMethod());
         if (authorizationHeader == null) {
             return null;
         }
