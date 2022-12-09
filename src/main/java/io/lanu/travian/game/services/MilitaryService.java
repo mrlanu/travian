@@ -16,7 +16,7 @@ public interface MilitaryService {
     SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, SettlementEntity village);
     List<CombatUnitResponse> getAllResearchedUnits(String villageId);
     Map<ECombatGroupLocation, List<CombatGroupView>> getAllCombatGroupsByVillage(SettlementEntity village);
-    SettlementEntity sendTroops(CombatGroupContractResponse combatGroupContractResponse, SettlementEntity village);
+    SettlementEntity sendTroops(SettlementEntity settlementState, String contractId);
     Map<String, TroopMovementsBrief> getTroopMovementsBrief(String settlementId);
     CombatGroupContractResponse checkTroopsSendingRequest(SettlementEntity settlementState,
                                                           SettlementEntity targetState,

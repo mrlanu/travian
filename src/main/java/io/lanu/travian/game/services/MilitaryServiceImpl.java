@@ -2,13 +2,14 @@ package io.lanu.travian.game.services;
 
 import io.lanu.travian.Consts;
 import io.lanu.travian.enums.*;
-import io.lanu.travian.errors.UserErrorException;
+import io.lanu.travian.game.entities.CombatGroupContractEntity;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.requests.CombatGroupSendingRequest;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.responses.*;
+import io.lanu.travian.game.repositories.CombatGroupContractRepository;
 import io.lanu.travian.game.repositories.CombatGroupRepository;
 import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
 import io.lanu.travian.game.repositories.SettlementRepository;
@@ -29,13 +30,16 @@ public class MilitaryServiceImpl implements MilitaryService {
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
     private final CombatGroupRepository combatGroupRepository;
     private final SettlementRepository settlementRepository;
+    private final CombatGroupContractRepository combatGroupContractRepository;
 
     public MilitaryServiceImpl(ResearchedCombatUnitRepository researchedCombatUnitRepository,
                                CombatGroupRepository combatGroupRepository,
-                               SettlementRepository settlementRepository) {
+                               SettlementRepository settlementRepository,
+                               CombatGroupContractRepository combatGroupContractRepository) {
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.combatGroupRepository = combatGroupRepository;
         this.settlementRepository = settlementRepository;
+        this.combatGroupContractRepository = combatGroupContractRepository;
     }
 
     @Override
@@ -167,17 +171,20 @@ public class MilitaryServiceImpl implements MilitaryService {
     public CombatGroupContractResponse checkTroopsSendingRequest(SettlementEntity settlementState,
                                                                  SettlementEntity targetState,
                                                                  CombatGroupSendingRequest combatGroupSendingRequest) {
+        //delete all expired contracts (executed or canceled)
+        combatGroupContractRepository.deleteAllByOwnerSettlementId(settlementState.getId());
+
         var duration = getDistance(targetState.getX(), targetState.getY(),
                 settlementState.getX(), settlementState.getY()).multiply(BigDecimal.valueOf(3600)
                         .divide(BigDecimal.valueOf(10 * Consts.SPEED), MathContext.DECIMAL32)).intValue();
         var arrivalTime = LocalDateTime.now().plusSeconds(duration);
+        var combatGroupContractEntity = combatGroupContractRepository
+                .save(new CombatGroupContractEntity(null, settlementState.getId(), combatGroupSendingRequest.getMission(),
+                targetState.getId(), combatGroupSendingRequest.getWaves().get(0).getTroops(), arrivalTime, duration));
+
         return CombatGroupContractResponse.builder()
-                .nation(settlementState.getNation()) //delete
+                .savedEntityId(combatGroupContractEntity.getId())
                 .mission(combatGroupSendingRequest.getMission())
-                .originVillageId(settlementState.getId())  //delete
-                .originVillageName(settlementState.getName())  //delete
-                .originPlayerName(settlementState.getOwnerUserName())  //delete
-                .originVillageCoordinates(new int[]{settlementState.getX(), settlementState.getY()})  //delete
                 .targetVillageId(targetState.getId())
                 .targetVillageName(targetState.getName())
                 .targetPlayerName(targetState.getOwnerUserName())
@@ -241,27 +248,27 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public SettlementEntity sendTroops(CombatGroupContractResponse contract, SettlementEntity village) {
+    public SettlementEntity sendTroops(SettlementEntity settlementState, String contractId) {
         // deduct all involved units from village army
-        var homeLegion = village.getHomeLegion();
-        var attackingUnits = contract.getUnits();
+        var homeLegion = settlementState.getHomeLegion();
+        var contractEntity = combatGroupContractRepository.findById(contractId).orElseThrow();
+        var attackingUnits = contractEntity.getUnits();
         for (int i = 0; i < homeLegion.length; i++) {
             homeLegion[i] = homeLegion[i] - attackingUnits[i];
         }
 
         var combatGroup = CombatGroupEntity.builder()
                 .moved(true)
-                .ownerSettlementId(village.getId())
-                .ownerNation(contract.getNation())
-                .toSettlementId(contract.getTargetVillageId())
-                .executionTime(LocalDateTime.now().plusSeconds(contract.getDuration()))
-                .duration(contract.getDuration())
-                .mission(contract.getMission())
-                .units(contract.getUnits())
+                .ownerSettlementId(settlementState.getId())
+                .ownerNation(settlementState.getNation())
+                .toSettlementId(contractEntity.getTargetVillageId())
+                .executionTime(LocalDateTime.now().plusSeconds(contractEntity.getDuration()))
+                .duration(contractEntity.getDuration())
+                .mission(contractEntity.getMission())
+                .units(contractEntity.getUnits())
                 .build();
 
         combatGroupRepository.save(combatGroup);
-
-        return village;
+        return settlementState;
     }
 }

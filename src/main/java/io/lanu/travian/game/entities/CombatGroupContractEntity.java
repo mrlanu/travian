@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class CombatGroupContractEntity {
     @Id
     private String id;
+    private String ownerSettlementId;
     private ECombatGroupMission mission;
     private String targetVillageId;
     private int[] units;

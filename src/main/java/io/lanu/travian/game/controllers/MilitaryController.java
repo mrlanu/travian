@@ -61,10 +61,10 @@ public class MilitaryController {
        return militaryService.checkTroopsSendingRequest(settlementState, targetState, combatGroupSendingRequest);
     }
 
-    @PostMapping("/troops-send")
-    public boolean sendTroops(@RequestBody CombatGroupContractResponse combatGroupContractResponse){
-        var settlementState = state.recalculateCurrentState(combatGroupContractResponse.getOriginVillageId());
-        settlementState = militaryService.sendTroops(combatGroupContractResponse, settlementState);
+    @PostMapping("/{settlementId}/troops-send/{contractId}")
+    public boolean sendTroops(@PathVariable String settlementId, @PathVariable String contractId){
+        var settlementState = state.recalculateCurrentState(settlementId);
+        settlementState = militaryService.sendTroops(settlementState, contractId);
         state.save(settlementState);
         return true;
     }

@@ -14,12 +14,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class CombatGroupContractResponse {
-    private ENation nation;
+    private String savedEntityId;
     private ECombatGroupMission mission;
-    private String originVillageId;
-    private String originVillageName;
-    private String originPlayerName;
-    private int[] originVillageCoordinates;
     private String targetVillageId;
     private String targetVillageName;
     private String targetPlayerName;
