@@ -39,9 +39,10 @@ public class MilitaryController {
         return militaryService.getTroopMovementsBrief(villageId);
     }
 
-    @PostMapping("/military")
-    public VillageView orderCombatUnits(@RequestBody OrderCombatUnitRequest orderCombatUnitRequest) {
-        var settlementState = state.recalculateCurrentState(orderCombatUnitRequest.getVillageId());
+    @PostMapping("/{settlementId}/military")
+    public VillageView orderCombatUnits(@PathVariable String settlementId,
+                                        @RequestBody OrderCombatUnitRequest orderCombatUnitRequest) {
+        var settlementState = state.recalculateCurrentState(settlementId);
         settlementState = militaryService.orderCombatUnits(orderCombatUnitRequest, settlementState);
         state.save(settlementState);
         return settlementService.getVillageById(settlementState);
