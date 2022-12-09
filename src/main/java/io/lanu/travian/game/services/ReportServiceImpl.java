@@ -52,6 +52,22 @@ public class ReportServiceImpl implements ReportService{
         return result;
     }
 
+    @Override
+    public boolean setRead(String reportId) {
+        var report = reportRepository.findById(reportId).orElseThrow();
+        report.setRead(true);
+        reportRepository.save(report);
+        return true;
+    }
+
+    @Override
+    public List<ReportBriefResponse> deleteReports(String settlementId, List<String> reportsId) {
+        var cache = new HashMap<String, SettlementEntity>();
+        reportRepository.deleteAllById(reportsId);
+        return reportRepository.findAllByReportOwner(settlementId).stream()
+                .map(reportEntity -> buildBrief(cache, reportEntity)).collect(Collectors.toList());
+    }
+
     private ReportBriefResponse buildBrief(Map<String, SettlementEntity> cache, ReportEntity reportEntity){
         SettlementEntity from;
         SettlementEntity to;
