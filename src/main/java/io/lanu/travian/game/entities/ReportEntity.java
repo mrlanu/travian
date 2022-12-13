@@ -1,7 +1,6 @@
 package io.lanu.travian.game.entities;
 
 import io.lanu.travian.enums.ECombatGroupMission;
-import io.lanu.travian.game.models.ReportPlayer;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,12 +15,12 @@ public class ReportEntity {
     //since we create two reports (one for from, and one for to )
     private String reportOwner;
     private ECombatGroupMission mission;
-    private ReportPlayer from;
-    private ReportPlayer to;
+    private ReportPlayerEntity from;
+    private ReportPlayerEntity to;
     private LocalDateTime dateTime;
     private boolean read;
 
-    public ReportEntity(String reportOwner, ECombatGroupMission mission, ReportPlayer from, ReportPlayer to,
+    public ReportEntity(String reportOwner, ECombatGroupMission mission, ReportPlayerEntity from, ReportPlayerEntity to,
                         LocalDateTime dateTime) {
         this.reportOwner = reportOwner;
         this.mission = mission;

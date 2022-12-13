@@ -3,8 +3,7 @@ package io.lanu.travian.security;
 import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.errors.UserErrorException;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
-import io.lanu.travian.game.services.SettlementRepository;
-import org.springframework.core.env.Environment;
+import io.lanu.travian.game.services.SettlementService;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,14 +17,12 @@ public class UsersServiceImpl implements UsersService {
 
     private final UsersRepository usersRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final Environment environment;
-    private final SettlementRepository settlementService;
+    private final SettlementService settlementService;
 
 
-    public UsersServiceImpl(UsersRepository usersRepository, BCryptPasswordEncoder bCryptPasswordEncoder, Environment environment, SettlementRepository settlementService) {
+    public UsersServiceImpl(UsersRepository usersRepository, BCryptPasswordEncoder bCryptPasswordEncoder, SettlementService settlementService) {
         this.usersRepository = usersRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.environment = environment;
         this.settlementService = settlementService;
     }
 

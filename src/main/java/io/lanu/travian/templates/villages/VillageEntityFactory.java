@@ -63,7 +63,7 @@ public class VillageEntityFactory {
                     new ArrayList<>(),
                     new ArrayList<>(),
                     null);
-            case OASIS: return new SettlementEntity(null, SettlementType.OASIS, subType, null, null, 0, 0 , "Oasis", null,
+            case OASIS: return new SettlementEntity(null, SettlementType.OASIS, subType, null, "Nature", 0, 0 , "Oasis", null,
                     0, 0, 100,
                     Map.ofEntries(
                             Map.entry(1, new BuildModel(EBuilding.WOODCUTTER, 2)),

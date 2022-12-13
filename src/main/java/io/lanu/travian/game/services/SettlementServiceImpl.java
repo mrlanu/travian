@@ -11,34 +11,31 @@ import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.models.responses.TileDetail;
 import io.lanu.travian.game.models.responses.VillageView;
 import io.lanu.travian.game.repositories.*;
-import io.lanu.travian.security.UserEntity;
 import io.lanu.travian.security.UsersRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
-import java.math.MathContext;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class SettlementServiceImpl implements SettlementRepository {
-    private final io.lanu.travian.game.repositories.SettlementRepository settlementRepository;
+public class SettlementServiceImpl implements SettlementService {
+    private final SettlementRepository settlementRepository;
     private final MapTileRepository worldRepo;
     private final CombatGroupRepository combatGroupRepository;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
-    private final UsersRepository usersRepository;
-    private static final MathContext mc = new MathContext(3);
+    private final ReportRepository reportRepository;
 
-    public SettlementServiceImpl(io.lanu.travian.game.repositories.SettlementRepository settlementRepository,
+    public SettlementServiceImpl(SettlementRepository settlementRepository,
                                  MapTileRepository worldRepo,
-                                 CombatGroupRepository combatGroupRepository, ResearchedCombatUnitRepository researchedCombatUnitRepository, UsersRepository usersRepository) {
+                                 CombatGroupRepository combatGroupRepository, ResearchedCombatUnitRepository researchedCombatUnitRepository, UsersRepository usersRepository, ReportRepository reportRepository) {
         this.settlementRepository = settlementRepository;
         this.worldRepo = worldRepo;
         this.combatGroupRepository = combatGroupRepository;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
-        this.usersRepository = usersRepository;
+        this.reportRepository = reportRepository;
     }
 
     @Override
@@ -108,17 +105,19 @@ public class SettlementServiceImpl implements SettlementRepository {
 
     @Override
     public TileDetail getTileDetail(SettlementEntity settlement, int fromX, int fromY) {
-        var user = usersRepository.findByUserId(settlement.getAccountId()).orElse(new UserEntity("Nature"));
-        return new TileDetail(settlement.getId(), settlement.getSettlementType(), settlement.getSubType(), settlement.getNation(), user.getUsername(),
-                settlement.getName(), settlement.getX(), settlement.getY(), settlement.getPopulation(),
-                MilitaryServiceImpl.getDistance(settlement.getX(), settlement.getY(), fromX, fromY));
+        return new TileDetail(settlement.getId(), settlement.getSettlementType(), settlement.getSubType(),
+                settlement.getNation(), settlement.getOwnerUserName(), settlement.getName(), settlement.getX(), settlement.getY(),
+                settlement.getPopulation(), MilitaryServiceImpl.getDistance(settlement.getX(), settlement.getY(),
+                fromX, fromY));
     }
 
     @Override
     public VillageView getVillageById(SettlementEntity settlementEntity) {
         var militariesInVillage =
                 combatGroupRepository.getAllByToSettlementIdAndMoved(settlementEntity.getId(), false);
-        return new VillageView(settlementEntity, settlementEntity.getConstructionEventList(), militariesInVillage);
+        var newReportsCount = reportRepository.countAllByReportOwnerAndRead(settlementEntity.getId(), false);
+        return new VillageView(settlementEntity, settlementEntity.getConstructionEventList(),
+                militariesInVillage, newReportsCount);
     }
 
 }

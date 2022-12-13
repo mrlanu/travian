@@ -4,10 +4,7 @@ import io.lanu.travian.game.models.responses.ReportBriefResponse;
 import io.lanu.travian.game.models.responses.ReportResponse;
 import io.lanu.travian.game.services.ReportService;
 import io.lanu.travian.game.services.SettlementState;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,5 +30,15 @@ public class ReportController {
     @GetMapping("/reports/{reportId}")
     public ReportResponse getReportById(@PathVariable String reportId){
         return reportService.getById(reportId);
+    }
+
+    @PutMapping("/reports/read")
+    public boolean readReports(@RequestBody List<String> reportsId){
+        return reportService.readReports(reportsId);
+    }
+
+    @PutMapping("/reports/delete")
+    public boolean deleteReports(@RequestBody List<String> reportsId){
+        return reportService.deleteReports(reportsId);
     }
 }

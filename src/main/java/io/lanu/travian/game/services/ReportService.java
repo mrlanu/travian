@@ -9,4 +9,8 @@ public interface ReportService {
     List<ReportBriefResponse> getAllReportsBrief(String settlementId);
 
     ReportResponse getById(String reportId);
+
+    boolean readReports(List<String> reportsId);
+
+    boolean deleteReports(List<String> reportsId);
 }

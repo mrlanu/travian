@@ -13,13 +13,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CombatGroupSendingContract {
-    private ENation nation;
+public class CombatGroupContractResponse {
+    private String savedEntityId;
     private ECombatGroupMission mission;
-    private String originVillageId;
-    private String originVillageName;
-    private String originPlayerName;
-    private int[] originVillageCoordinates;
     private String targetVillageId;
     private String targetVillageName;
     private String targetPlayerName;

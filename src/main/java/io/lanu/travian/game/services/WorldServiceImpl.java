@@ -5,6 +5,7 @@ import io.lanu.travian.enums.SettlementSubType;
 import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.entities.MapTile;
 import io.lanu.travian.game.repositories.MapTileRepository;
+import io.lanu.travian.game.repositories.SettlementRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +19,9 @@ public class WorldServiceImpl implements WorldService{
     private final MapTileRepository repo;
     private final SettlementRepository settlementRepository;
 
-    public WorldServiceImpl(MapTileRepository repo, SettlementRepository settlementService) {
+    public WorldServiceImpl(MapTileRepository repo, SettlementRepository settlementRepository) {
         this.repo = repo;
-        this.settlementRepository = settlementService;
+        this.settlementRepository = settlementRepository;
     }
 
     @Override
@@ -59,7 +60,7 @@ public class WorldServiceImpl implements WorldService{
             entity.setX(emptySpot.getCorX());
             entity.setY(emptySpot.getCorY());
             entity.setName(subType.toString());
-            var id = settlementRepository.saveVillage(entity).getId();
+            var id = settlementRepository.save(entity).getId();
             emptySpot.setId(id);
             emptySpot.setName(subType.toString());
             emptySpot.setClazz(subType.toString().toLowerCase());

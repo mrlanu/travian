@@ -19,11 +19,8 @@ public class CombatGroupEntity {
     @Id
     private String id;
     private boolean moved;
-    private ENation nation;
-    private String ownerUserName;
-    private String ownerAccountId;
     private String ownerSettlementId;
-    private String ownerSettlementName;
+    private ENation ownerNation;
     private String toSettlementId;
     private LocalDateTime executionTime;
     private int duration;
