@@ -11,6 +11,7 @@ import io.lanu.travian.game.repositories.ReportRepository;
 import io.lanu.travian.game.repositories.SettlementRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class ReportServiceImpl implements ReportService{
     public List<ReportBriefResponse> getAllReportsBrief(String settlementId){
         var cache = new HashMap<String, SettlementEntity>();
         return reportRepository.findAllByReportOwner(settlementId).stream()
+                .sorted(Comparator.comparing(ReportEntity::getDateTime).reversed())
                 .map(reportEntity -> buildBrief(cache, reportEntity)).collect(Collectors.toList());
     }
 
