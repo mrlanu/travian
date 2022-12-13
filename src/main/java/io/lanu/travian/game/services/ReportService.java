@@ -10,7 +10,7 @@ public interface ReportService {
 
     ReportResponse getById(String reportId);
 
-    boolean setRead(String reportId);
+    boolean readReports(List<String> reportsId);
 
-    List<ReportBriefResponse> deleteReports(String settlementId, List<String> reportsId);
+    boolean deleteReports(List<String> reportsId);
 }

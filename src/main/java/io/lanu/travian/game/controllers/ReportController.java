@@ -32,13 +32,13 @@ public class ReportController {
         return reportService.getById(reportId);
     }
 
-    @PutMapping("/reports/{reportId}")
-    public boolean setRead(@PathVariable String reportId){
-        return reportService.setRead(reportId);
+    @PutMapping("/reports/read")
+    public boolean readReports(@RequestBody List<String> reportsId){
+        return reportService.readReports(reportsId);
     }
 
-    @PutMapping("{settlementId}/reports/delete")
-    public List<ReportBriefResponse> deleteReports(@PathVariable String settlementId, @RequestBody List<String> reportsId){
-        return reportService.deleteReports(settlementId, reportsId);
+    @PutMapping("/reports/delete")
+    public boolean deleteReports(@RequestBody List<String> reportsId){
+        return reportService.deleteReports(reportsId);
     }
 }

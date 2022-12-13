@@ -5,6 +5,7 @@ import io.lanu.travian.enums.EResource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 @Data
@@ -17,6 +18,6 @@ public class ReportPlayer {
     private ENation nation;
     private int[] troops;
     private int[] dead;
-    private Map<EResource, Integer> bounty;
+    private Map<EResource, BigDecimal> bounty;
     private int carry;
 }

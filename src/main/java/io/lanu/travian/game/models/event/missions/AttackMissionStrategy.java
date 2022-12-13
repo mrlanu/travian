@@ -29,9 +29,6 @@ public class AttackMissionStrategy extends MissionStrategy {
         // perform an attack if we are in origin village or skip and this attack will be performed in target village during recursion
         if (currentSettlement.getId().equals(combatGroup.getToSettlementId())){
 
-            createReports();
-            System.out.println("Report created " + currentSettlement.getId());
-
             var storage = currentSettlement.getStorage();
 
             //here should be an algorithm of a plunder
@@ -44,7 +41,7 @@ public class AttackMissionStrategy extends MissionStrategy {
             combatGroup.setToSettlementId(combatGroup.getOwnerSettlementId());
             combatGroup.setExecutionTime(LocalDateTime.now().plusSeconds(combatGroup.getDuration()));
             settlementState.getCombatGroupRepository().save(combatGroup);
-
+            createReports();
 
         } else{
 
@@ -60,7 +57,7 @@ public class AttackMissionStrategy extends MissionStrategy {
                 combatGroup.getOwnerSettlementId(),
                 ECombatGroupMission.ATTACK,
                 new ReportPlayerEntity(combatGroup.getOwnerSettlementId(), combatGroup.getOwnerNation(), combatGroup.getUnits(),
-                        combatGroup.getUnits(), new HashMap<>(), 100),
+                        combatGroup.getUnits(), combatGroup.getPlunder(), 300),
                 new ReportPlayerEntity(currentSettlement.getId(), currentSettlement.getNation(), currentSettlement.getHomeLegion(),
                         currentSettlement.getHomeLegion(), null, 0), LocalDateTime.now());
         var repo = settlementState.getReportRepository();
