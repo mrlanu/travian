@@ -34,6 +34,12 @@ public class UsersController {
     public void createFakeUsers(){
         usersService.registerUser(new AuthRequest("mrlanu@gmail.com", "mrlanu", "12345"));
         usersService.registerUser(new AuthRequest("wer@yahoo.com", "wer", "12345"));
+        usersService.registerUser(new AuthRequest("mrlan@gmail.com", "mrlan", "12345"));
+        usersService.registerUser(new AuthRequest("wertu@yahoo.com", "wertu", "12345"));
+        usersService.registerUser(new AuthRequest("mr@gmail.com", "mr", "12345"));
+        usersService.registerUser(new AuthRequest("mama@yahoo.com", "mama", "12345"));
+        usersService.registerUser(new AuthRequest("bob@gmail.com", "bob", "12345"));
+        usersService.registerUser(new AuthRequest("igor@yahoo.com", "igor", "12345"));
     }
 
 }

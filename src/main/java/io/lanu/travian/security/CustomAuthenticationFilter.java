@@ -77,6 +77,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
                                 .email(email)
                                 .username(userDetails.getUsername())
                                 .userId(userDetails.getUserId())
+                                .statisticsId(userDetails.getStatisticsId())
                                 .build()
                 );
     }
