@@ -16,6 +16,7 @@ public class AuthResponse {
     private Date expirationDate;
     private String email;
     private String username;
+    private String statisticsId;
     private String userId;
 }
 

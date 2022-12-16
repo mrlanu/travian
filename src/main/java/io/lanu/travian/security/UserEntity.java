@@ -20,9 +20,6 @@ public class UserEntity implements Serializable {
     private String userId;
     private String email;
     private String username;
+    private String statisticsId;
     private String encryptedPassword;
-
-    public UserEntity(String username) {
-        this.username = username;
-    }
 }
