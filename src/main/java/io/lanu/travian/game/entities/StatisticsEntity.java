@@ -33,6 +33,9 @@ public class StatisticsEntity {
         this.defensePoints = defensePoints;
     }
 
+    public void addPopulation(int amount){
+        this.population += amount;
+    }
     public void addVillage(int amount){
         this.villagesCount += amount;
     }

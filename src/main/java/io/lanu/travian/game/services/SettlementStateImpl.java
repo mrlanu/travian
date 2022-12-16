@@ -8,6 +8,7 @@ import io.lanu.travian.game.models.event.*;
 import io.lanu.travian.game.repositories.CombatGroupRepository;
 import io.lanu.travian.game.repositories.ReportRepository;
 import io.lanu.travian.game.repositories.SettlementRepository;
+import io.lanu.travian.game.repositories.StatisticsRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -27,12 +28,14 @@ public class SettlementStateImpl implements SettlementState {
     private final SettlementRepository settlementRepository;
     private final CombatGroupRepository combatGroupRepository;
     private final ReportRepository reportRepository;
+    private final StatisticsRepository statisticsRepository;
 
     public SettlementStateImpl(SettlementRepository settlementRepository, CombatGroupRepository combatGroupRepository,
-                               ReportRepository reportRepository) {
+                               ReportRepository reportRepository, StatisticsRepository statisticsRepository) {
         this.settlementRepository = settlementRepository;
         this.combatGroupRepository = combatGroupRepository;
         this.reportRepository = reportRepository;
+        this.statisticsRepository = statisticsRepository;
     }
 
     @Override
@@ -93,7 +96,7 @@ public class SettlementStateImpl implements SettlementState {
         // add all building events
         List<Event> allEvents = currentSettlement.getConstructionEventList().stream()
                 .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
-                .map(ConstructionEvent::new)
+                .map(event -> new ConstructionEvent(event, statisticsRepository))
                 .collect(Collectors.toList());
 
         // add all units events
