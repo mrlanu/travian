@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,7 @@ public class MessagesServiceImpl implements MessagesService{
                                 messageEntity.getSenderName(), messageEntity.getSenderId(),
                                 messageEntity.getRecipientName(), messageEntity.getRecipientId(),
                                 messageEntity.isRead(), messageEntity.getDateTime()))
+                .sorted(Comparator.comparing(MessageBriefResponse::getTime).reversed())
                 .collect(Collectors.toList());
     }
 

@@ -23,8 +23,7 @@ public class ReportController {
     @GetMapping("/{villageId}/reports")
     public List<ReportBriefResponse> getAllReportsBrief(@PathVariable String villageId){
         state.recalculateCurrentState(villageId);
-        var reports = reportService.getAllReportsBrief(villageId);
-        return reports;
+        return reportService.getAllReportsBrief(villageId);
     }
 
     @GetMapping("/reports/{reportId}")
