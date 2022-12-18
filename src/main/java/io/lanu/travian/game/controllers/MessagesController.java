@@ -32,4 +32,9 @@ public class MessagesController {
     public MessageResponse getMessageById(@PathVariable String messageId){
         return messagesService.getMessageById(messageId);
     }
+
+    @PutMapping("/delete")
+    public void deleteMessage(@RequestBody List<String> messagesId, @RequestParam String requestedOwnerId){
+        messagesService.delete(messagesId, requestedOwnerId);
+    }
 }

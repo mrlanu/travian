@@ -73,21 +73,26 @@ public class MessagesServiceImpl implements MessagesService{
     }
 
     @Override
-    public boolean delete(String messageId, String requestOwnerId){
-        var message = messagesRepository.findById(messageId).orElseThrow();
-        if (requestOwnerId.equals(message.getSenderId())){
-            if (message.isVisibleForRecipient()){
-                message.setVisibleForSender(false);
-            }else {
-                messagesRepository.deleteById(messageId);
-            }
-        }else {
-            if (message.isVisibleForSender()){
-                message.setVisibleForRecipient(false);
-            }else {
-                messagesRepository.deleteById(messageId);
-            }
-        }
+    public boolean delete(List<String> messagesId, String requestOwnerId){
+        messagesRepository.findAllById(messagesId).forEach(
+                message -> {
+                    if (requestOwnerId.equals(message.getSenderId())){
+                        if (message.isVisibleForRecipient()){
+                            message.setVisibleForSender(false);
+                            messagesRepository.save(message);
+                        }else {
+                            messagesRepository.deleteById(message.getId());
+                        }
+                    }else {
+                        if (message.isVisibleForSender()){
+                            message.setVisibleForRecipient(false);
+                            messagesRepository.save(message);
+                        }else {
+                            messagesRepository.deleteById(message.getId());
+                        }
+                    }
+                }
+        );
         return true;
     }
 }
