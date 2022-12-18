@@ -42,4 +42,9 @@ public class MessagesController {
     public void deleteMessage(@RequestBody List<String> messagesId, @RequestParam String requestedOwnerId){
         messagesService.delete(messagesId, requestedOwnerId);
     }
+
+    @GetMapping("/count-new")
+    public long countNewMessages(@RequestParam String recipientId){
+        return messagesService.countNewMessages(recipientId);
+    }
 }

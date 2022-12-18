@@ -14,4 +14,5 @@ public interface MessagesService {
     void read(List<String> messagesId);
     boolean delete(List<String> messagesId, String requestOwnerId);
     MessageResponse getMessageById(String messageId);
+    long countNewMessages(String recipientId);
 }

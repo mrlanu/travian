@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface MessagesRepository extends MongoRepository<MessageEntity, String> {
     List<MessageEntity> findAllByRecipientIdAndVisibleForRecipient(String recipientId, boolean visible);
-    List<MessageEntity> findAllBySenderIdAndVisibleForRecipient(String senderId, boolean visible);
     List<MessageEntity> findAllBySenderIdAndVisibleForSender(String senderId, boolean visible);
+    long countAllByRecipientIdAndVisibleForRecipientAndRead(String recipientId, boolean visible, boolean read);
 }

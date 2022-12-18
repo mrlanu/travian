@@ -33,6 +33,11 @@ public class MessagesServiceImpl implements MessagesService{
     }
 
     @Override
+    public long countNewMessages(String recipientId) {
+        return messagesRepository.countAllByRecipientIdAndVisibleForRecipientAndRead(recipientId, true, false);
+    }
+
+    @Override
     public List<MessageBriefResponse> getAllBriefs(String clientId, boolean sent) {
         List<MessageEntity> allMessages;
         if (sent){
