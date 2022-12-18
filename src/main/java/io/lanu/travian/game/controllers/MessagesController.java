@@ -33,6 +33,11 @@ public class MessagesController {
         return messagesService.getMessageById(messageId);
     }
 
+    @PutMapping("/read")
+    public void readMessage(@RequestBody List<String> messagesId){
+        messagesService.read(messagesId);
+    }
+
     @PutMapping("/delete")
     public void deleteMessage(@RequestBody List<String> messagesId, @RequestParam String requestedOwnerId){
         messagesService.delete(messagesId, requestedOwnerId);

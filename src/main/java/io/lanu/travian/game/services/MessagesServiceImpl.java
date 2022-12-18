@@ -66,10 +66,13 @@ public class MessagesServiceImpl implements MessagesService{
     }
 
     @Override
-    public void read(String messageId) {
-        var message = messagesRepository.findById(messageId).orElseThrow();
-        message.setRead(true);
-        messagesRepository.save(message);
+    public void read(List<String> messagesId) {
+        messagesRepository.findAllById(messagesId).forEach(
+                messageEntity -> {
+                    messageEntity.setRead(true);
+                    messagesRepository.save(messageEntity);
+                }
+        );
     }
 
     @Override

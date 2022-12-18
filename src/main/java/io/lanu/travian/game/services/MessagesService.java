@@ -11,7 +11,7 @@ public interface MessagesService {
     List<MessageBriefResponse> getAllBriefs(String clientId, boolean sent);
 
     MessageEntity save(MessageSendRequest messageSendRequest);
-    void read(String messageId);
+    void read(List<String> messagesId);
     boolean delete(List<String> messagesId, String requestOwnerId);
     MessageResponse getMessageById(String messageId);
 }
