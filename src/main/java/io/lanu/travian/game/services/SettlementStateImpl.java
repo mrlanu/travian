@@ -53,6 +53,11 @@ public class SettlementStateImpl implements SettlementState {
         return reportRepository;
     }
 
+    @Override
+    public SettlementRepository getSettlementRepository() {
+        return settlementRepository;
+    }
+
     public SettlementEntity recalculateCurrentState(String villageId) {
         SettlementEntity settlementEntity = settlementRepository.findById(villageId).orElseThrow();
         var allEvents = combineAllEvents(settlementEntity);

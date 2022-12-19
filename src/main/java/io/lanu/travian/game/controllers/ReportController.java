@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/villages")
+@RequestMapping("/api")
 public class ReportController {
 
     private final SettlementState state;
@@ -20,10 +20,10 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    @GetMapping("/{villageId}/reports")
-    public List<ReportBriefResponse> getAllReportsBrief(@PathVariable String villageId){
-        state.recalculateCurrentState(villageId);
-        return reportService.getAllReportsBrief(villageId);
+    @GetMapping("/reports")
+    public List<ReportBriefResponse> getAllReportsBrief(@RequestParam String accountId, @RequestParam String settlementId){
+        state.recalculateCurrentState(settlementId);
+        return reportService.getAllReportsBrief(accountId);
     }
 
     @GetMapping("/reports/{reportId}")

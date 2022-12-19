@@ -53,8 +53,10 @@ public class AttackMissionStrategy extends MissionStrategy {
     }
 
     private void createReports() {
+        var settlement = settlementState
+                .getSettlementRepository().findById(combatGroup.getOwnerSettlementId()).orElseThrow();
         var report = new ReportEntity(
-                combatGroup.getOwnerSettlementId(),
+                settlement.getAccountId(),
                 ECombatGroupMission.ATTACK,
                 new ReportPlayerEntity(combatGroup.getOwnerSettlementId(), combatGroup.getOwnerNation(), combatGroup.getUnits(),
                         combatGroup.getUnits(), combatGroup.getPlunder(), 300),
@@ -62,7 +64,7 @@ public class AttackMissionStrategy extends MissionStrategy {
                         currentSettlement.getHomeLegion(), null, 0), LocalDateTime.now());
         var repo = settlementState.getReportRepository();
         repo.save(report);
-        report.setReportOwner(currentSettlement.getId());
+        report.setReportOwner(currentSettlement.getAccountId());
         report.setId(null);
         repo.save(report);
     }

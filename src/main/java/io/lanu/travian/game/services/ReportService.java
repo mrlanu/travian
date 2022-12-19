@@ -6,7 +6,7 @@ import io.lanu.travian.game.models.responses.ReportResponse;
 import java.util.List;
 
 public interface ReportService {
-    List<ReportBriefResponse> getAllReportsBrief(String settlementId);
+    List<ReportBriefResponse> getAllReportsBrief(String accountId);
 
     ReportResponse getById(String reportId);
 

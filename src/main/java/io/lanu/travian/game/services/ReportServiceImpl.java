@@ -29,9 +29,9 @@ public class ReportServiceImpl implements ReportService{
     }
 
     @Override
-    public List<ReportBriefResponse> getAllReportsBrief(String settlementId){
+    public List<ReportBriefResponse> getAllReportsBrief(String accountId){
         var cache = new HashMap<String, SettlementEntity>();
-        return reportRepository.findAllByReportOwner(settlementId).stream()
+        return reportRepository.findAllByReportOwner(accountId).stream()
                 .sorted(Comparator.comparing(ReportEntity::getDateTime).reversed())
                 .map(reportEntity -> buildBrief(cache, reportEntity)).collect(Collectors.toList());
     }
