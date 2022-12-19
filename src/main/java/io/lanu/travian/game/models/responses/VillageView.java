@@ -48,15 +48,14 @@ public class VillageView {
     private Map<EResource, BigDecimal> producePerHour;
     private List<ConstructionEventView> eventsList;
     private List<CombatUnitOrderView> unitOrders;
-    private long newReportsCount;
 
     public VillageView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList,
-                       List<CombatGroupEntity> militariesInVillage, long newReportsCount) {
-        createView(settlementEntity, eventList, militariesInVillage, newReportsCount);
+                       List<CombatGroupEntity> militariesInVillage) {
+        createView(settlementEntity, eventList, militariesInVillage);
     }
 
     private void createView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList,
-                            List<CombatGroupEntity> militariesInVillage, long newReportsCount) {
+                            List<CombatGroupEntity> militariesInVillage) {
         this.villageId = settlementEntity.getId();
         this.accountId = settlementEntity.getAccountId();
         this.ownerUserName = settlementEntity.getOwnerUserName();
@@ -77,7 +76,6 @@ public class VillageView {
         this.producePerHour = settlementEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(eventList);
         this.unitOrders = this.buildUnitOrdersView(settlementEntity.getCombatUnitOrders());
-        this.newReportsCount = newReportsCount;
     }
 
     private Map<String, Integer> mapHomeLegion(int[] homeLegion, ENation nation, List<CombatGroupEntity> militariesInVillage) {

@@ -13,4 +13,5 @@ public interface ReportService {
     boolean readReports(List<String> reportsId);
 
     boolean deleteReports(List<String> reportsId);
+    long countAllByReportOwnerIdAndRead(String ownerId);
 }

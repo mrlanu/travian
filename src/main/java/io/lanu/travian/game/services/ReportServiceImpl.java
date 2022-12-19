@@ -68,6 +68,11 @@ public class ReportServiceImpl implements ReportService{
         return true;
     }
 
+    @Override
+    public long countAllByReportOwnerIdAndRead(String ownerId) {
+        return reportRepository.countAllByReportOwnerAndRead(ownerId, false);
+    }
+
     private ReportBriefResponse buildBrief(Map<String, SettlementEntity> cache, ReportEntity reportEntity){
         SettlementEntity from;
         SettlementEntity to;

@@ -115,9 +115,8 @@ public class SettlementServiceImpl implements SettlementService {
     public VillageView getVillageById(SettlementEntity settlementEntity) {
         var militariesInVillage =
                 combatGroupRepository.getAllByToSettlementIdAndMoved(settlementEntity.getId(), false);
-        var newReportsCount = reportRepository.countAllByReportOwnerAndRead(settlementEntity.getId(), false);
         return new VillageView(settlementEntity, settlementEntity.getConstructionEventList(),
-                militariesInVillage, newReportsCount);
+                militariesInVillage);
     }
 
 }

@@ -20,6 +20,11 @@ public class ReportController {
         this.reportService = reportService;
     }
 
+    @GetMapping("/reports/count-new")
+    public long countNewReports(@RequestParam String accountId){
+        return reportService.countAllByReportOwnerIdAndRead(accountId);
+    }
+
     @GetMapping("/reports")
     public List<ReportBriefResponse> getAllReportsBrief(@RequestParam String accountId, @RequestParam String settlementId){
         state.recalculateCurrentState(settlementId);
