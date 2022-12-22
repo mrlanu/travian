@@ -33,12 +33,6 @@ public class MilitaryController {
         return militaryService.getAllCombatGroupsByVillage(settlementState);
     }
 
-    //can't be called alone(getVillageBtId should be called first for recalculation)
-    @GetMapping("/{villageId}/troop-movements")
-    public Map<String, TroopMovementsBrief> getTroopMovements(@PathVariable String villageId){
-        return militaryService.getTroopMovementsBrief(villageId);
-    }
-
     @PostMapping("/{settlementId}/military")
     public VillageView orderCombatUnits(@PathVariable String settlementId,
                                         @RequestBody OrderCombatUnitRequest orderCombatUnitRequest) {

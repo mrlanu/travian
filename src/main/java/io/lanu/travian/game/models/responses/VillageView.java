@@ -48,9 +48,11 @@ public class VillageView {
     private Map<EResource, BigDecimal> producePerHour;
     private List<ConstructionEventView> eventsList;
     private List<CombatUnitOrderView> unitOrders;
+    private Map<String, TroopMovementsBrief> movements;
 
     public VillageView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList,
-                       List<CombatGroupEntity> militariesInVillage) {
+                       List<CombatGroupEntity> militariesInVillage, Map<String, TroopMovementsBrief> movements) {
+        this.movements = movements;
         createView(settlementEntity, eventList, militariesInVillage);
     }
 
