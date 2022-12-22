@@ -31,18 +31,18 @@ public class MilitaryServiceImpl implements MilitaryService {
     private final CombatGroupRepository combatGroupRepository;
     private final SettlementRepository settlementRepository;
     private final CombatGroupContractRepository combatGroupContractRepository;
-    private final SettlementState settlementState;
+    private final EngineService engineService;
 
     public MilitaryServiceImpl(ResearchedCombatUnitRepository researchedCombatUnitRepository,
                                CombatGroupRepository combatGroupRepository,
                                SettlementRepository settlementRepository,
                                CombatGroupContractRepository combatGroupContractRepository,
-                               SettlementState settlementState) {
+                               EngineService engineService) {
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.combatGroupRepository = combatGroupRepository;
         this.settlementRepository = settlementRepository;
         this.combatGroupContractRepository = combatGroupContractRepository;
-        this.settlementState = settlementState;
+        this.engineService = engineService;
     }
 
     @Override
@@ -208,7 +208,7 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     @Override
     public SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, String settlementId) {
-        var currentState = settlementState.recalculateCurrentState(settlementId);
+        var currentState = engineService.recalculateCurrentState(settlementId);
         ECombatUnit unit = orderCombatUnitRequest.getUnitType();
         ModelMapper mapper = new ModelMapper();
         CombatUnitResponse mappedUnit = mapper.map(unit, CombatUnitResponse.class);

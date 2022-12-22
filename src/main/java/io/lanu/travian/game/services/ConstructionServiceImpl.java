@@ -22,17 +22,17 @@ import java.util.stream.Collectors;
 @Service
 public class ConstructionServiceImpl implements ConstructionService {
 
-    private final SettlementState settlementState;
+    private final EngineService engineService;
     private final SettlementRepository settlementRepository;
 
-    public ConstructionServiceImpl(SettlementState settlementState, SettlementRepository settlementRepository) {
-        this.settlementState = settlementState;
+    public ConstructionServiceImpl(EngineService engineService, SettlementRepository settlementRepository) {
+        this.engineService = engineService;
         this.settlementRepository = settlementRepository;
     }
 
     @Override
     public SettlementEntity createBuildEvent(String settlementId, Integer buildingPosition, EBuilding kind) {
-        var currentState = settlementState.recalculateCurrentState(settlementId);
+        var currentState = engineService.recalculateCurrentState(settlementId);
         var events = currentState.getConstructionEventList()
                 .stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
@@ -69,7 +69,7 @@ public class ConstructionServiceImpl implements ConstructionService {
 
     @Override
     public SettlementEntity deleteBuildingEvent(String settlementId, String eventId) {
-        var currentState = settlementState.recalculateCurrentState(settlementId);
+        var currentState = engineService.recalculateCurrentState(settlementId);
         var allEvents = currentState.getConstructionEventList().stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
@@ -106,7 +106,7 @@ public class ConstructionServiceImpl implements ConstructionService {
 
     @Override
     public List<NewBuilding> getListOfAllNewBuildings(String settlementId) {
-        var currentState = settlementState.recalculateCurrentState(settlementId);
+        var currentState = engineService.recalculateCurrentState(settlementId);
         var events = currentState.getConstructionEventList();
         var all = getListOfNewBuildings();
         // if events size >=2 return all buildings unavailable for build otherwise checking ability to build

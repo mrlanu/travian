@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class SettlementStateImpl implements SettlementState {
+public class EngineServiceImpl implements EngineService {
 
     private static final MathContext mc = new MathContext(3);
     private final SettlementRepository settlementRepository;
@@ -30,8 +30,8 @@ public class SettlementStateImpl implements SettlementState {
     private final ReportRepository reportRepository;
     private final StatisticsRepository statisticsRepository;
 
-    public SettlementStateImpl(SettlementRepository settlementRepository, CombatGroupRepository combatGroupRepository,
-                               ReportRepository reportRepository, StatisticsRepository statisticsRepository) {
+    public EngineServiceImpl(SettlementRepository settlementRepository, CombatGroupRepository combatGroupRepository,
+                             ReportRepository reportRepository, StatisticsRepository statisticsRepository) {
         this.settlementRepository = settlementRepository;
         this.combatGroupRepository = combatGroupRepository;
         this.reportRepository = reportRepository;

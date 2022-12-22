@@ -3,7 +3,7 @@ package io.lanu.travian.game.models.event.missions;
 import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
-import io.lanu.travian.game.services.SettlementState;
+import io.lanu.travian.game.services.EngineService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,8 +11,8 @@ import lombok.EqualsAndHashCode;
 @Data
 public class ReturnHomeMissionStrategy extends MissionStrategy{
 
-    public ReturnHomeMissionStrategy(SettlementEntity currentSettlement, CombatGroupEntity combatGroup, SettlementState settlementState) {
-        super(currentSettlement, combatGroup, settlementState);
+    public ReturnHomeMissionStrategy(SettlementEntity currentSettlement, CombatGroupEntity combatGroup, EngineService engineService) {
+        super(currentSettlement, combatGroup, engineService);
     }
 
     @Override
@@ -25,6 +25,6 @@ public class ReturnHomeMissionStrategy extends MissionStrategy{
         }
         //add all plundered resources to storage
         currentSettlement.manipulateGoods(EManipulation.ADD, combatGroup.getPlunder());
-        settlementState.getCombatGroupRepository().deleteById(combatGroup.getId());
+        engineService.getCombatGroupRepository().deleteById(combatGroup.getId());
     }
 }

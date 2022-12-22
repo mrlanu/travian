@@ -2,7 +2,7 @@ package io.lanu.travian.game.models.event.missions;
 
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
-import io.lanu.travian.game.services.SettlementState;
+import io.lanu.travian.game.services.EngineService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,14 +11,14 @@ import lombok.NoArgsConstructor;
 public abstract class MissionStrategy {
     protected SettlementEntity currentSettlement;
     protected CombatGroupEntity combatGroup;
-    protected SettlementState settlementState;
+    protected EngineService engineService;
 
     public MissionStrategy(SettlementEntity currentSettlement,
                            CombatGroupEntity combatGroup,
-                           SettlementState settlementState) {
+                           EngineService engineService) {
         this.currentSettlement = currentSettlement;
         this.combatGroup = combatGroup;
-        this.settlementState = settlementState;
+        this.engineService = engineService;
     }
 
     public abstract void handle();

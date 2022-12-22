@@ -3,7 +3,7 @@ package io.lanu.travian.game.controllers;
 import io.lanu.travian.game.models.responses.ReportBriefResponse;
 import io.lanu.travian.game.models.responses.ReportResponse;
 import io.lanu.travian.game.services.ReportService;
-import io.lanu.travian.game.services.SettlementState;
+import io.lanu.travian.game.services.EngineService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,10 +12,10 @@ import java.util.List;
 @RequestMapping("/api")
 public class ReportController {
 
-    private final SettlementState state;
+    private final EngineService state;
     private final ReportService reportService;
 
-    public ReportController(SettlementState state, ReportService reportService) {
+    public ReportController(EngineService state, ReportService reportService) {
         this.state = state;
         this.reportService = reportService;
     }

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Service
 public class SettlementServiceImpl implements SettlementService {
 
-    private final SettlementState settlementState;
+    private final EngineService engineService;
     private final SettlementRepository settlementRepository;
     private final MapTileRepository worldRepo;
     private final CombatGroupRepository combatGroupRepository;
@@ -30,12 +30,12 @@ public class SettlementServiceImpl implements SettlementService {
     private final MilitaryService militaryService;
 
     public SettlementServiceImpl(
-            SettlementState settlementState, SettlementRepository settlementRepository,
+            EngineService engineService, SettlementRepository settlementRepository,
             MapTileRepository worldRepo,
             CombatGroupRepository combatGroupRepository,
             ResearchedCombatUnitRepository researchedCombatUnitRepository,
             MilitaryService militaryService) {
-        this.settlementState = settlementState;
+        this.engineService = engineService;
         this.settlementRepository = settlementRepository;
         this.worldRepo = worldRepo;
         this.combatGroupRepository = combatGroupRepository;
@@ -94,7 +94,7 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     public SettlementEntity updateName(String settlementId, String newName) {
-        var currentState = settlementState.recalculateCurrentState(settlementId);
+        var currentState = engineService.recalculateCurrentState(settlementId);
         currentState.setName(newName);
         return settlementRepository.save(currentState);
     }
@@ -119,7 +119,7 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     public SettlementView getSettlementById(String settlementId) {
-        var currentState = settlementState.recalculateCurrentState(settlementId);
+        var currentState = engineService.recalculateCurrentState(settlementId);
         var militariesInVillage =
                 combatGroupRepository.getAllByToSettlementIdAndMoved(settlementId, false);
         var movementsBrief = militaryService.getTroopMovementsBrief(settlementId);

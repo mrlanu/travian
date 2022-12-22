@@ -5,7 +5,7 @@ import io.lanu.travian.game.repositories.CombatGroupRepository;
 import io.lanu.travian.game.repositories.ReportRepository;
 import io.lanu.travian.game.repositories.SettlementRepository;
 
-public interface SettlementState {
+public interface EngineService {
     SettlementEntity recalculateCurrentState(String villageId);
     SettlementEntity save(SettlementEntity settlement);
     CombatGroupRepository getCombatGroupRepository();
