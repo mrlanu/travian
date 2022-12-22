@@ -7,6 +7,7 @@ import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.game.models.responses.NewBuilding;
+import io.lanu.travian.game.repositories.SettlementRepository;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,18 @@ import java.util.stream.Collectors;
 @Service
 public class ConstructionServiceImpl implements ConstructionService {
 
+    private final SettlementState settlementState;
+    private final SettlementRepository settlementRepository;
+
+    public ConstructionServiceImpl(SettlementState settlementState, SettlementRepository settlementRepository) {
+        this.settlementState = settlementState;
+        this.settlementRepository = settlementRepository;
+    }
+
     @Override
-    public SettlementEntity createBuildEvent(SettlementEntity village, Integer buildingPosition, EBuilding kind) {
-        var events = village.getConstructionEventList()
+    public SettlementEntity createBuildEvent(String settlementId, Integer buildingPosition, EBuilding kind) {
+        var currentState = settlementState.recalculateCurrentState(settlementId);
+        var events = currentState.getConstructionEventList()
                 .stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
@@ -36,10 +46,11 @@ public class ConstructionServiceImpl implements ConstructionService {
         //the kind of building if requested new building, and null if requested upgrade
         if (kind != null) {
             buildModel = new BuildModel(kind, 0);
-            village.getBuildings().put(buildingPosition, buildModel);
+            currentState.getBuildings().put(buildingPosition, buildModel);
         } else {
-            buildModel = village.getBuildings().get(buildingPosition);
+            buildModel = currentState.getBuildings().get(buildingPosition);
         }
+
         BuildingBase building = BuildingsFactory.getBuilding(buildModel.getKind(),
                 alreadyUnderUpgrade ? buildModel.getLevel() + 1 : buildModel.getLevel());
 
@@ -47,18 +58,19 @@ public class ConstructionServiceImpl implements ConstructionService {
                 events.get(events.size() - 1).getExecutionTime().plusSeconds(building.getTimeToNextLevel()) :
                 LocalDateTime.now().plusSeconds(building.getTimeToNextLevel());
 
-        village.manipulateGoods(EManipulation.SUBTRACT, building.getResourcesToNextLevel());
+        currentState.manipulateGoods(EManipulation.SUBTRACT, building.getResourcesToNextLevel());
 
         ConstructionEventEntity buildEvent = new ConstructionEventEntity(buildingPosition, buildModel.getKind(),
-                building.getLevel() + 1, village.getId(), executionTime);
+                building.getLevel() + 1, currentState.getId(), executionTime);
 
-        village.getConstructionEventList().add(buildEvent);
-        return village;
+        currentState.getConstructionEventList().add(buildEvent);
+        return settlementRepository.save(currentState);
     }
 
     @Override
-    public SettlementEntity deleteBuildingEvent(SettlementEntity village, String eventId) {
-        var allEvents = village.getConstructionEventList().stream()
+    public SettlementEntity deleteBuildingEvent(String settlementId, String eventId) {
+        var currentState = settlementState.recalculateCurrentState(settlementId);
+        var allEvents = currentState.getConstructionEventList().stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
         var event = allEvents.stream()
@@ -69,7 +81,7 @@ public class ConstructionServiceImpl implements ConstructionService {
                 .filter(e -> e.getBuildingPosition() == event.getBuildingPosition())
                 .count();
 
-        BuildModel buildModel = village.getBuildings().get(event.getBuildingPosition());
+        BuildModel buildModel = currentState.getBuildings().get(event.getBuildingPosition());
         BuildingBase building = BuildingsFactory.getBuilding(buildModel.getKind(),
                 numberOfEvents == 1 ? buildModel.getLevel() : buildModel.getLevel() + 1);
         //deduct time that was needed for building from following events
@@ -85,21 +97,22 @@ public class ConstructionServiceImpl implements ConstructionService {
         });
         // if deleting any building construction to level 1. in this case should return empty spot (except resources fields)
         if (event.getToLevel() == 1 && event.getBuildingPosition() >= 19 && numberOfEvents == 1){
-            village.getBuildings().put(event.getBuildingPosition(), new BuildModel(EBuilding.EMPTY, 0));
+            currentState.getBuildings().put(event.getBuildingPosition(), new BuildModel(EBuilding.EMPTY, 0));
         }
-        village.manipulateGoods(EManipulation.ADD, building.getResourcesToNextLevel());
-        village.getConstructionEventList().remove(event);
-        return village;
+        currentState.manipulateGoods(EManipulation.ADD, building.getResourcesToNextLevel());
+        currentState.getConstructionEventList().remove(event);
+        return settlementRepository.save(currentState);
     }
 
     @Override
-    public List<NewBuilding> getListOfAllNewBuildings(SettlementEntity village) {
-        var events = village.getConstructionEventList();
+    public List<NewBuilding> getListOfAllNewBuildings(String settlementId) {
+        var currentState = settlementState.recalculateCurrentState(settlementId);
+        var events = currentState.getConstructionEventList();
         var all = getListOfNewBuildings();
         // if events size >=2 return all buildings unavailable for build otherwise checking ability to build
         return events.size() >= 2 ? all : all.stream()
-                .filter(newBuilding -> newBuilding.isBuildingExistAndMaxLevelAndMulti(village.getBuildings()))
-                .peek(newBuilding -> newBuilding.checkAvailability(village.getBuildings().values(), village.getStorage()))
+                .filter(newBuilding -> newBuilding.isBuildingExistAndMaxLevelAndMulti(currentState.getBuildings()))
+                .peek(newBuilding -> newBuilding.checkAvailability(currentState.getBuildings().values(), currentState.getStorage()))
                 .collect(Collectors.toList());
     }
 

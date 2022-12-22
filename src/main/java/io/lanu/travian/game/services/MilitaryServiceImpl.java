@@ -31,15 +31,18 @@ public class MilitaryServiceImpl implements MilitaryService {
     private final CombatGroupRepository combatGroupRepository;
     private final SettlementRepository settlementRepository;
     private final CombatGroupContractRepository combatGroupContractRepository;
+    private final SettlementState settlementState;
 
     public MilitaryServiceImpl(ResearchedCombatUnitRepository researchedCombatUnitRepository,
                                CombatGroupRepository combatGroupRepository,
                                SettlementRepository settlementRepository,
-                               CombatGroupContractRepository combatGroupContractRepository) {
+                               CombatGroupContractRepository combatGroupContractRepository,
+                               SettlementState settlementState) {
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.combatGroupRepository = combatGroupRepository;
         this.settlementRepository = settlementRepository;
         this.combatGroupContractRepository = combatGroupContractRepository;
+        this.settlementState = settlementState;
     }
 
     @Override
@@ -204,15 +207,15 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, SettlementEntity settlement) {
-
+    public SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, String settlementId) {
+        var currentState = settlementState.recalculateCurrentState(settlementId);
         ECombatUnit unit = orderCombatUnitRequest.getUnitType();
         ModelMapper mapper = new ModelMapper();
         CombatUnitResponse mappedUnit = mapper.map(unit, CombatUnitResponse.class);
         mappedUnit.setSpeed(mappedUnit.getSpeed() / Consts.SPEED);
         mappedUnit.setTime(mappedUnit.getTime() / Consts.SPEED);
 
-        List<OrderCombatUnitEntity> ordersList = settlement.getCombatUnitOrders()
+        List<OrderCombatUnitEntity> ordersList = currentState.getCombatUnitOrders()
                 .stream()
                 .sorted(Comparator.comparing(OrderCombatUnitEntity::getCreated))
                 .collect(Collectors.toList());
@@ -226,13 +229,13 @@ public class MilitaryServiceImpl implements MilitaryService {
                 orderCombatUnitRequest.getUnitType(), orderCombatUnitRequest.getAmount(), mappedUnit.getTime(), mappedUnit.getEat(),
                 endOrderTime);
 
-        spendResources(orderCombatUnitRequest.getAmount(), settlement, mappedUnit);
+        spendResources(orderCombatUnitRequest.getAmount(), currentState, mappedUnit);
 
         armyOrder.setCreated(LocalDateTime.now());
         ordersList.add(armyOrder);
-        settlement.setCombatUnitOrders(ordersList);
+        currentState.setCombatUnitOrders(ordersList);
 
-        return settlement;
+        return settlementRepository.save(currentState);
     }
 
     private void spendResources(int unitsAmount, SettlementEntity settlementEntity, CombatUnitResponse kind) {

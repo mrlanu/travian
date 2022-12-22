@@ -1,45 +1,27 @@
 package io.lanu.travian.game.controllers;
 
-import io.lanu.travian.enums.ECombatGroupLocation;
-import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.requests.CombatGroupSendingRequest;
-import io.lanu.travian.game.models.responses.*;
+import io.lanu.travian.game.models.responses.CombatGroupContractResponse;
+import io.lanu.travian.game.models.responses.CombatUnitResponse;
+import io.lanu.travian.game.repositories.SettlementRepository;
 import io.lanu.travian.game.services.MilitaryService;
-import io.lanu.travian.game.services.SettlementService;
 import io.lanu.travian.game.services.SettlementState;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/villages")
 public class MilitaryController {
 
     private final SettlementState state;
-
+    private final SettlementRepository settlementRepository;
     private final MilitaryService militaryService;
-    private final SettlementService settlementService;
 
-    public MilitaryController(SettlementState state, MilitaryService militaryService, SettlementService settlementService) {
+    public MilitaryController(SettlementState state, SettlementRepository settlementRepository, MilitaryService militaryService) {
         this.state = state;
+        this.settlementRepository = settlementRepository;
         this.militaryService = militaryService;
-        this.settlementService = settlementService;
-    }
-
-    @GetMapping("/{villageId}/combat-group")
-    public Map<ECombatGroupLocation, List<CombatGroupView>> getAllCombatGroupsByVillageId(@PathVariable String villageId){
-        var settlementState = state.recalculateCurrentState(villageId);
-        return militaryService.getAllCombatGroupsByVillage(settlementState);
-    }
-
-    @PostMapping("/{settlementId}/military")
-    public VillageView orderCombatUnits(@PathVariable String settlementId,
-                                        @RequestBody OrderCombatUnitRequest orderCombatUnitRequest) {
-        var settlementState = state.recalculateCurrentState(settlementId);
-        settlementState = militaryService.orderCombatUnits(orderCombatUnitRequest, settlementState);
-        state.save(settlementState);
-        return settlementService.getVillageById(settlementState);
     }
 
     @GetMapping("/{villageId}/military/researched")
@@ -52,7 +34,8 @@ public class MilitaryController {
     public CombatGroupContractResponse checkTroopsSendingRequest(@PathVariable String settlementId,
                                                                  @RequestBody CombatGroupSendingRequest combatGroupSendingRequest) {
         var settlementState = state.recalculateCurrentState(settlementId);
-        var targetState = state.recalculateCurrentState(combatGroupSendingRequest.getTargetSettlementId());
+        var targetState = settlementRepository
+                .findById(combatGroupSendingRequest.getTargetSettlementId()).orElseThrow();
        return militaryService.checkTroopsSendingRequest(settlementState, targetState, combatGroupSendingRequest);
     }
 

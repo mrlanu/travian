@@ -9,7 +9,7 @@ import io.lanu.travian.game.models.ResearchedCombatUnitShort;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.models.responses.TileDetail;
-import io.lanu.travian.game.models.responses.VillageView;
+import io.lanu.travian.game.models.responses.SettlementView;
 import io.lanu.travian.game.repositories.*;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
@@ -21,16 +21,21 @@ import java.util.stream.Collectors;
 
 @Service
 public class SettlementServiceImpl implements SettlementService {
+
+    private final SettlementState settlementState;
     private final SettlementRepository settlementRepository;
     private final MapTileRepository worldRepo;
     private final CombatGroupRepository combatGroupRepository;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
     private final MilitaryService militaryService;
 
-    public SettlementServiceImpl(SettlementRepository settlementRepository,
-                                 MapTileRepository worldRepo,
-                                 CombatGroupRepository combatGroupRepository,
-                                 ResearchedCombatUnitRepository researchedCombatUnitRepository, MilitaryService militaryService) {
+    public SettlementServiceImpl(
+            SettlementState settlementState, SettlementRepository settlementRepository,
+            MapTileRepository worldRepo,
+            CombatGroupRepository combatGroupRepository,
+            ResearchedCombatUnitRepository researchedCombatUnitRepository,
+            MilitaryService militaryService) {
+        this.settlementState = settlementState;
         this.settlementRepository = settlementRepository;
         this.worldRepo = worldRepo;
         this.combatGroupRepository = combatGroupRepository;
@@ -88,9 +93,10 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     @Override
-    public SettlementEntity updateName(SettlementEntity settlementEntity, String newName) {
-        settlementEntity.setName(newName);
-        return settlementEntity;
+    public SettlementEntity updateName(String settlementId, String newName) {
+        var currentState = settlementState.recalculateCurrentState(settlementId);
+        currentState.setName(newName);
+        return settlementRepository.save(currentState);
     }
 
     @Override
@@ -112,12 +118,24 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     @Override
-    public VillageView getVillageById(SettlementEntity settlementEntity) {
+    public SettlementView getSettlementById(String settlementId) {
+        var currentState = settlementState.recalculateCurrentState(settlementId);
         var militariesInVillage =
-                combatGroupRepository.getAllByToSettlementIdAndMoved(settlementEntity.getId(), false);
-        var movements = militaryService.getTroopMovementsBrief(settlementEntity.getId());
-        return new VillageView(settlementEntity, settlementEntity.getConstructionEventList(),
-                militariesInVillage, movements);
+                combatGroupRepository.getAllByToSettlementIdAndMoved(settlementId, false);
+        var movementsBrief = militaryService.getTroopMovementsBrief(settlementId);
+        var combatGroupsByLocation = militaryService
+                .getAllCombatGroupsByVillage(currentState);
+        return new SettlementView(currentState, militariesInVillage, movementsBrief, combatGroupsByLocation);
+    }
+
+    @Override
+    public SettlementView getSettlementById(SettlementEntity currentState) {
+        var militariesInVillage =
+                combatGroupRepository.getAllByToSettlementIdAndMoved(currentState.getId(), false);
+        var movementsBrief = militaryService.getTroopMovementsBrief(currentState.getId());
+        var combatGroupsByLocation = militaryService
+                .getAllCombatGroupsByVillage(currentState);
+        return new SettlementView(currentState, militariesInVillage, movementsBrief, combatGroupsByLocation);
     }
 
 }
