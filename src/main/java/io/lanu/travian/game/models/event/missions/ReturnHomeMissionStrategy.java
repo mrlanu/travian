@@ -18,11 +18,7 @@ public class ReturnHomeMissionStrategy extends MissionStrategy{
     @Override
     public void handle() {
         // add all returned units to village army
-        var homeLegion = currentSettlement.getHomeLegion();
-        var returnedUnits = combatGroup.getUnits();
-        for (int i = 0; i < homeLegion.length; i++){
-            homeLegion[i] = homeLegion[i] + returnedUnits[i];
-        }
+        currentSettlement.manipulateHomeLegion(combatGroup.getUnits());
         //add all plundered resources to storage
         currentSettlement.manipulateGoods(EManipulation.ADD, combatGroup.getPlunder());
         engineService.getCombatGroupRepository().deleteById(combatGroup.getId());

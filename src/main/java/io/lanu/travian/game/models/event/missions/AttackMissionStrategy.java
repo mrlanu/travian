@@ -1,6 +1,7 @@
 package io.lanu.travian.game.models.event.missions;
 
 import io.lanu.travian.enums.ECombatGroupMission;
+import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.ReportEntity;
@@ -35,19 +36,27 @@ public class AttackMissionStrategy extends MissionStrategy {
             storage.put(EResource.CLAY, storage.get(EResource.CLAY).subtract(BigDecimal.valueOf(100)));
             combatGroup.setPlunder(Map.of(EResource.CROP, BigDecimal.ZERO, EResource.CLAY, BigDecimal.valueOf(100),
                     EResource.IRON, BigDecimal.ZERO, EResource.WOOD, BigDecimal.ZERO));
+            createReports();
             //----------
             combatGroup.setMission(ECombatGroupMission.BACK);
             combatGroup.setToSettlementId(combatGroup.getOwnerSettlementId());
-            combatGroup.setExecutionTime(LocalDateTime.now().plusSeconds(combatGroup.getDuration()));
+            combatGroup.setExecutionTime(combatGroup.getExecutionTime().plusSeconds(combatGroup.getDuration()));
+
             engineService.getCombatGroupRepository().save(combatGroup);
-            createReports();
 
         } else{
-
             System.out.println("Skipped " + currentSettlement.getId());
             //just in the skip case
             engineService.recalculateCurrentState(combatGroup.getToSettlementId());
 
+            var returningGroup = engineService
+                    .getCombatGroupRepository().findById(combatGroup.getId()).orElseThrow();
+
+            if (returningGroup.getExecutionTime().isBefore(LocalDateTime.now())){
+                currentSettlement.manipulateGoods(EManipulation.ADD, returningGroup.getPlunder());
+                currentSettlement.manipulateHomeLegion(returningGroup.getUnits());
+                engineService.getCombatGroupRepository().deleteById(returningGroup.getId());
+            }
         }
     }
 
@@ -60,7 +69,7 @@ public class AttackMissionStrategy extends MissionStrategy {
                 new ReportPlayerEntity(combatGroup.getOwnerSettlementId(), combatGroup.getOwnerNation(), combatGroup.getUnits(),
                         combatGroup.getUnits(), combatGroup.getPlunder(), 300),
                 new ReportPlayerEntity(currentSettlement.getId(), currentSettlement.getNation(), currentSettlement.getHomeLegion(),
-                        currentSettlement.getHomeLegion(), null, 0), LocalDateTime.now());
+                        currentSettlement.getHomeLegion(), null, 0), combatGroup.getExecutionTime());
         var repo = engineService.getReportRepository();
         repo.save(report);
         report.setReportOwner(currentSettlement.getAccountId());

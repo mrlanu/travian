@@ -2,10 +2,7 @@ package io.lanu.travian.game.services;
 
 import io.lanu.travian.Consts;
 import io.lanu.travian.enums.*;
-import io.lanu.travian.game.entities.CombatGroupContractEntity;
-import io.lanu.travian.game.entities.CombatGroupEntity;
-import io.lanu.travian.game.entities.OrderCombatUnitEntity;
-import io.lanu.travian.game.entities.SettlementEntity;
+import io.lanu.travian.game.entities.*;
 import io.lanu.travian.game.models.requests.CombatGroupSendingRequest;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.responses.*;
@@ -93,6 +90,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         List<CombatGroupView> unitsList = combatGroupRepository
                 .getCombatGroupByOwnerSettlementIdOrToSettlementId(settlement.getId(), settlement.getId())
                 .stream()
+                .sorted(Comparator.comparing(CombatGroupEntity::getExecutionTime))
                 .map(cG -> {
                     SettlementEntity from;
                     SettlementEntity to;

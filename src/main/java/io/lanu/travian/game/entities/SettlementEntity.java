@@ -104,6 +104,12 @@ public class SettlementEntity {
         }
     }
 
+    public void manipulateHomeLegion(int[] units){
+        for (int i = 0; i < homeLegion.length; i++){
+            homeLegion[i] = homeLegion[i] + units[i];
+        }
+    }
+
     public BigDecimal getWarehouseCapacity() {
         // in BuildModel overridden equals method so level doesnt matter in containsValue
         return buildings.containsValue(new BuildModel(EBuilding.WAREHOUSE, 0)) ?
