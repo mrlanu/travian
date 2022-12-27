@@ -1,6 +1,8 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.enums.ECombatGroupMission;
 import io.lanu.travian.enums.EResource;
+import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.CombatUnitDoneEventEntity;
@@ -117,7 +119,23 @@ public class EngineServiceImpl implements EngineService {
                 .map(cG -> new TroopsArrivedEvent(cG, this))
                 .collect(Collectors.toList());
 
-        allEvents.addAll(militaryEventList);
+        List<TroopsArrivedEvent> militaryEventsWithReturn = new ArrayList<>();
+        militaryEventList.forEach(mE -> {
+            militaryEventsWithReturn.add(mE);
+            if (!currentSettlement.getId().equals(mE.getCombatGroup().getToSettlementId())
+                    && (mE.getCombatGroup().getMission().equals(ECombatGroupMission.ATTACK)
+                        || mE.getCombatGroup().getMission().equals(ECombatGroupMission.RAID))
+                    && mE.getExecutionTime().plusSeconds(mE.getCombatGroup().getDuration()).isBefore(LocalDateTime.now())){
+                var returningGroup = CombatGroupEntity
+                        .builder()
+                        .id(mE.getCombatGroup().getId())
+                        .mission(ECombatGroupMission.BACK)
+                        .executionTime(mE.getExecutionTime().plusSeconds(mE.getCombatGroup().getDuration()))
+                        .build();
+                militaryEventsWithReturn.add(new TroopsArrivedEvent(returningGroup, this));
+            }
+        });
+        allEvents.addAll(militaryEventsWithReturn);
 
         // add last empty event
         allEvents.add(new LastEvent(LocalDateTime.now()));

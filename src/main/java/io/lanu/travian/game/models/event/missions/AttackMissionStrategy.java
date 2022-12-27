@@ -1,18 +1,16 @@
 package io.lanu.travian.game.models.event.missions;
 
 import io.lanu.travian.enums.ECombatGroupMission;
-import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.ReportEntity;
-import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.ReportPlayerEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.services.EngineService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
@@ -45,18 +43,8 @@ public class AttackMissionStrategy extends MissionStrategy {
             engineService.getCombatGroupRepository().save(combatGroup);
 
         } else{
-            System.out.println("Skipped " + currentSettlement.getId());
             //just in the skip case
             engineService.recalculateCurrentState(combatGroup.getToSettlementId());
-
-            var returningGroup = engineService
-                    .getCombatGroupRepository().findById(combatGroup.getId()).orElseThrow();
-
-            if (returningGroup.getExecutionTime().isBefore(LocalDateTime.now())){
-                currentSettlement.manipulateGoods(EManipulation.ADD, returningGroup.getPlunder());
-                currentSettlement.manipulateHomeLegion(returningGroup.getUnits());
-                engineService.getCombatGroupRepository().deleteById(returningGroup.getId());
-            }
         }
     }
 
