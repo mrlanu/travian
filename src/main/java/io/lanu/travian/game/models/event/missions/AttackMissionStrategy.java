@@ -37,6 +37,8 @@ public class AttackMissionStrategy extends MissionStrategy {
             createReports();
             //----------
             combatGroup.setMission(ECombatGroupMission.BACK);
+            //switch
+            combatGroup.setFromSettlementId(combatGroup.getToSettlementId());
             combatGroup.setToSettlementId(combatGroup.getOwnerSettlementId());
             combatGroup.setExecutionTime(combatGroup.getExecutionTime().plusSeconds(combatGroup.getDuration()));
 

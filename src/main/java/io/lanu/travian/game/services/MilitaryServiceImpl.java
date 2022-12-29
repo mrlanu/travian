@@ -94,10 +94,10 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .map(cG -> {
                     SettlementEntity from;
                     SettlementEntity to;
-                    if (cache.containsKey(cG.getOwnerSettlementId())) {
-                        from = cache.get(cG.getOwnerSettlementId());
+                    if (cache.containsKey(cG.getFromSettlementId())) {
+                        from = cache.get(cG.getFromSettlementId());
                     } else {
-                        from = settlementRepository.findById(cG.getOwnerSettlementId()).orElseThrow();
+                        from = settlementRepository.findById(cG.getFromSettlementId()).orElseThrow();
                         cache.put(from.getId(), from);
                     }
                     if (cache.containsKey(cG.getToSettlementId())) {
@@ -110,7 +110,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                     if (cG.isMoved()) {
                         ENation nation = settlement.getNation();
                         if (cG.getToSettlementId().equals(settlement.getId())) {
-                            nation = from.getNation();
+                            nation = settlement.getNation();
                         }
                         return new CombatGroupMovedView(cG.getId(), nation, cG.getMission(), true, null,
                                 new VillageBrief(from.getId(), from.getName(), from.getOwnerUserName(), new int[]{from.getX(), from.getY()}),
@@ -262,6 +262,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .moved(true)
                 .ownerSettlementId(settlementState.getId())
                 .ownerNation(settlementState.getNation())
+                .fromSettlementId(settlementState.getId())
                 .toSettlementId(contractEntity.getTargetVillageId())
                 .executionTime(LocalDateTime.now().plusSeconds(contractEntity.getDuration()))
                 .duration(contractEntity.getDuration())

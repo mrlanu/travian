@@ -23,11 +23,9 @@ import java.util.stream.Collectors;
 public class ConstructionServiceImpl implements ConstructionService {
 
     private final EngineService engineService;
-    private final SettlementRepository settlementRepository;
 
     public ConstructionServiceImpl(EngineService engineService, SettlementRepository settlementRepository) {
         this.engineService = engineService;
-        this.settlementRepository = settlementRepository;
     }
 
     @Override
@@ -64,7 +62,7 @@ public class ConstructionServiceImpl implements ConstructionService {
                 building.getLevel() + 1, currentState.getId(), executionTime);
 
         currentState.getConstructionEventList().add(buildEvent);
-        return settlementRepository.save(currentState);
+        return engineService.save(currentState);
     }
 
     @Override
@@ -101,7 +99,7 @@ public class ConstructionServiceImpl implements ConstructionService {
         }
         currentState.manipulateGoods(EManipulation.ADD, building.getResourcesToNextLevel());
         currentState.getConstructionEventList().remove(event);
-        return settlementRepository.save(currentState);
+        return engineService.save(currentState);
     }
 
     @Override

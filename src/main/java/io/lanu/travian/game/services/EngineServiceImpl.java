@@ -41,7 +41,17 @@ public class EngineServiceImpl implements EngineService {
 
     @Override
     public SettlementEntity save(SettlementEntity settlement){
-        return settlementRepository.save(settlement);
+        while (cache.contains(settlement.getId())){
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        cache.add(settlement.getId());
+        var result = settlementRepository.save(settlement);
+        cache.remove(settlement.getId());
+        return result;
     }
 
     @Override
