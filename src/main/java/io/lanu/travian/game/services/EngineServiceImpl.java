@@ -18,9 +18,7 @@ import java.math.MathContext;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +29,7 @@ public class EngineServiceImpl implements EngineService {
     private final CombatGroupRepository combatGroupRepository;
     private final ReportRepository reportRepository;
     private final StatisticsRepository statisticsRepository;
+    private final Set<String> cache = new HashSet<>();
 
     public EngineServiceImpl(SettlementRepository settlementRepository, CombatGroupRepository combatGroupRepository,
                              ReportRepository reportRepository, StatisticsRepository statisticsRepository) {
@@ -61,11 +60,22 @@ public class EngineServiceImpl implements EngineService {
     }
 
     public SettlementEntity recalculateCurrentState(String villageId) {
+        while (cache.contains(villageId)){
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        cache.add(villageId);
+
         SettlementEntity settlementEntity = settlementRepository.findById(villageId).orElseThrow();
         var allEvents = combineAllEvents(settlementEntity);
         executeAllEvents(settlementEntity, allEvents);
         settlementEntity.castStorage();
-        return settlementRepository.save(settlementEntity);
+        var result = settlementRepository.save(settlementEntity);
+        cache.remove(villageId);
+        return result;
     }
 
     private void executeAllEvents(SettlementEntity settlementEntity, List<Event> allEvents) {
