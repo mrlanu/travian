@@ -34,6 +34,10 @@ public class BuildingsFactory {
                 break;
             case MARKETPLACE: result = new Marketplace(1);
                 break;
+            case ACADEMY: result = new Academy();
+                break;
+            case BLACKSMITH: result = new Blacksmith();
+                break;
             default:
                 throw new IllegalStateException("Unexpected value: " + buildingKind);
         }

@@ -67,6 +67,20 @@ public enum EBuilding {
                     new RequirementBuilding(EBuilding.WAREHOUSE.getName(), 1, false),
                     new RequirementBuilding(EBuilding.GRANARY.getName(), 1, false)), false),
 
+    ACADEMY("Academy", EBuildingType.MILITARY, null, Arrays.asList(220, 160,  90,  40), 1.28, 4, 4,
+            new Time(3875), 20,
+            "New types of troops are researched here.",
+            Arrays.asList(
+                    new RequirementBuilding(EBuilding.BARRACK.getName(), 3, false),
+                    new RequirementBuilding(EBuilding.MAIN.getName(), 3, false)), false),
+
+    BLACKSMITH("Smithy", EBuildingType.MILITARY, null, Arrays.asList(170,  200, 380,  130), 1.28, 4, 2,
+            new Time(3875), 20,
+            "Troops' weapons are enhanced here.",
+            Arrays.asList(
+                    new RequirementBuilding(EBuilding.MAIN.getName(), 3, false),
+                    new RequirementBuilding(EBuilding.ACADEMY.getName(), 1, false)), false),
+
     EMPTY("empty-spot", EBuildingType.EMPTY);
 
     private static final Integer[] productions = {3, 7, 13, 21, 31, 46, 70, 98, 140, 203, 280};
