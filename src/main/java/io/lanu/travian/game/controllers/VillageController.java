@@ -2,6 +2,7 @@ package io.lanu.travian.game.controllers;
 
 import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.EResource;
+import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
@@ -39,8 +40,8 @@ public class VillageController {
 
     @PostMapping("/create-new-village")
     public ResponseEntity<String> newVillage(@RequestBody NewVillageRequest newVillageRequest){
-        SettlementEntity settlementEntity = settlementService.newVillage(newVillageRequest);
-        return ResponseEntity.status(HttpStatus.OK).body("New Village ID : " + settlementEntity.getId());
+        SettlementStateDTO settlementState = settlementService.newVillage(newVillageRequest);
+        return ResponseEntity.status(HttpStatus.OK).body("New Village ID : " + settlementState.getSettlementEntity().getId());
     }
 
     @GetMapping("/{settlementId}")

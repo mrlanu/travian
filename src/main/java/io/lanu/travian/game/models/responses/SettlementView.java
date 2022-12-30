@@ -1,6 +1,7 @@
 package io.lanu.travian.game.models.responses;
 
 import io.lanu.travian.enums.*;
+import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
@@ -48,17 +49,11 @@ public class SettlementView {
     private Map<String, TroopMovementsBrief> movementsBrief;
     private Map<ECombatGroupLocation, List<CombatGroupView>> combatGroupByLocation;
 
-    public SettlementView(SettlementEntity settlementEntity,
-                          List<CombatGroupEntity> militariesInVillage,
-                          Map<String, TroopMovementsBrief> movementsBrief,
-                          Map<ECombatGroupLocation, List<CombatGroupView>> combatGroupByLocation) {
-        this.movementsBrief = movementsBrief;
-        this.combatGroupByLocation = combatGroupByLocation;
-        createView(settlementEntity, militariesInVillage);
-    }
+    public SettlementView(SettlementStateDTO currentState) {
+        var settlementEntity = currentState.getSettlementEntity();
 
-    private void createView(SettlementEntity settlementEntity,
-                            List<CombatGroupEntity> militariesInVillage) {
+        this.movementsBrief = currentState.getMovementsBriefMap();
+        this.combatGroupByLocation = currentState.getCombatGroupByLocationMap();
         this.villageId = settlementEntity.getId();
         this.accountId = settlementEntity.getAccountId();
         this.ownerUserName = settlementEntity.getOwnerUserName();
@@ -74,7 +69,8 @@ public class SettlementView {
         this.warehouseCapacity = settlementEntity.getWarehouseCapacity();
         this.granaryCapacity = settlementEntity.getGranaryCapacity();
         this.buildings = this.buildBuildingsView(settlementEntity.getBuildings(), settlementEntity.getConstructionEventList());
-        this.homeLegion = this.mapHomeLegion(settlementEntity.getHomeLegion(), settlementEntity.getNation(), militariesInVillage);
+        this.homeLegion = this.mapHomeLegion(settlementEntity.getHomeLegion(), settlementEntity.getNation(),
+                currentState.getCombatGroupsInSettlement());
         this.homeUnits = settlementEntity.getHomeLegion();
         this.producePerHour = settlementEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(settlementEntity.getConstructionEventList());

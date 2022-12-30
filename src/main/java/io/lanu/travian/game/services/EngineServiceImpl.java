@@ -1,12 +1,16 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.enums.ECombatGroupLocation;
 import io.lanu.travian.enums.ECombatGroupMission;
+import io.lanu.travian.enums.ENation;
 import io.lanu.travian.enums.EResource;
+import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.CombatUnitDoneEventEntity;
 import io.lanu.travian.game.models.event.*;
+import io.lanu.travian.game.models.responses.*;
 import io.lanu.travian.game.repositories.CombatGroupRepository;
 import io.lanu.travian.game.repositories.ReportRepository;
 import io.lanu.travian.game.repositories.SettlementRepository;
@@ -40,22 +44,6 @@ public class EngineServiceImpl implements EngineService {
     }
 
     @Override
-    public SettlementEntity save(SettlementEntity settlement){
-        while (cache.contains(settlement.getId())){
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        cache.add(settlement.getId());
-        settlement.setModifiedTime(LocalDateTime.now());
-        var result = settlementRepository.save(settlement);
-        cache.remove(settlement.getId());
-        return result;
-    }
-
-    @Override
     public CombatGroupRepository getCombatGroupRepository() {
         return combatGroupRepository;
     }
@@ -71,24 +59,48 @@ public class EngineServiceImpl implements EngineService {
     }
 
     @Override
-    public SettlementEntity recalculateCurrentState(String villageId, LocalDateTime untilTime) {
-        while (cache.contains(villageId)){
+    public SettlementStateDTO recalculateCurrentState(String settlementId, LocalDateTime untilTime) {
+        while (cache.contains(settlementId)){
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
-        cache.add(villageId);
+        cache.add(settlementId);
+        var state = SettlementStateDTO
+                .builder()
+                .settlementEntity(settlementRepository.findById(settlementId).orElseThrow())
+                .build();
 
-        SettlementEntity settlementEntity = settlementRepository.findById(villageId).orElseThrow();
-        var allEvents = combineAllEvents(settlementEntity, untilTime);
-        executeAllEvents(settlementEntity, allEvents);
-        settlementEntity.castStorage();
-        settlementEntity.setModifiedTime(untilTime);
-        var result = settlementRepository.save(settlementEntity);
-        cache.remove(villageId);
-        return result;
+        var allEvents = combineAllEvents(state.getSettlementEntity(), untilTime);
+        executeAllEvents(state.getSettlementEntity(), allEvents);
+        state.getSettlementEntity().castStorage();
+        state.getSettlementEntity().setModifiedTime(untilTime);
+        settlementRepository.save(state.getSettlementEntity());
+
+        state.setCombatGroupsInSettlement(combatGroupRepository.getAllByToSettlementIdAndMoved(settlementId, false));
+        state.setMovementsBriefMap(getTroopMovementsBrief(state.getSettlementEntity().getId()));
+        state.setCombatGroupByLocationMap(getAllCombatGroupsByLocation(state.getSettlementEntity()));
+
+        cache.remove(settlementId);
+        return state;
+    }
+
+    @Override
+    public SettlementStateDTO saveSettlementEntity(SettlementStateDTO currentState){
+        while (cache.contains(currentState.getSettlementEntity().getId())){
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        cache.add(currentState.getSettlementEntity().getId());
+        currentState.getSettlementEntity().setModifiedTime(LocalDateTime.now());
+        var result = settlementRepository.save(currentState.getSettlementEntity());
+        cache.remove(currentState.getSettlementEntity().getId());
+        return currentState;
     }
 
     private void executeAllEvents(SettlementEntity settlementEntity, List<Event> allEvents) {
@@ -207,5 +219,129 @@ public class EngineServiceImpl implements EngineService {
             result.add(new CombatUnitDoneEvent(new CombatUnitDoneEventEntity(exec, order.getUnitType(), order.getEatHour())));
         }
         return result;
+    }
+
+    private Map<String, TroopMovementsBrief> getTroopMovementsBrief(String settlementId) {
+        var result = Map.of(
+                "Incoming Reinforcements", new TroopMovementsBrief(),
+                "Incoming Attacks", new TroopMovementsBrief(),
+                "Outgoing Reinforcements", new TroopMovementsBrief(),
+                "Outgoing Attacks", new TroopMovementsBrief()
+        );
+        combatGroupRepository.getCombatGroupByOwnerSettlementIdOrToSettlementId(settlementId, settlementId)
+                .stream()
+                .sorted(Comparator.comparing(CombatGroupEntity::getExecutionTime))
+                .forEach(cG -> {
+                    if (cG.isMoved()) {
+                        TroopMovementsBrief r;
+                        //INCOMING
+                        if (settlementId.equals(cG.getToSettlementId())) {
+                            //REINFORCEMENT
+                            if (cG.getMission().equals(ECombatGroupMission.BACK) || cG.getMission().equals(ECombatGroupMission.REINFORCEMENT)) {
+                                r = result.get("Incoming Reinforcements");
+                                //ATTACK & RAID
+                            } else {
+                                r = result.get("Incoming Attacks");
+                            }
+                            //OUTGOING
+                        } else {
+                            //REINFORCEMENT
+                            if (cG.getMission().equals(ECombatGroupMission.BACK) || cG.getMission().equals(ECombatGroupMission.REINFORCEMENT)) {
+                                r = result.get("Outgoing Reinforcements");
+                                //ATTACK & RAID
+                            } else {
+                                r = result.get("Outgoing Attacks");
+                            }
+                        }
+                        r.incrementCount();
+                        r.setTimeToArrive((int) Duration.between(LocalDateTime.now(), cG.getExecutionTime()).toSeconds());
+                    }
+                });
+        return result;
+    }
+
+    private Map<ECombatGroupLocation, List<CombatGroupView>> getAllCombatGroupsByLocation(SettlementEntity settlement) {
+        var cache = new HashMap<String, SettlementEntity>();
+
+        // other units
+        List<CombatGroupView> unitsList = combatGroupRepository
+                .getCombatGroupByOwnerSettlementIdOrToSettlementId(settlement.getId(), settlement.getId())
+                .stream()
+                .sorted(Comparator.comparing(CombatGroupEntity::getExecutionTime))
+                .map(cG -> {
+                    SettlementEntity from;
+                    SettlementEntity to;
+                    if (cache.containsKey(cG.getFromSettlementId())) {
+                        from = cache.get(cG.getFromSettlementId());
+                    } else {
+                        from = settlementRepository.findById(cG.getFromSettlementId()).orElseThrow();
+                        cache.put(from.getId(), from);
+                    }
+                    if (cache.containsKey(cG.getToSettlementId())) {
+                        to = cache.get(cG.getToSettlementId());
+                    } else {
+                        to = settlementRepository.findById(cG.getToSettlementId()).orElseThrow();
+                        cache.put(to.getId(), to);
+                    }
+
+                    if (cG.isMoved()) {
+                        ENation nation = settlement.getNation();
+                        if (cG.getToSettlementId().equals(settlement.getId())) {
+                            nation = settlement.getNation();
+                        }
+                        return new CombatGroupMovedView(cG.getId(), nation, cG.getMission(), true, null,
+                                new VillageBrief(from.getId(), from.getName(), from.getOwnerUserName(), new int[]{from.getX(), from.getY()}),
+                                new VillageBrief(to.getId(), to.getName(), to.getOwnerUserName(), new int[]{to.getX(), to.getY()}),
+                                cG.getUnits(), cG.getPlunder(), cG.getExecutionTime(),
+                                (int) Duration.between(LocalDateTime.now(), cG.getExecutionTime()).toSeconds());
+                    } else {
+                        return new CombatGroupStaticView(cG.getId(), settlement.getNation(), cG.getMission(), false, null,
+                                new VillageBrief(from.getId(), from.getName(), from.getOwnerUserName(), new int[]{from.getX(), from.getY()}),
+                                new VillageBrief(to.getId(), to.getName(), to.getOwnerUserName(), new int[]{to.getX(), to.getY()}),
+                                cG.getUnits(), to.getId(), 5);
+                    }
+                })
+                .peek(cG -> {
+                    if (cG.getTo().getVillageId().equals(settlement.getId())) {
+                        if (cG.isMove()) {
+                            cG.setState(ECombatGroupLocation.IN);
+                        } else {
+                            cG.setState(ECombatGroupLocation.HOME);
+                        }
+                    } else {
+                        if (cG.isMove()) {
+                            cG.setState(ECombatGroupLocation.OUT);
+                        } else {
+                            cG.setState(ECombatGroupLocation.AWAY);
+                        }
+                    }
+                })
+                .collect(Collectors.toList());
+
+        Map<ECombatGroupLocation, List<CombatGroupView>> militaryUnitsMap = unitsList.stream()
+                .collect(Collectors.groupingBy(CombatGroupView::getState));
+
+        // home army
+        CombatGroupView homeArmy = new CombatGroupStaticView("home", settlement.getNation(), ECombatGroupMission.HOME,
+                false, ECombatGroupLocation.HOME,
+                new VillageBrief(settlement.getId(), settlement.getName(), settlement.getOwnerUserName(), new int[]{settlement.getX(), settlement.getY()}),
+                new VillageBrief(settlement.getId(), settlement.getName(), settlement.getOwnerUserName(), new int[]{settlement.getX(), settlement.getY()}),
+                settlement.getHomeLegion(), settlement.getId(), 5);
+
+        var homeArmies = militaryUnitsMap.getOrDefault(ECombatGroupLocation.HOME, new ArrayList<>());
+        homeArmies.add(homeArmy);
+        militaryUnitsMap.put(ECombatGroupLocation.HOME, homeArmies);
+
+        if (!militaryUnitsMap.containsKey(ECombatGroupLocation.IN)){
+            militaryUnitsMap.put(ECombatGroupLocation.IN, new ArrayList<>());
+        }
+        if (!militaryUnitsMap.containsKey(ECombatGroupLocation.OUT)){
+            militaryUnitsMap.put(ECombatGroupLocation.OUT, new ArrayList<>());
+        }
+        if (!militaryUnitsMap.containsKey(ECombatGroupLocation.AWAY)){
+            militaryUnitsMap.put(ECombatGroupLocation.AWAY, new ArrayList<>());
+        }
+
+        return militaryUnitsMap;
     }
 }

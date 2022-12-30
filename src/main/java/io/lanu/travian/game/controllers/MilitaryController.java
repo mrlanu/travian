@@ -37,14 +37,14 @@ public class MilitaryController {
         var settlementState = state.recalculateCurrentState(settlementId, LocalDateTime.now());
         var targetState = settlementRepository
                 .findById(combatGroupSendingRequest.getTargetSettlementId()).orElseThrow();
-       return militaryService.checkTroopsSendingRequest(settlementState, targetState, combatGroupSendingRequest);
+       return militaryService.checkTroopsSendingRequest(settlementState.getSettlementEntity(), targetState, combatGroupSendingRequest);
     }
 
     @PostMapping("/{settlementId}/troops-send/{contractId}")
     public boolean sendTroops(@PathVariable String settlementId, @PathVariable String contractId){
         var settlementState = state.recalculateCurrentState(settlementId, LocalDateTime.now());
         settlementState = militaryService.sendTroops(settlementState, contractId);
-        state.save(settlementState);
+        state.saveSettlementEntity(settlementState);
         return true;
     }
 

@@ -32,7 +32,7 @@ public class MapController {
                                     @PathVariable int fromX,
                                     @PathVariable int fromY){
         var settlementState = state.recalculateCurrentState(id, LocalDateTime.now());
-        return settlementService.getTileDetail(settlementState, fromX, fromY);
+        return settlementService.getTileDetail(settlementState.getSettlementEntity(), fromX, fromY);
     }
 
     @PostMapping("/map-part")
