@@ -1,11 +1,13 @@
 package io.lanu.travian.game.controllers;
 
 import io.lanu.travian.game.models.requests.CombatGroupSendingRequest;
+import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.responses.CombatGroupContractResponse;
 import io.lanu.travian.game.models.responses.CombatUnitResponse;
-import io.lanu.travian.game.repositories.SettlementRepository;
+import io.lanu.travian.game.models.responses.SettlementView;
 import io.lanu.travian.game.services.MilitaryService;
 import io.lanu.travian.game.services.EngineService;
+import io.lanu.travian.game.services.SettlementService;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -16,12 +18,13 @@ import java.util.List;
 public class MilitaryController {
 
     private final EngineService state;
-    private final SettlementRepository settlementRepository;
+    private final SettlementService settlementService;
+
     private final MilitaryService militaryService;
 
-    public MilitaryController(EngineService state, SettlementRepository settlementRepository, MilitaryService militaryService) {
+    public MilitaryController(EngineService state, SettlementService settlementService, MilitaryService militaryService) {
         this.state = state;
-        this.settlementRepository = settlementRepository;
+        this.settlementService = settlementService;
         this.militaryService = militaryService;
     }
 
@@ -35,7 +38,7 @@ public class MilitaryController {
     public CombatGroupContractResponse checkTroopsSendingRequest(@PathVariable String settlementId,
                                                                  @RequestBody CombatGroupSendingRequest combatGroupSendingRequest) {
         var settlementState = state.recalculateCurrentState(settlementId, LocalDateTime.now());
-        var targetState = settlementRepository
+        var targetState = settlementService
                 .findById(combatGroupSendingRequest.getTargetSettlementId()).orElseThrow();
        return militaryService.checkTroopsSendingRequest(settlementState.getSettlementEntity(), targetState, combatGroupSendingRequest);
     }
@@ -46,6 +49,13 @@ public class MilitaryController {
         settlementState = militaryService.sendTroops(settlementState, contractId);
         state.saveSettlementEntity(settlementState);
         return true;
+    }
+
+    @PostMapping("/{settlementId}/military")
+    public SettlementView orderCombatUnits(@PathVariable String settlementId,
+                                           @RequestBody OrderCombatUnitRequest orderCombatUnitRequest) {
+        var currentState = militaryService.orderCombatUnits(orderCombatUnitRequest, settlementId);
+        return settlementService.getSettlementById(currentState);
     }
 
 }

@@ -42,9 +42,9 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     @Override
-    public SettlementEntity findById(String villageId) {
-        return settlementRepository.findById(villageId)
-                .orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
+    public Optional<SettlementEntity> findById(String villageId) {
+        return settlementRepository.findById(villageId);
+                //.orElseThrow(() -> new IllegalStateException(String.format("Village with id - %s is not exist.", villageId)));
     }
 
     @Override

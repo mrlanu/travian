@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface SettlementService {
     SettlementStateDTO saveSettlement(SettlementStateDTO settlementState);
 
-    SettlementEntity findById(String villageId);
+    Optional<SettlementEntity> findById(String villageId);
 
     SettlementStateDTO newVillage(NewVillageRequest newVillageRequest);
 

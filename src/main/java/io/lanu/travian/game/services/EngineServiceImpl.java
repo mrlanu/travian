@@ -135,7 +135,7 @@ public class EngineServiceImpl implements EngineService {
 
     private List<Event> combineAllEvents(SettlementEntity currentSettlement, LocalDateTime untilTime) {
 
-        // add all building events
+        // add all constructions events
         List<Event> allEvents = currentSettlement.getConstructionEventList().stream()
                 .filter(event -> event.getExecutionTime().isBefore(untilTime))
                 .map(event -> new ConstructionEvent(event, statisticsRepository))
@@ -145,8 +145,7 @@ public class EngineServiceImpl implements EngineService {
         var combatEventList = createCombatUnitDoneEventsFromOrders(currentSettlement, untilTime);
         allEvents.addAll(combatEventList);
 
-
-        // add all wars events
+        // add all combat groups arrived events
         var militaryEventList = combatGroupRepository
                 .getCombatGroupByOwnerSettlementIdOrToSettlementId(currentSettlement.getId(), currentSettlement.getId())
                 .stream()
@@ -154,6 +153,7 @@ public class EngineServiceImpl implements EngineService {
                 .map(cG -> new TroopsArrivedEvent(cG, this))
                 .collect(Collectors.toList());
 
+        // add returning events after raids or attacks (just mocks, they will be edited later in events loop)
         List<TroopsArrivedEvent> militaryEventsWithReturn = new ArrayList<>();
         militaryEventList.forEach(mE -> {
             militaryEventsWithReturn.add(mE);
