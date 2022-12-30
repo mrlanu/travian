@@ -206,7 +206,7 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     @Override
     public SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, String settlementId) {
-        var currentState = engineService.recalculateCurrentState(settlementId);
+        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
         ECombatUnit unit = orderCombatUnitRequest.getUnitType();
         ModelMapper mapper = new ModelMapper();
         CombatUnitResponse mappedUnit = mapper.map(unit, CombatUnitResponse.class);
@@ -233,7 +233,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         ordersList.add(armyOrder);
         currentState.setCombatUnitOrders(ordersList);
 
-        return settlementRepository.save(currentState);
+        return engineService.save(currentState);
     }
 
     private void spendResources(int unitsAmount, SettlementEntity settlementEntity, CombatUnitResponse kind) {

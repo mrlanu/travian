@@ -8,6 +8,7 @@ import io.lanu.travian.game.services.MilitaryService;
 import io.lanu.travian.game.services.EngineService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -26,14 +27,14 @@ public class MilitaryController {
 
     @GetMapping("/{villageId}/military/researched")
     public List<CombatUnitResponse> getAllResearchedUnits(@PathVariable String villageId){
-        state.recalculateCurrentState(villageId);
+        state.recalculateCurrentState(villageId, LocalDateTime.now());
         return militaryService.getAllResearchedUnits(villageId);
     }
 
     @PostMapping("/{settlementId}/check-troops-send")
     public CombatGroupContractResponse checkTroopsSendingRequest(@PathVariable String settlementId,
                                                                  @RequestBody CombatGroupSendingRequest combatGroupSendingRequest) {
-        var settlementState = state.recalculateCurrentState(settlementId);
+        var settlementState = state.recalculateCurrentState(settlementId, LocalDateTime.now());
         var targetState = settlementRepository
                 .findById(combatGroupSendingRequest.getTargetSettlementId()).orElseThrow();
        return militaryService.checkTroopsSendingRequest(settlementState, targetState, combatGroupSendingRequest);
@@ -41,7 +42,7 @@ public class MilitaryController {
 
     @PostMapping("/{settlementId}/troops-send/{contractId}")
     public boolean sendTroops(@PathVariable String settlementId, @PathVariable String contractId){
-        var settlementState = state.recalculateCurrentState(settlementId);
+        var settlementState = state.recalculateCurrentState(settlementId, LocalDateTime.now());
         settlementState = militaryService.sendTroops(settlementState, contractId);
         state.save(settlementState);
         return true;

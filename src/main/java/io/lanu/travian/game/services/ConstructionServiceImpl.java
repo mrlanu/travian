@@ -24,13 +24,13 @@ public class ConstructionServiceImpl implements ConstructionService {
 
     private final EngineService engineService;
 
-    public ConstructionServiceImpl(EngineService engineService, SettlementRepository settlementRepository) {
+    public ConstructionServiceImpl(EngineService engineService) {
         this.engineService = engineService;
     }
 
     @Override
     public SettlementEntity createBuildEvent(String settlementId, Integer buildingPosition, EBuilding kind) {
-        var currentState = engineService.recalculateCurrentState(settlementId);
+        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
         var events = currentState.getConstructionEventList()
                 .stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
@@ -67,7 +67,7 @@ public class ConstructionServiceImpl implements ConstructionService {
 
     @Override
     public SettlementEntity deleteBuildingEvent(String settlementId, String eventId) {
-        var currentState = engineService.recalculateCurrentState(settlementId);
+        var currentState = engineService.recalculateCurrentState(settlementId,LocalDateTime.now());
         var allEvents = currentState.getConstructionEventList().stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
@@ -104,7 +104,7 @@ public class ConstructionServiceImpl implements ConstructionService {
 
     @Override
     public List<NewBuilding> getListOfAllNewBuildings(String settlementId) {
-        var currentState = engineService.recalculateCurrentState(settlementId);
+        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
         var events = currentState.getConstructionEventList();
         var all = getListOfNewBuildings();
         // if events size >=2 return all buildings unavailable for build otherwise checking ability to build

@@ -8,6 +8,7 @@ import io.lanu.travian.game.services.SettlementService;
 import io.lanu.travian.game.services.EngineService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -30,7 +31,7 @@ public class MapController {
     public TileDetail getTileDetail(@PathVariable String id,
                                     @PathVariable int fromX,
                                     @PathVariable int fromY){
-        var settlementState = state.recalculateCurrentState(id);
+        var settlementState = state.recalculateCurrentState(id, LocalDateTime.now());
         return settlementService.getTileDetail(settlementState, fromX, fromY);
     }
 

@@ -48,8 +48,8 @@ public class SettlementEntity {
     private int[] homeLegion;
     private List<ConstructionEventEntity> constructionEventList;
     private List<OrderCombatUnitEntity> combatUnitOrders;
-    @LastModifiedDate
-    private LocalDateTime modified;
+    //@LastModifiedDate
+    private LocalDateTime modifiedTime;
 
     public Map<EResource, BigDecimal> calculateProducePerHour(){
         var result = IntStream.range(1, 19)

@@ -9,6 +9,7 @@ import io.lanu.travian.game.repositories.SettlementRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,6 +61,7 @@ public class WorldServiceImpl implements WorldService{
             entity.setX(emptySpot.getCorX());
             entity.setY(emptySpot.getCorY());
             entity.setName(subType.toString());
+            entity.setModifiedTime(LocalDateTime.now());
             var id = settlementRepository.save(entity).getId();
             emptySpot.setId(id);
             emptySpot.setName(subType.toString());

@@ -7,13 +7,17 @@ import io.lanu.travian.game.entities.ResearchedCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.ResearchedCombatUnitShort;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
+import io.lanu.travian.game.models.responses.SettlementView;
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.models.responses.TileDetail;
-import io.lanu.travian.game.models.responses.SettlementView;
-import io.lanu.travian.game.repositories.*;
+import io.lanu.travian.game.repositories.CombatGroupRepository;
+import io.lanu.travian.game.repositories.MapTileRepository;
+import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
+import io.lanu.travian.game.repositories.SettlementRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -64,7 +68,7 @@ public class SettlementServiceImpl implements SettlementService {
         tile.setEmpty(false);
         worldRepo.save(tile);
         createResearchedCombatUnitEntity(result.getId());
-        return saveVillage(result);
+        return engineService.save(result);
     }
 
     private int getRandomBetween(int min, int max){
@@ -94,9 +98,9 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     public SettlementEntity updateName(String settlementId, String newName) {
-        var currentState = engineService.recalculateCurrentState(settlementId);
+        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
         currentState.setName(newName);
-        return settlementRepository.save(currentState);
+        return engineService.save(currentState);
     }
 
     @Override
@@ -106,7 +110,7 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     public SettlementEntity saveVillage(SettlementEntity settlementEntity){
-        return settlementRepository.save(settlementEntity);
+        return engineService.save(settlementEntity);
     }
 
     @Override
@@ -119,7 +123,7 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     public SettlementView getSettlementById(String settlementId) {
-        var currentState = engineService.recalculateCurrentState(settlementId);
+        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
         var militariesInVillage =
                 combatGroupRepository.getAllByToSettlementIdAndMoved(settlementId, false);
         var movementsBrief = militaryService.getTroopMovementsBrief(settlementId);

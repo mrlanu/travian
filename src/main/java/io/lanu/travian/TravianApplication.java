@@ -35,7 +35,4 @@ public class TravianApplication {
     public CommandLineRunner isWorldExist(){
         return args -> worldService.createWorld();
     }
-
-
-
 }

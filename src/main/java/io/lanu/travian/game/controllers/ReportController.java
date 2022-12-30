@@ -6,6 +6,7 @@ import io.lanu.travian.game.services.ReportService;
 import io.lanu.travian.game.services.EngineService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -27,7 +28,7 @@ public class ReportController {
 
     @GetMapping("/reports")
     public List<ReportBriefResponse> getAllReportsBrief(@RequestParam String accountId, @RequestParam String settlementId){
-        state.recalculateCurrentState(settlementId);
+        state.recalculateCurrentState(settlementId, LocalDateTime.now());
         return reportService.getAllReportsBrief(accountId);
     }
 
