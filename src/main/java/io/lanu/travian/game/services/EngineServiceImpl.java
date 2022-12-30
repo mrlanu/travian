@@ -1,6 +1,8 @@
 package io.lanu.travian.game.services;
 
+import io.lanu.travian.enums.ECombatGroupMission;
 import io.lanu.travian.enums.EResource;
+import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.CombatUnitDoneEventEntity;
@@ -16,22 +18,21 @@ import java.math.MathContext;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class SettlementStateImpl implements SettlementState {
+public class EngineServiceImpl implements EngineService {
 
     private static final MathContext mc = new MathContext(3);
     private final SettlementRepository settlementRepository;
     private final CombatGroupRepository combatGroupRepository;
     private final ReportRepository reportRepository;
     private final StatisticsRepository statisticsRepository;
+    private final Set<String> cache = new HashSet<>();
 
-    public SettlementStateImpl(SettlementRepository settlementRepository, CombatGroupRepository combatGroupRepository,
-                               ReportRepository reportRepository, StatisticsRepository statisticsRepository) {
+    public EngineServiceImpl(SettlementRepository settlementRepository, CombatGroupRepository combatGroupRepository,
+                             ReportRepository reportRepository, StatisticsRepository statisticsRepository) {
         this.settlementRepository = settlementRepository;
         this.combatGroupRepository = combatGroupRepository;
         this.reportRepository = reportRepository;
@@ -40,7 +41,18 @@ public class SettlementStateImpl implements SettlementState {
 
     @Override
     public SettlementEntity save(SettlementEntity settlement){
-        return settlementRepository.save(settlement);
+        while (cache.contains(settlement.getId())){
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        cache.add(settlement.getId());
+        settlement.setModifiedTime(LocalDateTime.now());
+        var result = settlementRepository.save(settlement);
+        cache.remove(settlement.getId());
+        return result;
     }
 
     @Override
@@ -58,17 +70,30 @@ public class SettlementStateImpl implements SettlementState {
         return settlementRepository;
     }
 
-    public SettlementEntity recalculateCurrentState(String villageId) {
+    @Override
+    public SettlementEntity recalculateCurrentState(String villageId, LocalDateTime untilTime) {
+        while (cache.contains(villageId)){
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        cache.add(villageId);
+
         SettlementEntity settlementEntity = settlementRepository.findById(villageId).orElseThrow();
-        var allEvents = combineAllEvents(settlementEntity);
+        var allEvents = combineAllEvents(settlementEntity, untilTime);
         executeAllEvents(settlementEntity, allEvents);
         settlementEntity.castStorage();
-        return settlementRepository.save(settlementEntity);
+        settlementEntity.setModifiedTime(untilTime);
+        var result = settlementRepository.save(settlementEntity);
+        cache.remove(villageId);
+        return result;
     }
 
     private void executeAllEvents(SettlementEntity settlementEntity, List<Event> allEvents) {
         //var executor = new EventExecutor();
-        var modified = settlementEntity.getModified();
+        var modified = settlementEntity.getModifiedTime();
         for (Event event : allEvents) {
             var cropPerHour = settlementEntity.calculateProducePerHour().get(EResource.CROP);
 
@@ -96,16 +121,16 @@ public class SettlementStateImpl implements SettlementState {
         }
     }
 
-    private List<Event> combineAllEvents(SettlementEntity currentSettlement) {
+    private List<Event> combineAllEvents(SettlementEntity currentSettlement, LocalDateTime untilTime) {
 
         // add all building events
         List<Event> allEvents = currentSettlement.getConstructionEventList().stream()
-                .filter(event -> event.getExecutionTime().isBefore(LocalDateTime.now()))
+                .filter(event -> event.getExecutionTime().isBefore(untilTime))
                 .map(event -> new ConstructionEvent(event, statisticsRepository))
                 .collect(Collectors.toList());
 
         // add all units events
-        var combatEventList = createCombatUnitDoneEventsFromOrders(currentSettlement);
+        var combatEventList = createCombatUnitDoneEventsFromOrders(currentSettlement, untilTime);
         allEvents.addAll(combatEventList);
 
 
@@ -113,21 +138,37 @@ public class SettlementStateImpl implements SettlementState {
         var militaryEventList = combatGroupRepository
                 .getCombatGroupByOwnerSettlementIdOrToSettlementId(currentSettlement.getId(), currentSettlement.getId())
                 .stream()
-                .filter(cG -> cG.isMoved() && cG.getExecutionTime().isBefore(LocalDateTime.now()))
+                .filter(cG -> cG.isMoved() && cG.getExecutionTime().isBefore(untilTime))
                 .map(cG -> new TroopsArrivedEvent(cG, this))
                 .collect(Collectors.toList());
 
-        allEvents.addAll(militaryEventList);
+        List<TroopsArrivedEvent> militaryEventsWithReturn = new ArrayList<>();
+        militaryEventList.forEach(mE -> {
+            militaryEventsWithReturn.add(mE);
+            if (!currentSettlement.getId().equals(mE.getCombatGroup().getToSettlementId())
+                    && (mE.getCombatGroup().getMission().equals(ECombatGroupMission.ATTACK)
+                        || mE.getCombatGroup().getMission().equals(ECombatGroupMission.RAID))
+                    && mE.getExecutionTime().plusSeconds(mE.getCombatGroup().getDuration()).isBefore(untilTime)){
+                var returningGroup = CombatGroupEntity
+                        .builder()
+                        .id(mE.getCombatGroup().getId())
+                        .mission(ECombatGroupMission.BACK)
+                        .executionTime(mE.getExecutionTime().plusSeconds(mE.getCombatGroup().getDuration()))
+                        .build();
+                militaryEventsWithReturn.add(new TroopsArrivedEvent(returningGroup, this));
+            }
+        });
+        allEvents.addAll(militaryEventsWithReturn);
 
         // add last empty event
-        allEvents.add(new LastEvent(LocalDateTime.now()));
+        allEvents.add(new LastEvent(untilTime));
 
         return allEvents.stream()
                 .sorted(Comparator.comparing(Event::getExecutionTime))
                 .collect(Collectors.toList());
     }
 
-    private List<Event> createCombatUnitDoneEventsFromOrders(SettlementEntity settlement) {
+    private List<Event> createCombatUnitDoneEventsFromOrders(SettlementEntity settlement, LocalDateTime untilTime) {
 
         List<Event> result = new ArrayList<>();
         var ordersList = settlement.getCombatUnitOrders();
@@ -135,9 +176,9 @@ public class SettlementStateImpl implements SettlementState {
 
         if (ordersList.size() > 0) {
             for (OrderCombatUnitEntity order : ordersList) {
-                long duration = Duration.between(order.getLastTime(), LocalDateTime.now()).toSeconds();
+                long duration = Duration.between(order.getLastTime(), untilTime).toSeconds();
 
-                if (LocalDateTime.now().isAfter(order.getEndOrderTime())) {
+                if (untilTime.isAfter(order.getEndOrderTime())) {
                     // add all troops from order to result list
                     result.addAll(addCompletedCombatUnit(order, order.getLeftTrain()));
                     continue;

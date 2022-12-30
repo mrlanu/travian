@@ -48,8 +48,8 @@ public class SettlementEntity {
     private int[] homeLegion;
     private List<ConstructionEventEntity> constructionEventList;
     private List<OrderCombatUnitEntity> combatUnitOrders;
-    @LastModifiedDate
-    private LocalDateTime modified;
+    //@LastModifiedDate
+    private LocalDateTime modifiedTime;
 
     public Map<EResource, BigDecimal> calculateProducePerHour(){
         var result = IntStream.range(1, 19)
@@ -101,6 +101,12 @@ public class SettlementEntity {
             storage.forEach((k, v) -> storage.put(k, storage.get(k).add(goods.get(k))));
         } else {
             storage.forEach((k, v) -> storage.put(k, storage.get(k).subtract(goods.get(k))));
+        }
+    }
+
+    public void manipulateHomeLegion(int[] units){
+        for (int i = 0; i < homeLegion.length; i++){
+            homeLegion[i] = homeLegion[i] + units[i];
         }
     }
 

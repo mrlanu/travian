@@ -2,10 +2,7 @@ package io.lanu.travian.game.services;
 
 import io.lanu.travian.Consts;
 import io.lanu.travian.enums.*;
-import io.lanu.travian.game.entities.CombatGroupContractEntity;
-import io.lanu.travian.game.entities.CombatGroupEntity;
-import io.lanu.travian.game.entities.OrderCombatUnitEntity;
-import io.lanu.travian.game.entities.SettlementEntity;
+import io.lanu.travian.game.entities.*;
 import io.lanu.travian.game.models.requests.CombatGroupSendingRequest;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.responses.*;
@@ -31,15 +28,18 @@ public class MilitaryServiceImpl implements MilitaryService {
     private final CombatGroupRepository combatGroupRepository;
     private final SettlementRepository settlementRepository;
     private final CombatGroupContractRepository combatGroupContractRepository;
+    private final EngineService engineService;
 
     public MilitaryServiceImpl(ResearchedCombatUnitRepository researchedCombatUnitRepository,
                                CombatGroupRepository combatGroupRepository,
                                SettlementRepository settlementRepository,
-                               CombatGroupContractRepository combatGroupContractRepository) {
+                               CombatGroupContractRepository combatGroupContractRepository,
+                               EngineService engineService) {
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
         this.combatGroupRepository = combatGroupRepository;
         this.settlementRepository = settlementRepository;
         this.combatGroupContractRepository = combatGroupContractRepository;
+        this.engineService = engineService;
     }
 
     @Override
@@ -90,13 +90,14 @@ public class MilitaryServiceImpl implements MilitaryService {
         List<CombatGroupView> unitsList = combatGroupRepository
                 .getCombatGroupByOwnerSettlementIdOrToSettlementId(settlement.getId(), settlement.getId())
                 .stream()
+                .sorted(Comparator.comparing(CombatGroupEntity::getExecutionTime))
                 .map(cG -> {
                     SettlementEntity from;
                     SettlementEntity to;
-                    if (cache.containsKey(cG.getOwnerSettlementId())) {
-                        from = cache.get(cG.getOwnerSettlementId());
+                    if (cache.containsKey(cG.getFromSettlementId())) {
+                        from = cache.get(cG.getFromSettlementId());
                     } else {
-                        from = settlementRepository.findById(cG.getOwnerSettlementId()).orElseThrow();
+                        from = settlementRepository.findById(cG.getFromSettlementId()).orElseThrow();
                         cache.put(from.getId(), from);
                     }
                     if (cache.containsKey(cG.getToSettlementId())) {
@@ -109,7 +110,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                     if (cG.isMoved()) {
                         ENation nation = settlement.getNation();
                         if (cG.getToSettlementId().equals(settlement.getId())) {
-                            nation = from.getNation();
+                            nation = settlement.getNation();
                         }
                         return new CombatGroupMovedView(cG.getId(), nation, cG.getMission(), true, null,
                                 new VillageBrief(from.getId(), from.getName(), from.getOwnerUserName(), new int[]{from.getX(), from.getY()}),
@@ -204,15 +205,15 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, SettlementEntity settlement) {
-
+    public SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, String settlementId) {
+        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
         ECombatUnit unit = orderCombatUnitRequest.getUnitType();
         ModelMapper mapper = new ModelMapper();
         CombatUnitResponse mappedUnit = mapper.map(unit, CombatUnitResponse.class);
         mappedUnit.setSpeed(mappedUnit.getSpeed() / Consts.SPEED);
         mappedUnit.setTime(mappedUnit.getTime() / Consts.SPEED);
 
-        List<OrderCombatUnitEntity> ordersList = settlement.getCombatUnitOrders()
+        List<OrderCombatUnitEntity> ordersList = currentState.getCombatUnitOrders()
                 .stream()
                 .sorted(Comparator.comparing(OrderCombatUnitEntity::getCreated))
                 .collect(Collectors.toList());
@@ -226,13 +227,13 @@ public class MilitaryServiceImpl implements MilitaryService {
                 orderCombatUnitRequest.getUnitType(), orderCombatUnitRequest.getAmount(), mappedUnit.getTime(), mappedUnit.getEat(),
                 endOrderTime);
 
-        spendResources(orderCombatUnitRequest.getAmount(), settlement, mappedUnit);
+        spendResources(orderCombatUnitRequest.getAmount(), currentState, mappedUnit);
 
         armyOrder.setCreated(LocalDateTime.now());
         ordersList.add(armyOrder);
-        settlement.setCombatUnitOrders(ordersList);
+        currentState.setCombatUnitOrders(ordersList);
 
-        return settlement;
+        return engineService.save(currentState);
     }
 
     private void spendResources(int unitsAmount, SettlementEntity settlementEntity, CombatUnitResponse kind) {
@@ -261,6 +262,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .moved(true)
                 .ownerSettlementId(settlementState.getId())
                 .ownerNation(settlementState.getNation())
+                .fromSettlementId(settlementState.getId())
                 .toSettlementId(contractEntity.getTargetVillageId())
                 .executionTime(LocalDateTime.now().plusSeconds(contractEntity.getDuration()))
                 .duration(contractEntity.getDuration())

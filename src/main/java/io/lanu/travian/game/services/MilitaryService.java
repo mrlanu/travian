@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface MilitaryService {
-    SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, SettlementEntity village);
+    SettlementEntity orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, String settlementId);
     List<CombatUnitResponse> getAllResearchedUnits(String villageId);
     Map<ECombatGroupLocation, List<CombatGroupView>> getAllCombatGroupsByVillage(SettlementEntity village);
     SettlementEntity sendTroops(SettlementEntity settlementState, String contractId);

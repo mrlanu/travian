@@ -4,23 +4,21 @@ import io.lanu.travian.enums.ECombatGroupMission;
 import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.ReportEntity;
-import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.ReportPlayerEntity;
-import io.lanu.travian.game.services.SettlementState;
+import io.lanu.travian.game.entities.SettlementEntity;
+import io.lanu.travian.game.services.EngineService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class AttackMissionStrategy extends MissionStrategy {
 
-    public AttackMissionStrategy(SettlementEntity currentSettlement, CombatGroupEntity combatGroup, SettlementState settlementState) {
-        super(currentSettlement, combatGroup, settlementState);
+    public AttackMissionStrategy(SettlementEntity currentSettlement, CombatGroupEntity combatGroup, EngineService engineService) {
+        super(currentSettlement, combatGroup, engineService);
     }
 
     @Override
@@ -36,24 +34,24 @@ public class AttackMissionStrategy extends MissionStrategy {
             storage.put(EResource.CLAY, storage.get(EResource.CLAY).subtract(BigDecimal.valueOf(100)));
             combatGroup.setPlunder(Map.of(EResource.CROP, BigDecimal.ZERO, EResource.CLAY, BigDecimal.valueOf(100),
                     EResource.IRON, BigDecimal.ZERO, EResource.WOOD, BigDecimal.ZERO));
+            createReports();
             //----------
             combatGroup.setMission(ECombatGroupMission.BACK);
+            //switch
+            combatGroup.setFromSettlementId(combatGroup.getToSettlementId());
             combatGroup.setToSettlementId(combatGroup.getOwnerSettlementId());
-            combatGroup.setExecutionTime(LocalDateTime.now().plusSeconds(combatGroup.getDuration()));
-            settlementState.getCombatGroupRepository().save(combatGroup);
-            createReports();
+            combatGroup.setExecutionTime(combatGroup.getExecutionTime().plusSeconds(combatGroup.getDuration()));
+
+            engineService.getCombatGroupRepository().save(combatGroup);
 
         } else{
-
-            System.out.println("Skipped " + currentSettlement.getId());
             //just in the skip case
-            settlementState.recalculateCurrentState(combatGroup.getToSettlementId());
-
+            engineService.recalculateCurrentState(combatGroup.getToSettlementId(), combatGroup.getExecutionTime().plusSeconds(1));
         }
     }
 
     private void createReports() {
-        var settlement = settlementState
+        var settlement = engineService
                 .getSettlementRepository().findById(combatGroup.getOwnerSettlementId()).orElseThrow();
         var report = new ReportEntity(
                 settlement.getAccountId(),
@@ -61,8 +59,8 @@ public class AttackMissionStrategy extends MissionStrategy {
                 new ReportPlayerEntity(combatGroup.getOwnerSettlementId(), combatGroup.getOwnerNation(), combatGroup.getUnits(),
                         combatGroup.getUnits(), combatGroup.getPlunder(), 300),
                 new ReportPlayerEntity(currentSettlement.getId(), currentSettlement.getNation(), currentSettlement.getHomeLegion(),
-                        currentSettlement.getHomeLegion(), null, 0), LocalDateTime.now());
-        var repo = settlementState.getReportRepository();
+                        currentSettlement.getHomeLegion(), null, 0), combatGroup.getExecutionTime());
+        var repo = engineService.getReportRepository();
         repo.save(report);
         report.setReportOwner(currentSettlement.getAccountId());
         report.setId(null);

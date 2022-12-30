@@ -5,9 +5,10 @@ import io.lanu.travian.game.models.requests.MapPart;
 import io.lanu.travian.game.models.responses.TileDetail;
 import io.lanu.travian.game.repositories.MapTileRepository;
 import io.lanu.travian.game.services.SettlementService;
-import io.lanu.travian.game.services.SettlementState;
+import io.lanu.travian.game.services.EngineService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -15,12 +16,12 @@ import java.util.List;
 @RequestMapping("/api/world")
 public class MapController {
 
-    private final SettlementState state;
+    private final EngineService state;
     private final MapTileRepository repository;
 
     private final SettlementService settlementService;
 
-    public MapController(SettlementState state, MapTileRepository repository, SettlementService settlementService) {
+    public MapController(EngineService state, MapTileRepository repository, SettlementService settlementService) {
         this.state = state;
         this.repository = repository;
         this.settlementService = settlementService;
@@ -30,7 +31,7 @@ public class MapController {
     public TileDetail getTileDetail(@PathVariable String id,
                                     @PathVariable int fromX,
                                     @PathVariable int fromY){
-        var settlementState = state.recalculateCurrentState(id);
+        var settlementState = state.recalculateCurrentState(id, LocalDateTime.now());
         return settlementService.getTileDetail(settlementState, fromX, fromY);
     }
 

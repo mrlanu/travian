@@ -21,6 +21,7 @@ public class CombatGroupEntity {
     private boolean moved;
     private String ownerSettlementId;
     private ENation ownerNation;
+    private String fromSettlementId;
     private String toSettlementId;
     private LocalDateTime executionTime;
     private int duration;

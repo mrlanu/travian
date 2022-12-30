@@ -7,13 +7,17 @@ import io.lanu.travian.game.entities.ResearchedCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.ResearchedCombatUnitShort;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
+import io.lanu.travian.game.models.responses.SettlementView;
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.models.responses.TileDetail;
-import io.lanu.travian.game.models.responses.VillageView;
-import io.lanu.travian.game.repositories.*;
+import io.lanu.travian.game.repositories.CombatGroupRepository;
+import io.lanu.travian.game.repositories.MapTileRepository;
+import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
+import io.lanu.travian.game.repositories.SettlementRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,16 +25,21 @@ import java.util.stream.Collectors;
 
 @Service
 public class SettlementServiceImpl implements SettlementService {
+
+    private final EngineService engineService;
     private final SettlementRepository settlementRepository;
     private final MapTileRepository worldRepo;
     private final CombatGroupRepository combatGroupRepository;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
     private final MilitaryService militaryService;
 
-    public SettlementServiceImpl(SettlementRepository settlementRepository,
-                                 MapTileRepository worldRepo,
-                                 CombatGroupRepository combatGroupRepository,
-                                 ResearchedCombatUnitRepository researchedCombatUnitRepository, MilitaryService militaryService) {
+    public SettlementServiceImpl(
+            EngineService engineService, SettlementRepository settlementRepository,
+            MapTileRepository worldRepo,
+            CombatGroupRepository combatGroupRepository,
+            ResearchedCombatUnitRepository researchedCombatUnitRepository,
+            MilitaryService militaryService) {
+        this.engineService = engineService;
         this.settlementRepository = settlementRepository;
         this.worldRepo = worldRepo;
         this.combatGroupRepository = combatGroupRepository;
@@ -59,7 +68,7 @@ public class SettlementServiceImpl implements SettlementService {
         tile.setEmpty(false);
         worldRepo.save(tile);
         createResearchedCombatUnitEntity(result.getId());
-        return saveVillage(result);
+        return engineService.save(result);
     }
 
     private int getRandomBetween(int min, int max){
@@ -88,9 +97,10 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     @Override
-    public SettlementEntity updateName(SettlementEntity settlementEntity, String newName) {
-        settlementEntity.setName(newName);
-        return settlementEntity;
+    public SettlementEntity updateName(String settlementId, String newName) {
+        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
+        currentState.setName(newName);
+        return engineService.save(currentState);
     }
 
     @Override
@@ -100,7 +110,7 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     public SettlementEntity saveVillage(SettlementEntity settlementEntity){
-        return settlementRepository.save(settlementEntity);
+        return engineService.save(settlementEntity);
     }
 
     @Override
@@ -112,12 +122,24 @@ public class SettlementServiceImpl implements SettlementService {
     }
 
     @Override
-    public VillageView getVillageById(SettlementEntity settlementEntity) {
+    public SettlementView getSettlementById(String settlementId) {
+        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
         var militariesInVillage =
-                combatGroupRepository.getAllByToSettlementIdAndMoved(settlementEntity.getId(), false);
-        var movements = militaryService.getTroopMovementsBrief(settlementEntity.getId());
-        return new VillageView(settlementEntity, settlementEntity.getConstructionEventList(),
-                militariesInVillage, movements);
+                combatGroupRepository.getAllByToSettlementIdAndMoved(settlementId, false);
+        var movementsBrief = militaryService.getTroopMovementsBrief(settlementId);
+        var combatGroupsByLocation = militaryService
+                .getAllCombatGroupsByVillage(currentState);
+        return new SettlementView(currentState, militariesInVillage, movementsBrief, combatGroupsByLocation);
+    }
+
+    @Override
+    public SettlementView getSettlementById(SettlementEntity currentState) {
+        var militariesInVillage =
+                combatGroupRepository.getAllByToSettlementIdAndMoved(currentState.getId(), false);
+        var movementsBrief = militaryService.getTroopMovementsBrief(currentState.getId());
+        var combatGroupsByLocation = militaryService
+                .getAllCombatGroupsByVillage(currentState);
+        return new SettlementView(currentState, militariesInVillage, movementsBrief, combatGroupsByLocation);
     }
 
 }

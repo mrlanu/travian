@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface ConstructionService {
 
-    SettlementEntity createBuildEvent(SettlementEntity village, Integer fieldPosition, EBuilding kind);
+    SettlementEntity createBuildEvent(String settlementId, Integer fieldPosition, EBuilding kind);
 
-    SettlementEntity deleteBuildingEvent(SettlementEntity village, String eventId);
+    SettlementEntity deleteBuildingEvent(String settlementId, String eventId);
 
-    List<NewBuilding> getListOfAllNewBuildings(SettlementEntity village);
+    List<NewBuilding> getListOfAllNewBuildings(String settlementId);
 }

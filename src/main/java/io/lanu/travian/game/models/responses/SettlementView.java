@@ -1,9 +1,6 @@
 package io.lanu.travian.game.models.responses;
 
-import io.lanu.travian.enums.EBuilding;
-import io.lanu.travian.enums.ENation;
-import io.lanu.travian.enums.EResource;
-import io.lanu.travian.enums.SettlementType;
+import io.lanu.travian.enums.*;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
@@ -27,7 +24,7 @@ import java.util.stream.IntStream;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class VillageView {
+public class SettlementView {
     private String villageId;
     private String accountId;
     private String ownerUserName;
@@ -48,15 +45,19 @@ public class VillageView {
     private Map<EResource, BigDecimal> producePerHour;
     private List<ConstructionEventView> eventsList;
     private List<CombatUnitOrderView> unitOrders;
-    private Map<String, TroopMovementsBrief> movements;
+    private Map<String, TroopMovementsBrief> movementsBrief;
+    private Map<ECombatGroupLocation, List<CombatGroupView>> combatGroupByLocation;
 
-    public VillageView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList,
-                       List<CombatGroupEntity> militariesInVillage, Map<String, TroopMovementsBrief> movements) {
-        this.movements = movements;
-        createView(settlementEntity, eventList, militariesInVillage);
+    public SettlementView(SettlementEntity settlementEntity,
+                          List<CombatGroupEntity> militariesInVillage,
+                          Map<String, TroopMovementsBrief> movementsBrief,
+                          Map<ECombatGroupLocation, List<CombatGroupView>> combatGroupByLocation) {
+        this.movementsBrief = movementsBrief;
+        this.combatGroupByLocation = combatGroupByLocation;
+        createView(settlementEntity, militariesInVillage);
     }
 
-    private void createView(SettlementEntity settlementEntity, List<ConstructionEventEntity> eventList,
+    private void createView(SettlementEntity settlementEntity,
                             List<CombatGroupEntity> militariesInVillage) {
         this.villageId = settlementEntity.getId();
         this.accountId = settlementEntity.getAccountId();
@@ -72,11 +73,11 @@ public class VillageView {
         this.storage = settlementEntity.getStorage();
         this.warehouseCapacity = settlementEntity.getWarehouseCapacity();
         this.granaryCapacity = settlementEntity.getGranaryCapacity();
-        this.buildings = this.buildBuildingsView(settlementEntity.getBuildings(), eventList);
+        this.buildings = this.buildBuildingsView(settlementEntity.getBuildings(), settlementEntity.getConstructionEventList());
         this.homeLegion = this.mapHomeLegion(settlementEntity.getHomeLegion(), settlementEntity.getNation(), militariesInVillage);
         this.homeUnits = settlementEntity.getHomeLegion();
         this.producePerHour = settlementEntity.calculateProducePerHour();
-        this.eventsList = this.buildEventsView(eventList);
+        this.eventsList = this.buildEventsView(settlementEntity.getConstructionEventList());
         this.unitOrders = this.buildUnitOrdersView(settlementEntity.getCombatUnitOrders());
     }
 
