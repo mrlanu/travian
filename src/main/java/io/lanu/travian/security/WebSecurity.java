@@ -34,7 +34,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests().antMatchers("/api/auth/**", "/api/users/fake",
-                "/api/messages", "/api/messages/*", "/api/villages/*/add-resources").permitAll();
+                "/api/villages/*/add-resources", "/api/villages/create-new-village").permitAll();
 
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/users") // just for a demo purpose
                 .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN");

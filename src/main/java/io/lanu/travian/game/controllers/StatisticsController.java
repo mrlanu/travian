@@ -1,8 +1,10 @@
 package io.lanu.travian.game.controllers;
 
-import io.lanu.travian.game.entities.StatisticsEntity;
 import io.lanu.travian.game.services.StatisticsService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
@@ -13,11 +15,6 @@ public class StatisticsController {
 
     public StatisticsController(StatisticsService statisticsService) {
         this.statisticsService = statisticsService;
-    }
-
-    @PostMapping()
-    public StatisticsEntity add(@RequestBody StatisticsEntity statisticsEntity){
-        return statisticsService.save(statisticsEntity);
     }
 
     @GetMapping()

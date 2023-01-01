@@ -3,9 +3,9 @@ package io.lanu.travian.game.services;
 import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
+import io.lanu.travian.game.models.responses.SettlementView;
 import io.lanu.travian.game.models.responses.ShortVillageInfo;
 import io.lanu.travian.game.models.responses.TileDetail;
-import io.lanu.travian.game.models.responses.SettlementView;
 
 import java.util.List;
 import java.util.Optional;

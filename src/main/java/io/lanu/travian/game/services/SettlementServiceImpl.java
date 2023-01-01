@@ -4,6 +4,7 @@ import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.SettlementSubType;
 import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.dto.SettlementStateDTO;
+import io.lanu.travian.game.entities.MapTile;
 import io.lanu.travian.game.entities.ResearchedCombatUnitEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.ResearchedCombatUnitShort;
@@ -14,6 +15,7 @@ import io.lanu.travian.game.models.responses.TileDetail;
 import io.lanu.travian.game.repositories.MapTileRepository;
 import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
 import io.lanu.travian.game.repositories.SettlementRepository;
+import io.lanu.travian.game.repositories.StatisticsRepository;
 import io.lanu.travian.templates.villages.VillageEntityFactory;
 import org.springframework.stereotype.Service;
 
@@ -30,15 +32,17 @@ public class SettlementServiceImpl implements SettlementService {
     private final SettlementRepository settlementRepository;
     private final MapTileRepository worldRepo;
     private final ResearchedCombatUnitRepository researchedCombatUnitRepository;
+    private final StatisticsRepository statisticsRepository;
 
     public SettlementServiceImpl(
             EngineService engineService, SettlementRepository settlementRepository,
             MapTileRepository worldRepo,
-            ResearchedCombatUnitRepository researchedCombatUnitRepository) {
+            ResearchedCombatUnitRepository researchedCombatUnitRepository, StatisticsRepository statisticsRepository) {
         this.engineService = engineService;
         this.settlementRepository = settlementRepository;
         this.worldRepo = worldRepo;
         this.researchedCombatUnitRepository = researchedCombatUnitRepository;
+        this.statisticsRepository = statisticsRepository;
     }
 
     @Override
@@ -50,8 +54,13 @@ public class SettlementServiceImpl implements SettlementService {
     @Override
     public SettlementStateDTO newVillage(NewVillageRequest newVillageRequest) {
         var state = instantiateNewVillage(newVillageRequest);
-        var availableTiles = worldRepo.getAllByEmptyTrue();
-        var tile = availableTiles.get(getRandomBetween(0, availableTiles.size()));
+        MapTile tile;
+        if (newVillageRequest.getX().equals(0) && newVillageRequest.getY().equals(0)){
+            var availableTiles = worldRepo.getAllByEmptyTrue();
+            tile = availableTiles.get(getRandomBetween(0, availableTiles.size()));
+        }else {
+            tile = worldRepo.getByCorXAndCorY(newVillageRequest.getX(), newVillageRequest.getY());
+        }
         state.getSettlementEntity().setX(tile.getCorX());
         state.getSettlementEntity().setY(tile.getCorY());
         state.getSettlementEntity().setId(tile.getId());
@@ -62,7 +71,15 @@ public class SettlementServiceImpl implements SettlementService {
         tile.setEmpty(false);
         worldRepo.save(tile);
         createResearchedCombatUnitEntity(state.getSettlementEntity().getId());
+        editStatistics(newVillageRequest.getAccountId());
         return engineService.saveSettlementEntity(state);
+    }
+
+    private void editStatistics(String accountId) {
+        var statistics = statisticsRepository.findByPlayerId(accountId);
+        statistics.addPopulation(2);
+        statistics.addVillage(1);
+        statisticsRepository.save(statistics);
     }
 
     private int getRandomBetween(int min, int max){

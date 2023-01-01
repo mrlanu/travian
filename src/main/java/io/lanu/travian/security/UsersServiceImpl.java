@@ -36,7 +36,7 @@ public class UsersServiceImpl implements UsersService {
             throw new UserErrorException(String.format("Email %s already exists", request.getEmail()));
         }
         request.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
-        var statistics = new StatisticsEntity(request.getUsername(), null, 2, 1,
+        var statistics = new StatisticsEntity(request.getUsername(), null, 0, 0,
                 "", 0, 0);
         var statisticsEntity = statisticsRepository.save(statistics);
         var user = usersRepository
