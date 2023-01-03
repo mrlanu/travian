@@ -50,7 +50,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                         .divide(BigDecimal.valueOf(10 * Consts.SPEED), MathContext.DECIMAL32)).intValue();
         var arrivalTime = LocalDateTime.now().plusSeconds(duration);
         var combatGroupContractEntity = combatGroupContractRepository
-                .save(new CombatGroupContractEntity(null, settlementState.getId(), combatGroupSendingRequest.getMission(),
+                .save(new CombatGroupContractEntity(null, settlementState.getId(), targetState.getAccountId(), combatGroupSendingRequest.getMission(),
                 targetState.getId(), combatGroupSendingRequest.getWaves().get(0).getTroops(), arrivalTime, duration));
 
         return CombatGroupContractResponse.builder()
@@ -130,9 +130,10 @@ public class MilitaryServiceImpl implements MilitaryService {
 
         var combatGroup = CombatGroupEntity.builder()
                 .moved(true)
-                .ownerSettlementId(settlementState.getSettlementEntity().getId())
                 .ownerNation(settlementState.getSettlementEntity().getNation())
+                .fromAccountId(settlementState.getSettlementEntity().getAccountId())
                 .fromSettlementId(settlementState.getSettlementEntity().getId())
+                .toAccountId(contractEntity.getToAccountId())
                 .toSettlementId(contractEntity.getTargetVillageId())
                 .executionTime(LocalDateTime.now().plusSeconds(contractEntity.getDuration()))
                 .duration(contractEntity.getDuration())

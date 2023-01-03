@@ -17,6 +17,7 @@ public class CombatGroupContractEntity {
     @Id
     private String id;
     private String ownerSettlementId;
+    private String toAccountId;
     private ECombatGroupMission mission;
     private String targetVillageId;
     private int[] units;

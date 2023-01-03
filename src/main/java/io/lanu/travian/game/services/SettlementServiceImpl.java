@@ -137,11 +137,13 @@ public class SettlementServiceImpl implements SettlementService {
     @Override
     public SettlementView getSettlementById(String settlementId) {
         var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
+        engineService.checkAllAccountEvents(settlementId);
         return new SettlementView(currentState);
     }
 
     @Override
     public SettlementView getSettlementById(SettlementStateDTO currentState) {
+        engineService.checkAllAccountEvents(currentState.getSettlementEntity().getId());
         return new SettlementView(currentState);
     }
 

@@ -37,9 +37,10 @@ public class AttackMissionStrategy extends MissionStrategy {
             createReports();
             //----------
             combatGroup.setMission(ECombatGroupMission.BACK);
-            //switch
+            //swap
+            String temp = combatGroup.getFromSettlementId();
             combatGroup.setFromSettlementId(combatGroup.getToSettlementId());
-            combatGroup.setToSettlementId(combatGroup.getOwnerSettlementId());
+            combatGroup.setToSettlementId(temp);
             combatGroup.setExecutionTime(combatGroup.getExecutionTime().plusSeconds(combatGroup.getDuration()));
 
             engineService.getCombatGroupRepository().save(combatGroup);
@@ -52,11 +53,11 @@ public class AttackMissionStrategy extends MissionStrategy {
 
     private void createReports() {
         var settlement = engineService
-                .getSettlementRepository().findById(combatGroup.getOwnerSettlementId()).orElseThrow();
+                .getSettlementRepository().findById(combatGroup.getFromSettlementId()).orElseThrow();
         var report = new ReportEntity(
                 settlement.getAccountId(),
                 ECombatGroupMission.ATTACK,
-                new ReportPlayerEntity(combatGroup.getOwnerSettlementId(), combatGroup.getOwnerNation(), combatGroup.getUnits(),
+                new ReportPlayerEntity(combatGroup.getFromSettlementId(), combatGroup.getOwnerNation(), combatGroup.getUnits(),
                         combatGroup.getUnits(), combatGroup.getPlunder(), 300),
                 new ReportPlayerEntity(currentSettlement.getId(), currentSettlement.getNation(), currentSettlement.getHomeLegion(),
                         currentSettlement.getHomeLegion(), null, 0), combatGroup.getExecutionTime());

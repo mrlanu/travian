@@ -15,6 +15,8 @@ import io.lanu.travian.game.repositories.CombatGroupRepository;
 import io.lanu.travian.game.repositories.ReportRepository;
 import io.lanu.travian.game.repositories.SettlementRepository;
 import io.lanu.travian.game.repositories.StatisticsRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -56,6 +58,28 @@ public class EngineServiceImpl implements EngineService {
     @Override
     public SettlementRepository getSettlementRepository() {
         return settlementRepository;
+    }
+
+    @Override
+    public void checkAllAccountEvents(String exceptSettlementId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String accountId = authentication.getName();
+
+        var cache = new HashSet<String>();
+        var allCombatEvents = combatGroupRepository
+                .getCombatGroupByFromAccountIdOrToAccountIdAndExecutionTimeBefore(accountId, accountId, LocalDateTime.now());
+        allCombatEvents.forEach(cG -> {
+            if (cG.getFromAccountId().equals(accountId)){
+                if (!cG.getFromSettlementId().equals(exceptSettlementId)){
+                    cache.add(cG.getFromSettlementId());
+                }
+            }else {
+                if (!cG.getToSettlementId().equals(exceptSettlementId)){
+                    cache.add(cG.getToSettlementId());
+                }
+            }
+        });
+        cache.forEach(id -> recalculateCurrentState(id, LocalDateTime.now()));
     }
 
     @Override
@@ -147,7 +171,7 @@ public class EngineServiceImpl implements EngineService {
 
         // add all combat groups arrived events
         var militaryEventList = combatGroupRepository
-                .getCombatGroupByOwnerSettlementIdOrToSettlementId(currentSettlement.getId(), currentSettlement.getId())
+                .getCombatGroupByFromSettlementIdOrToSettlementId(currentSettlement.getId(), currentSettlement.getId())
                 .stream()
                 .filter(cG -> cG.isMoved() && cG.getExecutionTime().isBefore(untilTime))
                 .map(cG -> new TroopsArrivedEvent(cG, this))
@@ -228,7 +252,7 @@ public class EngineServiceImpl implements EngineService {
                 "Outgoing Reinforcements", new TroopMovementsBrief(),
                 "Outgoing Attacks", new TroopMovementsBrief()
         );
-        combatGroupRepository.getCombatGroupByOwnerSettlementIdOrToSettlementId(settlementId, settlementId)
+        combatGroupRepository.getCombatGroupByFromSettlementIdOrToSettlementId(settlementId, settlementId)
                 .stream()
                 .sorted(Comparator.comparing(CombatGroupEntity::getExecutionTime))
                 .forEach(cG -> {
@@ -265,7 +289,7 @@ public class EngineServiceImpl implements EngineService {
 
         // other units
         List<CombatGroupView> unitsList = combatGroupRepository
-                .getCombatGroupByOwnerSettlementIdOrToSettlementId(settlement.getId(), settlement.getId())
+                .getCombatGroupByFromSettlementIdOrToSettlementId(settlement.getId(), settlement.getId())
                 .stream()
                 .sorted(Comparator.comparing(CombatGroupEntity::getExecutionTime))
                 .map(cG -> {
