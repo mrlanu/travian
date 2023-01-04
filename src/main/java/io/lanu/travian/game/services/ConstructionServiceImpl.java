@@ -3,11 +3,10 @@ package io.lanu.travian.game.services;
 import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.EBuildingType;
 import io.lanu.travian.enums.EManipulation;
+import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.entities.BuildModel;
-import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.game.models.responses.NewBuilding;
-import io.lanu.travian.game.repositories.SettlementRepository;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
 import org.springframework.stereotype.Service;
@@ -29,9 +28,9 @@ public class ConstructionServiceImpl implements ConstructionService {
     }
 
     @Override
-    public SettlementEntity createBuildEvent(String settlementId, Integer buildingPosition, EBuilding kind) {
-        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
-        var events = currentState.getConstructionEventList()
+    public SettlementStateDTO createBuildEvent(String settlementId, Integer buildingPosition, EBuilding kind) {
+        var currentState = engineService.updateParticularSettlementState(settlementId, LocalDateTime.now());
+        var events = currentState.getSettlementEntity().getConstructionEventList()
                 .stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
@@ -44,9 +43,9 @@ public class ConstructionServiceImpl implements ConstructionService {
         //the kind of building if requested new building, and null if requested upgrade
         if (kind != null) {
             buildModel = new BuildModel(kind, 0);
-            currentState.getBuildings().put(buildingPosition, buildModel);
+            currentState.getSettlementEntity().getBuildings().put(buildingPosition, buildModel);
         } else {
-            buildModel = currentState.getBuildings().get(buildingPosition);
+            buildModel = currentState.getSettlementEntity().getBuildings().get(buildingPosition);
         }
 
         BuildingBase building = BuildingsFactory.getBuilding(buildModel.getKind(),
@@ -56,19 +55,19 @@ public class ConstructionServiceImpl implements ConstructionService {
                 events.get(events.size() - 1).getExecutionTime().plusSeconds(building.getTimeToNextLevel()) :
                 LocalDateTime.now().plusSeconds(building.getTimeToNextLevel());
 
-        currentState.manipulateGoods(EManipulation.SUBTRACT, building.getResourcesToNextLevel());
+        currentState.getSettlementEntity().manipulateGoods(EManipulation.SUBTRACT, building.getResourcesToNextLevel());
 
         ConstructionEventEntity buildEvent = new ConstructionEventEntity(buildingPosition, buildModel.getKind(),
-                building.getLevel() + 1, currentState.getId(), executionTime);
+                building.getLevel() + 1, currentState.getSettlementEntity().getId(), executionTime);
 
-        currentState.getConstructionEventList().add(buildEvent);
-        return engineService.save(currentState);
+        currentState.getSettlementEntity().getConstructionEventList().add(buildEvent);
+        return engineService.saveSettlementEntity(currentState);
     }
 
     @Override
-    public SettlementEntity deleteBuildingEvent(String settlementId, String eventId) {
-        var currentState = engineService.recalculateCurrentState(settlementId,LocalDateTime.now());
-        var allEvents = currentState.getConstructionEventList().stream()
+    public SettlementStateDTO deleteBuildingEvent(String settlementId, String eventId) {
+        var currentState = engineService.updateParticularSettlementState(settlementId,LocalDateTime.now());
+        var allEvents = currentState.getSettlementEntity().getConstructionEventList().stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
         var event = allEvents.stream()
@@ -79,7 +78,7 @@ public class ConstructionServiceImpl implements ConstructionService {
                 .filter(e -> e.getBuildingPosition() == event.getBuildingPosition())
                 .count();
 
-        BuildModel buildModel = currentState.getBuildings().get(event.getBuildingPosition());
+        BuildModel buildModel = currentState.getSettlementEntity().getBuildings().get(event.getBuildingPosition());
         BuildingBase building = BuildingsFactory.getBuilding(buildModel.getKind(),
                 numberOfEvents == 1 ? buildModel.getLevel() : buildModel.getLevel() + 1);
         //deduct time that was needed for building from following events
@@ -95,22 +94,23 @@ public class ConstructionServiceImpl implements ConstructionService {
         });
         // if deleting any building construction to level 1. in this case should return empty spot (except resources fields)
         if (event.getToLevel() == 1 && event.getBuildingPosition() >= 19 && numberOfEvents == 1){
-            currentState.getBuildings().put(event.getBuildingPosition(), new BuildModel(EBuilding.EMPTY, 0));
+            currentState.getSettlementEntity().getBuildings().put(event.getBuildingPosition(), new BuildModel(EBuilding.EMPTY, 0));
         }
-        currentState.manipulateGoods(EManipulation.ADD, building.getResourcesToNextLevel());
-        currentState.getConstructionEventList().remove(event);
-        return engineService.save(currentState);
+        currentState.getSettlementEntity().manipulateGoods(EManipulation.ADD, building.getResourcesToNextLevel());
+        currentState.getSettlementEntity().getConstructionEventList().remove(event);
+        return engineService.saveSettlementEntity(currentState);
     }
 
     @Override
     public List<NewBuilding> getListOfAllNewBuildings(String settlementId) {
-        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
-        var events = currentState.getConstructionEventList();
+        var currentState = engineService.updateParticularSettlementState(settlementId, LocalDateTime.now());
+        var events = currentState.getSettlementEntity().getConstructionEventList();
         var all = getListOfNewBuildings();
         // if events size >=2 return all buildings unavailable for build otherwise checking ability to build
         return events.size() >= 2 ? all : all.stream()
-                .filter(newBuilding -> newBuilding.isBuildingExistAndMaxLevelAndMulti(currentState.getBuildings()))
-                .peek(newBuilding -> newBuilding.checkAvailability(currentState.getBuildings().values(), currentState.getStorage()))
+                .filter(newBuilding -> newBuilding.isBuildingExistAndMaxLevelAndMulti(currentState.getSettlementEntity().getBuildings()))
+                .peek(newBuilding -> newBuilding.checkAvailability(currentState.getSettlementEntity().getBuildings().values(),
+                        currentState.getSettlementEntity().getStorage()))
                 .collect(Collectors.toList());
     }
 

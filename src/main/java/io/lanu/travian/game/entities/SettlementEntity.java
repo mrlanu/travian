@@ -147,6 +147,10 @@ public class SettlementEntity {
         }
     }
 
+    public void addPopulation(int amount){
+        this.population += amount;
+    }
+
     /*public void addGoodToProducePerHour(Resource resourceType, BigDecimal amount){
         var producePerHour = villageEntity.getProducePerHour();
         producePerHour.put(resourceType, producePerHour.get(resourceType).add(amount));
