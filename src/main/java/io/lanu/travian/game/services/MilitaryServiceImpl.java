@@ -76,7 +76,7 @@ public class MilitaryServiceImpl implements MilitaryService {
 
     @Override
     public SettlementStateDTO orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, String settlementId) {
-        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
+        var currentState = engineService.updateParticularSettlementState(settlementId, LocalDateTime.now());
         ECombatUnit unit = orderCombatUnitRequest.getUnitType();
         ModelMapper mapper = new ModelMapper();
         CombatUnitResponse mappedUnit = mapper.map(unit, CombatUnitResponse.class);

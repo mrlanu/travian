@@ -13,7 +13,7 @@ public class VillageEntityFactory {
     public static SettlementEntity getVillageByType(SettlementType villageType, SettlementSubType subType){
         switch (villageType){
             case VILLAGE: return new SettlementEntity(null, SettlementType.VILLAGE, subType, null, null, 0, 0 , "New Village", ENation.GALLS,
-                    100, 100, 100,
+                    0, 100, 100,
                     Map.ofEntries(
                             Map.entry(1, new BuildModel(EBuilding.WOODCUTTER, 1)),
                             Map.entry(2, new BuildModel(EBuilding.CROPLAND, 1)),

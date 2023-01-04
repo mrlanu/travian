@@ -28,7 +28,7 @@ public class ReportController {
 
     @GetMapping("/reports")
     public List<ReportBriefResponse> getAllReportsBrief(@RequestParam String accountId, @RequestParam String settlementId){
-        state.recalculateCurrentState(settlementId, LocalDateTime.now());
+        state.updateParticularSettlementState(settlementId, LocalDateTime.now());
         return reportService.getAllReportsBrief(accountId);
     }
 

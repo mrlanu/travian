@@ -30,14 +30,14 @@ public class MilitaryController {
 
     @GetMapping("/{villageId}/military/researched")
     public List<CombatUnitResponse> getAllResearchedUnits(@PathVariable String villageId){
-        state.recalculateCurrentState(villageId, LocalDateTime.now());
+        state.updateParticularSettlementState(villageId, LocalDateTime.now());
         return militaryService.getAllResearchedUnits(villageId);
     }
 
     @PostMapping("/{settlementId}/check-troops-send")
     public CombatGroupContractResponse checkTroopsSendingRequest(@PathVariable String settlementId,
                                                                  @RequestBody CombatGroupSendingRequest combatGroupSendingRequest) {
-        var settlementState = state.recalculateCurrentState(settlementId, LocalDateTime.now());
+        var settlementState = state.updateParticularSettlementState(settlementId, LocalDateTime.now());
         var targetState = settlementService
                 .findById(combatGroupSendingRequest.getTargetSettlementId()).orElseThrow();
        return militaryService.checkTroopsSendingRequest(settlementState.getSettlementEntity(), targetState, combatGroupSendingRequest);
@@ -45,7 +45,7 @@ public class MilitaryController {
 
     @PostMapping("/{settlementId}/troops-send/{contractId}")
     public boolean sendTroops(@PathVariable String settlementId, @PathVariable String contractId){
-        var settlementState = state.recalculateCurrentState(settlementId, LocalDateTime.now());
+        var settlementState = state.updateParticularSettlementState(settlementId, LocalDateTime.now());
         settlementState = militaryService.sendTroops(settlementState, contractId);
         state.saveSettlementEntity(settlementState);
         return true;

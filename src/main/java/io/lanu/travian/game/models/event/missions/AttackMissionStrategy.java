@@ -47,7 +47,7 @@ public class AttackMissionStrategy extends MissionStrategy {
 
         } else{
             //just in the skip case
-            engineService.recalculateCurrentState(combatGroup.getToSettlementId(), combatGroup.getExecutionTime().plusSeconds(1));
+            engineService.updateParticularSettlementState(combatGroup.getToSettlementId(), combatGroup.getExecutionTime().plusSeconds(1));
         }
     }
 

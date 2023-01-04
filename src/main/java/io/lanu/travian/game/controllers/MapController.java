@@ -31,7 +31,7 @@ public class MapController {
     public TileDetail getTileDetail(@PathVariable String id,
                                     @PathVariable int fromX,
                                     @PathVariable int fromY){
-        var settlementState = state.recalculateCurrentState(id, LocalDateTime.now());
+        var settlementState = state.updateParticularSettlementState(id, LocalDateTime.now());
         return settlementService.getTileDetail(settlementState.getSettlementEntity(), fromX, fromY);
     }
 

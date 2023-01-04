@@ -140,6 +140,10 @@ public enum EBuilding {
         );
     }
 
+    public int getPopulation(int level){
+        return level == 1 ? this.cu : (int) Math.round((5 * this.cu + level - 1) / 10.0);
+    }
+
     public int getProduction(int level){
         return productions[level];
     }

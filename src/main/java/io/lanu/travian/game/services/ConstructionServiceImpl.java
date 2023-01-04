@@ -5,7 +5,6 @@ import io.lanu.travian.enums.EBuildingType;
 import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.entities.BuildModel;
-import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.game.models.responses.NewBuilding;
 import io.lanu.travian.templates.buildings.BuildingBase;
@@ -30,7 +29,7 @@ public class ConstructionServiceImpl implements ConstructionService {
 
     @Override
     public SettlementStateDTO createBuildEvent(String settlementId, Integer buildingPosition, EBuilding kind) {
-        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
+        var currentState = engineService.updateParticularSettlementState(settlementId, LocalDateTime.now());
         var events = currentState.getSettlementEntity().getConstructionEventList()
                 .stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
@@ -67,7 +66,7 @@ public class ConstructionServiceImpl implements ConstructionService {
 
     @Override
     public SettlementStateDTO deleteBuildingEvent(String settlementId, String eventId) {
-        var currentState = engineService.recalculateCurrentState(settlementId,LocalDateTime.now());
+        var currentState = engineService.updateParticularSettlementState(settlementId,LocalDateTime.now());
         var allEvents = currentState.getSettlementEntity().getConstructionEventList().stream()
                 .sorted(Comparator.comparing(ConstructionEventEntity::getExecutionTime))
                 .collect(Collectors.toList());
@@ -104,7 +103,7 @@ public class ConstructionServiceImpl implements ConstructionService {
 
     @Override
     public List<NewBuilding> getListOfAllNewBuildings(String settlementId) {
-        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
+        var currentState = engineService.updateParticularSettlementState(settlementId, LocalDateTime.now());
         var events = currentState.getSettlementEntity().getConstructionEventList();
         var all = getListOfNewBuildings();
         // if events size >=2 return all buildings unavailable for build otherwise checking ability to build

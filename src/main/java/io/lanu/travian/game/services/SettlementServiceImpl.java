@@ -77,7 +77,6 @@ public class SettlementServiceImpl implements SettlementService {
 
     private void editStatistics(String accountId) {
         var statistics = statisticsRepository.findByPlayerId(accountId);
-        statistics.addPopulation(2);
         statistics.addVillage(1);
         statisticsRepository.save(statistics);
     }
@@ -111,7 +110,7 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     public SettlementStateDTO updateName(String settlementId, String newName) {
-        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
+        var currentState = engineService.updateParticularSettlementState(settlementId, LocalDateTime.now());
         currentState.getSettlementEntity().setName(newName);
         return engineService.saveSettlementEntity(currentState);
     }
@@ -136,15 +135,14 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     public SettlementView getSettlementById(String settlementId) {
-        var currentState = engineService.recalculateCurrentState(settlementId, LocalDateTime.now());
-        engineService.checkAllAccountEvents(settlementId);
+        var currentState = engineService.updateAccount(settlementId);
         return new SettlementView(currentState);
     }
 
     @Override
     public SettlementView getSettlementById(SettlementStateDTO currentState) {
-        engineService.checkAllAccountEvents(currentState.getSettlementEntity().getId());
-        return new SettlementView(currentState);
+        var updatedState = engineService.updateAccount(currentState.getSettlementEntity().getId());
+        return new SettlementView(updatedState);
     }
 
 }

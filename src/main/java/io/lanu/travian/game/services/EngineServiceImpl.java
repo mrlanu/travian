@@ -61,7 +61,7 @@ public class EngineServiceImpl implements EngineService {
     }
 
     @Override
-    public void checkAllAccountEvents(String exceptSettlementId) {
+    public SettlementStateDTO updateAccount(String exceptSettlementId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String accountId = authentication.getName();
 
@@ -79,11 +79,12 @@ public class EngineServiceImpl implements EngineService {
                 }
             }
         });
-        cache.forEach(id -> recalculateCurrentState(id, LocalDateTime.now()));
+        cache.forEach(id -> updateParticularSettlementState(id, LocalDateTime.now()));
+        return updateParticularSettlementState(exceptSettlementId, LocalDateTime.now());
     }
 
     @Override
-    public SettlementStateDTO recalculateCurrentState(String settlementId, LocalDateTime untilTime) {
+    public SettlementStateDTO updateParticularSettlementState(String settlementId, LocalDateTime untilTime) {
         while (cache.contains(settlementId)){
             try {
                 Thread.sleep(50);
