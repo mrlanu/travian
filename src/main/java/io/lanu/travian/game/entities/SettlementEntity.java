@@ -134,15 +134,16 @@ public class SettlementEntity {
     }
 
     public void castStorage() {
+        var warehouseCapacity = getWarehouseCapacity();
         for (Map.Entry<EResource, BigDecimal> entry : this.storage.entrySet()) {
             if (entry.getKey().equals(EResource.CROP)){
-                if (entry.getValue().compareTo(getGranaryCapacity()) > 0){
-                    this.storage.put(entry.getKey(), getGranaryCapacity());
+                if (entry.getValue().compareTo(warehouseCapacity) > 0){
+                    this.storage.put(entry.getKey(), warehouseCapacity);
                 }
                 continue;
             }
-            if (entry.getValue().compareTo(getWarehouseCapacity()) > 0){
-                this.storage.put(entry.getKey(), getWarehouseCapacity());
+            if (entry.getValue().compareTo(warehouseCapacity) > 0){
+                this.storage.put(entry.getKey(), warehouseCapacity);
             }
         }
     }

@@ -83,10 +83,10 @@ public enum EBuilding {
 
     EMPTY("empty-spot", EBuildingType.EMPTY);
 
-    private static final Integer[] productions = {3, 7, 13, 21, 31, 46, 70, 98, 140, 203, 280};
-    private static final Integer[] capacity = {800, 1200, 1700, 2300, 3100, 4000, 5000, 6300, 7700, 9600, 12000,
-            14400, 18000, 22000, 26000, 32000, 38000, 45000, 55000, 66000, 80000};
-
+    private static final Integer[] productions = {
+            2, 5, 9, 15, 22, 33, 50, 70, 100, 145, 200,
+            280, 375, 495, 635, 800, 1000, 1300, 1600,
+            2000, 2450, 3050};
     private final String name;
     private final EBuildingType type;
     private final EResource resource;
@@ -148,7 +148,10 @@ public enum EBuilding {
         return productions[level];
     }
 
-    public int getCapacity(int level) { return capacity[level]; }
+    public int getCapacity(int level) {
+        double number = Math.pow(1.2, level) * 2120 - 1320;
+        return (int) (100.0 * Math.round(number / 100.0));
+    }
 
     private long round(double v, double n){
         return (long) (Math.round(v / n) * n);
