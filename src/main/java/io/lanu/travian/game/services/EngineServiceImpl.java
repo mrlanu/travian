@@ -241,7 +241,7 @@ public class EngineServiceImpl implements EngineService {
         LocalDateTime exec = order.getLastTime();
         for (int i = 0; i < amount; i++) {
             exec = exec.plus(order.getDurationEach(), ChronoUnit.SECONDS);
-            result.add(new CombatUnitDoneEvent(new CombatUnitDoneEventEntity(exec, order.getUnitType(), order.getEatHour())));
+            result.add(new CombatUnitDoneEvent(new CombatUnitDoneEventEntity(exec, order.getUnit())));
         }
         return result;
     }

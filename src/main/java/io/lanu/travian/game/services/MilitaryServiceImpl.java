@@ -1,24 +1,30 @@
 package io.lanu.travian.game.services;
 
 import io.lanu.travian.Consts;
-import io.lanu.travian.enums.*;
+import io.lanu.travian.enums.EManipulation;
+import io.lanu.travian.enums.ENation;
 import io.lanu.travian.game.dto.SettlementStateDTO;
-import io.lanu.travian.game.entities.*;
+import io.lanu.travian.game.entities.CombatGroupContractEntity;
+import io.lanu.travian.game.entities.CombatGroupEntity;
+import io.lanu.travian.game.entities.OrderCombatUnitEntity;
+import io.lanu.travian.game.entities.SettlementEntity;
+import io.lanu.travian.game.models.battle.Unit;
+import io.lanu.travian.game.models.battle.UnitsConst;
 import io.lanu.travian.game.models.requests.CombatGroupSendingRequest;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
-import io.lanu.travian.game.models.responses.*;
+import io.lanu.travian.game.models.responses.CombatGroupContractResponse;
+import io.lanu.travian.game.models.responses.CombatUnitResponse;
 import io.lanu.travian.game.repositories.CombatGroupContractRepository;
 import io.lanu.travian.game.repositories.CombatGroupRepository;
 import io.lanu.travian.game.repositories.ResearchedCombatUnitRepository;
-import io.lanu.travian.templates.military.CombatUnitFactory;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -70,18 +76,33 @@ public class MilitaryServiceImpl implements MilitaryService {
     public List<CombatUnitResponse> getAllResearchedUnits(String villageId, ENation nation) {
         return researchedCombatUnitRepository.findByVillageId(villageId).getUnits()
                 .stream()
-                .map(shortUnit -> CombatUnitFactory.getUnit(nation, shortUnit.getName(), shortUnit.getLevel()))
+                .map(shortUnit -> getUnit(UnitsConst.UNITS.get(nation.ordinal()).get(shortUnit.getUnit()), shortUnit.getLevel()))
                 .collect(Collectors.toList());
+    }
+
+    private CombatUnitResponse getUnit(Unit unit, int level) {
+        return CombatUnitResponse.builder()
+                .name(unit.getName())
+                .level(level)
+                .attack(unit.getOffense())
+                .defInfantry(unit.getDefenseInfantry())
+                .defCavalry(unit.getDefenseCavalry())
+                .speed(unit.getVelocity())
+                .capacity(unit.getCapacity())
+                .cost(unit.getCost())
+                .eat(unit.getUpKeep())
+                .time(unit.getTime() / Consts.SPEED)
+                .description(unit.getDescription())
+                .build();
     }
 
     @Override
     public SettlementStateDTO orderCombatUnits(OrderCombatUnitRequest orderCombatUnitRequest, String settlementId) {
         var currentState = engineService.updateParticularSettlementState(settlementId, LocalDateTime.now());
-        ECombatUnit unit = orderCombatUnitRequest.getUnitType();
-        ModelMapper mapper = new ModelMapper();
-        CombatUnitResponse mappedUnit = mapper.map(unit, CombatUnitResponse.class);
-        mappedUnit.setSpeed(mappedUnit.getSpeed() / Consts.SPEED);
-        mappedUnit.setTime(mappedUnit.getTime() / Consts.SPEED);
+
+        var unit = UnitsConst.UNITS
+                .get(currentState.getSettlementEntity().getNation().ordinal())
+                .get(orderCombatUnitRequest.getUnit());
 
         List<OrderCombatUnitEntity> ordersList = currentState.getSettlementEntity().getCombatUnitOrders()
                 .stream()
@@ -91,13 +112,13 @@ public class MilitaryServiceImpl implements MilitaryService {
         LocalDateTime lastTime = ordersList.size() > 0 ? ordersList.get(ordersList.size() - 1).getEndOrderTime() : LocalDateTime.now();
 
         LocalDateTime endOrderTime = lastTime.plus(
-                orderCombatUnitRequest.getAmount() * mappedUnit.getTime(), ChronoUnit.SECONDS);
+                orderCombatUnitRequest.getAmount() * (unit.getTime() / Consts.SPEED), ChronoUnit.SECONDS);
 
         OrderCombatUnitEntity armyOrder = new OrderCombatUnitEntity(orderCombatUnitRequest.getVillageId(), lastTime,
-                orderCombatUnitRequest.getUnitType(), orderCombatUnitRequest.getAmount(), mappedUnit.getTime(), mappedUnit.getEat(),
+                orderCombatUnitRequest.getUnit(), orderCombatUnitRequest.getAmount(), (long)(unit.getTime() / Consts.SPEED), unit.getUpKeep(),
                 endOrderTime);
 
-        spendResources(orderCombatUnitRequest.getAmount(), currentState.getSettlementEntity(), mappedUnit);
+        spendResources(orderCombatUnitRequest.getAmount(), currentState.getSettlementEntity(), unit);
 
         armyOrder.setCreated(LocalDateTime.now());
         ordersList.add(armyOrder);
@@ -106,8 +127,8 @@ public class MilitaryServiceImpl implements MilitaryService {
         return engineService.saveSettlementEntity(currentState);
     }
 
-    private void spendResources(int unitsAmount, SettlementEntity settlementEntity, CombatUnitResponse kind) {
-        var neededResources = kind.getCost().stream()
+    private void spendResources(int unitsAmount, SettlementEntity settlementEntity, Unit unit) {
+        var neededResources = unit.getCost().stream()
                 .map(res -> BigDecimal.valueOf((long) res * unitsAmount))
                 .collect(Collectors.toList());
         settlementEntity.manipulateGoods(EManipulation.SUBTRACT, neededResources);

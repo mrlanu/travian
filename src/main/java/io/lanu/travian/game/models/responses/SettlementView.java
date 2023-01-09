@@ -5,11 +5,10 @@ import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
-import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
+import io.lanu.travian.game.models.battle.UnitsConst;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
-import io.lanu.travian.templates.military.CombatUnitFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -74,17 +73,17 @@ public class SettlementView {
         this.homeUnits = settlementEntity.getHomeLegion();
         this.producePerHour = settlementEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(settlementEntity.getConstructionEventList());
-        this.unitOrders = this.buildUnitOrdersView(settlementEntity.getCombatUnitOrders());
+        this.unitOrders = this.buildUnitOrdersView(settlementEntity.getCombatUnitOrders(), currentState.getSettlementEntity().getNation());
     }
 
     private Map<String, Integer> mapHomeLegion(int[] homeLegion, ENation nation, List<CombatGroupEntity> militariesInVillage) {
         var result = new HashMap<String, Integer>();
         for (int i = 0; i < homeLegion.length; i++){
-            result.put(CombatUnitFactory.getCombatUnitFromArrayPosition(i, nation).getName(), homeLegion[i]);
+            result.put(UnitsConst.UNITS.get(nation.ordinal()).get(i).getName(), homeLegion[i]);
         }
         militariesInVillage.forEach(unit -> {
             for (int i = 0; i < unit.getUnits().length; i++){
-                var key = CombatUnitFactory.getCombatUnitFromArrayPosition(i, nation).getName();
+                var key = UnitsConst.UNITS.get(unit.getOwnerNation().ordinal()).get(i).getName();
                 result.put(key, result.getOrDefault(key, 0) + unit.getUnits()[i]);
             }
         });
@@ -99,14 +98,14 @@ public class SettlementView {
                         ChronoUnit.SECONDS.between(LocalDateTime.now(), event.getExecutionTime()))).collect(Collectors.toList());
     }
 
-    private List<CombatUnitOrderView> buildUnitOrdersView(List<OrderCombatUnitEntity> orders) {
+    private List<CombatUnitOrderView> buildUnitOrdersView(List<OrderCombatUnitEntity> orders, ENation nation) {
         return orders
                 .stream()
                 .sorted(Comparator.comparing(OrderCombatUnitEntity::getCreated))
                 .map(order -> {
                     var duration = Duration.between(LocalDateTime.now(), order.getEndOrderTime()).toSeconds();
                     return new CombatUnitOrderView(
-                            order.getUnitType().getName(),
+                            UnitsConst.UNITS.get(nation.ordinal()).get(order.getUnit()).getName(),
                             order.getLeftTrain(),
                             duration,
                             order.getDurationEach(),

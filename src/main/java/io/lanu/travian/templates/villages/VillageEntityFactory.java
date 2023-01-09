@@ -57,11 +57,11 @@ public class VillageEntityFactory {
                             Map.entry(38, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(39, new BuildModel(EBuilding.EMPTY, 0))),
                     Arrays.asList(BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000)),
-                    new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                    new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                     new ArrayList<>(),
                     new ArrayList<>(),
                     null);
-            case OASIS: return new SettlementEntity(null, SettlementType.OASIS, subType, null, "Nature", 0, 0 , "Oasis", null,
+            case OASIS: return new SettlementEntity(null, SettlementType.OASIS, subType, null, "Nature", 0, 0 , "Oasis", ENation.NATURE,
                     0, 0, 100,
                     Map.ofEntries(
                             Map.entry(1, new BuildModel(EBuilding.WOODCUTTER, 2)),
@@ -105,7 +105,7 @@ public class VillageEntityFactory {
                             Map.entry(38, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(39, new BuildModel(EBuilding.EMPTY, 0))),
                     Arrays.asList(BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000)),
-                    new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                    new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                     new ArrayList<>(),
                     new ArrayList<>(),
                     null);

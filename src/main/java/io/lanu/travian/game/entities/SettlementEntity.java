@@ -2,11 +2,11 @@ package io.lanu.travian.game.entities;
 
 import io.lanu.travian.enums.*;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
+import io.lanu.travian.game.models.battle.UnitsConst;
 import io.lanu.travian.templates.buildings.BuildingBase;
 import io.lanu.travian.templates.buildings.BuildingsFactory;
 import io.lanu.travian.templates.buildings.GranaryBuilding;
 import io.lanu.travian.templates.buildings.WarehouseBuilding;
-import io.lanu.travian.templates.military.CombatUnitFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -62,7 +62,7 @@ public class SettlementEntity {
 
     public BigDecimal calculateEatPerHour() {
         var eatExpenses = IntStream.range(0, 10)
-                .mapToObj(i -> CombatUnitFactory.getCombatUnitFromArrayPosition(i, ENation.GALLS).getEat() * homeLegion[i])
+                .mapToObj(i -> UnitsConst.UNITS.get(nation.ordinal()).get(i).getUpKeep() * homeLegion[i])
                 .reduce(0, Integer::sum);
         return BigDecimal.valueOf(eatExpenses);
     }
