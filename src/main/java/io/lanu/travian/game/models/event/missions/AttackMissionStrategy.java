@@ -1,7 +1,6 @@
 package io.lanu.travian.game.models.event.missions;
 
 import io.lanu.travian.enums.ECombatGroupMission;
-import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.ReportEntity;
 import io.lanu.travian.game.entities.ReportPlayerEntity;
@@ -11,7 +10,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
-import java.util.Map;
+import java.util.Arrays;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -31,9 +30,10 @@ public class AttackMissionStrategy extends MissionStrategy {
 
             //here should be an algorithm of a plunder
             // just dummy implementation
-            storage.put(EResource.CLAY, storage.get(EResource.CLAY).subtract(BigDecimal.valueOf(100)));
-            combatGroup.setPlunder(Map.of(EResource.CROP, BigDecimal.ZERO, EResource.CLAY, BigDecimal.valueOf(100),
-                    EResource.IRON, BigDecimal.ZERO, EResource.WOOD, BigDecimal.ZERO));
+            var clay = storage.get(1);
+            clay = clay.subtract(BigDecimal.valueOf(100));
+            storage.set(1, clay);
+            combatGroup.setPlunder(Arrays.asList(BigDecimal.ZERO, BigDecimal.valueOf(100), BigDecimal.ZERO, BigDecimal.ZERO));
             createReports();
             //----------
             combatGroup.setMission(ECombatGroupMission.BACK);
@@ -41,6 +41,10 @@ public class AttackMissionStrategy extends MissionStrategy {
             String temp = combatGroup.getFromSettlementId();
             combatGroup.setFromSettlementId(combatGroup.getToSettlementId());
             combatGroup.setToSettlementId(temp);
+            String tempAcc = combatGroup.getFromAccountId();
+            combatGroup.setFromAccountId(combatGroup.getToAccountId());
+            combatGroup.setToAccountId(tempAcc);
+
             combatGroup.setExecutionTime(combatGroup.getExecutionTime().plusSeconds(combatGroup.getDuration()));
 
             engineService.getCombatGroupRepository().save(combatGroup);

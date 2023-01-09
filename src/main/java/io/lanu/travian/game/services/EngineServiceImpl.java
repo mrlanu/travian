@@ -136,7 +136,7 @@ public class EngineServiceImpl implements EngineService {
 
             // if crop in the village is less than 0 keep create the death event & execute them until the crop will be positive
             while (cropPerHour.longValue() < 0) {
-                var leftCrop = settlementEntity.getStorage().get(EResource.CROP);
+                var leftCrop = settlementEntity.getStorage().get(3);
                 var durationToDeath = leftCrop.divide(cropPerHour.negate(), mc).multiply(BigDecimal.valueOf(3_600_000), mc);
 
                 LocalDateTime deathTime = modified.plus(durationToDeath.longValue(), ChronoUnit.MILLIS);

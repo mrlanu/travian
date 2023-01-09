@@ -48,10 +48,10 @@ public class VillageController {
     public void cheat(@PathVariable String settlementId) {
         var s = settlementRepository.findById(settlementId).orElseThrow();
         var storage = s.getStorage();
-        storage.put(EResource.CROP, BigDecimal.valueOf(700));
-        storage.put(EResource.CLAY, BigDecimal.valueOf(700));
-        storage.put(EResource.WOOD, BigDecimal.valueOf(700));
-        storage.put(EResource.IRON, BigDecimal.valueOf(700));
+        storage.set(0, BigDecimal.valueOf(700));
+        storage.set(1, BigDecimal.valueOf(700));
+        storage.set(2, BigDecimal.valueOf(700));
+        storage.set(3, BigDecimal.valueOf(700));
         settlementRepository.save(s);
     }
 

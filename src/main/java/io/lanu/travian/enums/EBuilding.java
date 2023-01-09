@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @Getter
 public enum EBuilding {
@@ -131,12 +130,12 @@ public enum EBuilding {
         this.isMulti = isMulti;
     }
 
-    public Map<EResource, BigDecimal> getResourcesToNextLevel(int level) {
-        return Map.of(
-                EResource.WOOD, BigDecimal.valueOf(round(Math.pow(k, level) * cost.get(0), 5)),
-                EResource.CLAY, BigDecimal.valueOf(round(Math.pow(k, level) * cost.get(1), 5)),
-                EResource.IRON, BigDecimal.valueOf(round(Math.pow(k, level) * cost.get(2), 5)),
-                EResource.CROP, BigDecimal.valueOf(round(Math.pow(k, level) * cost.get(3), 5))
+    public List<BigDecimal> getResourcesToNextLevel(int level) {
+        return Arrays.asList(
+                BigDecimal.valueOf(round(Math.pow(k, level) * cost.get(0), 5)),
+                BigDecimal.valueOf(round(Math.pow(k, level) * cost.get(1), 5)),
+                BigDecimal.valueOf(round(Math.pow(k, level) * cost.get(2), 5)),
+                BigDecimal.valueOf(round(Math.pow(k, level) * cost.get(3), 5))
         );
     }
 

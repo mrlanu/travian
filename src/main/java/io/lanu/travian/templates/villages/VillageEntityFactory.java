@@ -6,6 +6,7 @@ import io.lanu.travian.game.entities.SettlementEntity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 public class VillageEntityFactory {
@@ -55,10 +56,7 @@ public class VillageEntityFactory {
                             Map.entry(37, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(38, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(39, new BuildModel(EBuilding.EMPTY, 0))),
-                    Map.of(EResource.CROP, BigDecimal.valueOf(1000),
-                            EResource.CLAY, BigDecimal.valueOf(1000),
-                            EResource.WOOD, BigDecimal.valueOf(1000),
-                            EResource.IRON, BigDecimal.valueOf(1000)),
+                    Arrays.asList(BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000)),
                     new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
                     new ArrayList<>(),
                     new ArrayList<>(),
@@ -106,10 +104,7 @@ public class VillageEntityFactory {
                             Map.entry(37, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(38, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(39, new BuildModel(EBuilding.EMPTY, 0))),
-                    Map.of(EResource.CROP, BigDecimal.valueOf(1000),
-                            EResource.CLAY, BigDecimal.valueOf(1000),
-                            EResource.WOOD, BigDecimal.valueOf(1000),
-                            EResource.IRON, BigDecimal.valueOf(1000)),
+                    Arrays.asList(BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000)),
                     new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
                     new ArrayList<>(),
                     new ArrayList<>(),

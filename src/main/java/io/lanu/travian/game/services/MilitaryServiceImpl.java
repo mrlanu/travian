@@ -67,10 +67,10 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     @Override
-    public List<CombatUnitResponse> getAllResearchedUnits(String villageId) {
+    public List<CombatUnitResponse> getAllResearchedUnits(String villageId, ENation nation) {
         return researchedCombatUnitRepository.findByVillageId(villageId).getUnits()
                 .stream()
-                .map(shortUnit -> CombatUnitFactory.getUnit(shortUnit.getName(), shortUnit.getLevel()))
+                .map(shortUnit -> CombatUnitFactory.getUnit(nation, shortUnit.getName(), shortUnit.getLevel()))
                 .collect(Collectors.toList());
     }
 
@@ -107,8 +107,9 @@ public class MilitaryServiceImpl implements MilitaryService {
     }
 
     private void spendResources(int unitsAmount, SettlementEntity settlementEntity, CombatUnitResponse kind) {
-        Map<EResource, BigDecimal> neededResources = new HashMap<>();
-        kind.getCost().forEach((k, v) -> neededResources.put(k, BigDecimal.valueOf((long) v * unitsAmount)));
+        var neededResources = kind.getCost().stream()
+                .map(res -> BigDecimal.valueOf((long) res * unitsAmount))
+                .collect(Collectors.toList());
         settlementEntity.manipulateGoods(EManipulation.SUBTRACT, neededResources);
     }
 

@@ -1,6 +1,5 @@
 package io.lanu.travian.templates.buildings;
 
-import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.IntStream;
 
 @NoArgsConstructor
 @Data
@@ -23,12 +22,12 @@ public class BuildingBase implements IResourceProd{
     protected int maxLevel;
     protected String description;
     protected long timeToNextLevel;
-    protected Map<EResource, BigDecimal> resourcesToNextLevel;
+    protected List<BigDecimal> resourcesToNextLevel;
     protected List<RequirementBuilding> requirementBuildings;
 
-    public void setAbleToUpgrade(Map<EResource, BigDecimal> storage) {
-        this.ableToUpgrade = resourcesToNextLevel.entrySet().stream()
-                .noneMatch(x -> storage.get(x.getKey()).compareTo(x.getValue()) < 0);
+    public void setAbleToUpgrade(List<BigDecimal> storage) {
+        this.ableToUpgrade = IntStream.range(0, 4)
+                .noneMatch(i -> storage.get(i).compareTo(resourcesToNextLevel.get(i)) < 0);
     }
 
     public void setUnderUpgrade(List<ConstructionEventEntity> eventList) {

@@ -1,15 +1,16 @@
 package io.lanu.travian.game.models.responses;
 
-import io.lanu.travian.enums.EResource;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CombatUnitResponse {
     private String name;
     private int level;
@@ -18,7 +19,7 @@ public class CombatUnitResponse {
     private int defCavalry;
     private int speed;
     private int capacity;
-    private Map<EResource, Integer> cost;
+    private List<Integer> cost;
     private int eat;
     private long time;
     private String description;

@@ -30,8 +30,8 @@ public class MilitaryController {
 
     @GetMapping("/{villageId}/military/researched")
     public List<CombatUnitResponse> getAllResearchedUnits(@PathVariable String villageId){
-        state.updateParticularSettlementState(villageId, LocalDateTime.now());
-        return militaryService.getAllResearchedUnits(villageId);
+        var currentState = state.updateParticularSettlementState(villageId, LocalDateTime.now());
+        return militaryService.getAllResearchedUnits(villageId, currentState.getSettlementEntity().getNation());
     }
 
     @PostMapping("/{settlementId}/check-troops-send")

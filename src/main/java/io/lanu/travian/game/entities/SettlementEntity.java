@@ -12,13 +12,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,7 +44,7 @@ public class SettlementEntity {
     private int culture;
     private int approval;
     private Map<Integer, BuildModel> buildings;
-    private Map<EResource, BigDecimal> storage;
+    private List<BigDecimal> storage;
     private int[] homeLegion;
     private List<ConstructionEventEntity> constructionEventList;
     private List<OrderCombatUnitEntity> combatUnitOrders;
@@ -91,16 +91,21 @@ public class SettlementEntity {
                 producePerHour.get(EResource.CROP)
                         .multiply(divide);
 
-        manipulateGoods(EManipulation.ADD, Map.of(EResource.WOOD, woodProduced, EResource.CLAY, clayProduced,
-                EResource.IRON, ironProduced, EResource.CROP, cropProduced));
+        manipulateGoods(EManipulation.ADD, Arrays.asList(woodProduced, clayProduced, ironProduced, cropProduced));
     }
 
 
-    public void manipulateGoods(EManipulation kindOfManipulation, Map<EResource, BigDecimal> goods){
+    public void manipulateGoods(EManipulation kindOfManipulation, List<BigDecimal> goods){
         if (kindOfManipulation.equals(EManipulation.ADD)){
-            storage.forEach((k, v) -> storage.put(k, storage.get(k).add(goods.get(k))));
+            for (int i = 0; i < storage.size(); i++){
+                var res = storage.get(i);
+                storage.set(i, res.add(goods.get(i)));
+            }
         } else {
-            storage.forEach((k, v) -> storage.put(k, storage.get(k).subtract(goods.get(k))));
+            for (int i = 0; i < storage.size(); i++){
+                var res = storage.get(i);
+                storage.set(i, res.subtract(goods.get(i)));
+            }
         }
     }
 
@@ -135,15 +140,14 @@ public class SettlementEntity {
 
     public void castStorage() {
         var warehouseCapacity = getWarehouseCapacity();
-        for (Map.Entry<EResource, BigDecimal> entry : this.storage.entrySet()) {
-            if (entry.getKey().equals(EResource.CROP)){
-                if (entry.getValue().compareTo(warehouseCapacity) > 0){
-                    this.storage.put(entry.getKey(), warehouseCapacity);
-                }
-                continue;
+        var granaryCapacity = getGranaryCapacity();
+        for (int i = 0; i < storage.size() - 1; i++) {
+            if (storage.get(i).compareTo(warehouseCapacity) > 0){
+                storage.set(i, warehouseCapacity);
             }
-            if (entry.getValue().compareTo(warehouseCapacity) > 0){
-                this.storage.put(entry.getKey(), warehouseCapacity);
+            // cast crop
+            if (storage.get(3).compareTo(granaryCapacity) > 0){
+                storage.set(3, granaryCapacity);
             }
         }
     }

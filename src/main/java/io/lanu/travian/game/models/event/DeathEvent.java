@@ -21,7 +21,9 @@ public class DeathEvent implements Event {
         var army = settlementEntity.getHomeLegion();
         army[0] = army[0] - 1;
         var storage = settlementEntity.getStorage();
-        storage.put(EResource.CROP, storage.get(EResource.CROP).add(BigDecimal.ONE));
+        var crop = storage.get(3);
+        crop = crop.add(BigDecimal.ONE);
+        storage.set(3, crop);
     }
 
 }

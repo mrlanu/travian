@@ -38,7 +38,7 @@ public class SettlementView {
     private int culture;
     private int approval;
     private List<BuildingBase> buildings;
-    private Map<EResource, BigDecimal> storage;
+    private List<BigDecimal> storage;
     private BigDecimal warehouseCapacity;
     private BigDecimal granaryCapacity;
     private Map<String, Integer> homeLegion;
