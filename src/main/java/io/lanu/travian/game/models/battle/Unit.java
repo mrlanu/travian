@@ -21,4 +21,13 @@ public class Unit {
     private boolean infantry;
     private int researchTime;
     private String description;
+
+    //for SPY units
+    public int getS(){
+        return this.getUnitKind().equals(UnitKind.SPY) ? 35 : 0;
+    }
+
+    public int getSD(){
+        return this.getUnitKind().equals(UnitKind.SPY) ? 20 : 0;
+    }
 }

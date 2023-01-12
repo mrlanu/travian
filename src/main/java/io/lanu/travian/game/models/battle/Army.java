@@ -48,6 +48,22 @@ public class Army {
         return result.stream().reduce(BattlePoints.zero(), BattlePoints::add);
     }
 
+    public double getScan() {
+        var result = Army.zipWith(
+                (unit, number, upgrade) ->
+                        unit.getUnitKind().equals(UnitKind.SPY) ? number * upgrade(unit.getS(), upgrade) : 0
+        , units, numbers, upgrades);
+        return result.stream().reduce(0.0, Double::sum);
+    }
+
+    public double getScanDef() {
+        var result = Army.zipWith(
+                (unit, number, upgrade) ->
+                        unit.getUnitKind().equals(UnitKind.SPY) ? number * upgrade(unit.getSD(), upgrade) : 0
+                , units, numbers, upgrades);
+        return result.stream().reduce(0.0, Double::sum);
+    }
+
     public Integer getTotal() {
         return numbers.stream().reduce(0, Integer::sum);
     }

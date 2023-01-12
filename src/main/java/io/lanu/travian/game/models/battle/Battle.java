@@ -55,7 +55,12 @@ public class Battle {
     }
 
     private void scan() {
-
+        var offPoints = offArmy.getScan() * morale(false);
+        var defPoints = defArmies.stream()
+                .reduce(0.0, (a, b) -> a + b.getScanDef(), Double::sum) * getDefBonus();
+        var losses = Math.min(Math.pow((defPoints / offPoints), 1.5), 1);
+        battleResult.setOffLoses(losses);
+        battleResult.setDefLosses(0.0);
     }
 
     private void raid() {
@@ -111,12 +116,12 @@ public class Battle {
     }
 
     private double getDefBonus() {
-        return 1 + battleField.getWall().getBonus().getOff();
+        return 1 + battleField.getWall().getBonus(1.025).getDefBonus();
     }
 
     private Double getDefAbsolute() {
         return BASE_VILLAGE_DEF
-                + (battleField.getDef()) + battleField.getWall().getBonus().getDef()
-                + (battleField.getWall().getBonus().getDef());
+                + (battleField.getDef()) + battleField.getWall().getBonus(1.025).getDef()
+                + (battleField.getWall().getBonus(1.025).getDef());
     }
 }

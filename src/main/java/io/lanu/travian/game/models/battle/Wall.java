@@ -9,7 +9,8 @@ public class Wall {
     private int level;
     private int durability;
 
-    public BattleSides<Double> getBonus(){
-        return BattleSides.off(0.0, 0.0);
+    public WallBonus<Double> getBonus(double base){
+        var defBonus = Fns.roundP(0.001, Math.pow(base, level)) - 1;
+        return WallBonus.off(defBonus, 0.0);
     }
 }
