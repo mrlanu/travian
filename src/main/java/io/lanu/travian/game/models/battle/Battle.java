@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class Battle {
@@ -77,6 +78,53 @@ public class Battle {
     }
 
     private void normal() {
+        calcBasePoints();
+        calcTotalPoints();
+        calcRams();
+        var x = this.calcRatio();
+        battleResult.setOffLoses(Math.min(1/x, 1));
+        battleResult.setDefLosses(Math.min(x, 1));
+        calcCatapults();
+    }
+
+    private void calcCatapults() {
+        var targets = offSide.getTargets();
+        if (targets.size() == 0) { return; }
+        var morale = this.cataMorale();
+        int[] cats = offArmy.cats();
+        var points = fns.demolishPoints(
+                cats[0] / targets.size(),
+                cats[1],
+                battleField.getDurBonus(),
+                battleState.getRatio(),
+                morale
+                );
+        battleResult.setBuildings(
+                offSide.getTargets().stream()
+                        .map(b -> fns.demolish(b, points)).collect(Collectors.toList()));
+    }
+
+    private double cataMorale() {
+        return fns.cataMorale(offSide.getPopulation(), battleField.getPopulation());
+    }
+
+    private void calcRams() {
+        int[] rams = offArmy.rams();
+        if (rams.length == 0 || battleState.getWall() == 0) { return; }
+        var wall = battleField.getWall();
+        var earlyPoints = fns
+                .demolishPoints(rams[0], rams[1], battleField.getDurBonus(), battleState.getRatio(), 1);
+        // get in-battle wall level
+        var demolishWall = fns.demolishWall(wall.getDurability(), wall.getLevel(), earlyPoints);
+        battleState.setWall((int) demolishWall);
+        //battleField.getWall().setLevel((int) demolishWall);
+        // recalculate points with new wall bonus
+        calcTotalPoints();
+        // finally demolish wal
+        var points = fns
+                .demolishPoints(rams[0], rams[1], battleField.getDurBonus(), battleState.getRatio(), 1);
+        battleResult.setWall(fns.demolish(wall.getLevel(), points));
+        //battleResult.setWall((int) demolishWall);
     }
 
     private void loneAttackerDies() {
@@ -116,12 +164,12 @@ public class Battle {
     }
 
     private double getDefBonus() {
-        return 1 + battleField.getWall().getBonus(1.025).getDefBonus();
+        return 1 + battleField.getWall().getBonus(battleState.getWall(), 1.03).getDefBonus();
     }
 
     private Double getDefAbsolute() {
         return BASE_VILLAGE_DEF
-                + (battleField.getDef()) + battleField.getWall().getBonus(1.025).getDef()
-                + (battleField.getWall().getBonus(1.025).getDef());
+                + battleField.getDef()
+                + battleField.getWall().getBonus(battleState.getWall(), 1.03).getDef();
     }
 }

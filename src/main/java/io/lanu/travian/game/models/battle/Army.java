@@ -89,5 +89,23 @@ public class Army {
                 .map(n -> (int) Math.round(n * (1 - losses)))
                 .collect(Collectors.toList());
     }
+
+    public int[] rams() {
+        for (int i = 0; i < 10; i++) {
+            if (units.get(i).getUnitKind().equals(UnitKind.RAM)) {
+                return new int[]{numbers.get(i), upgrades.get(i)};
+            }
+        }
+        return new int[]{0, 0};
+    }
+
+    public int[] cats() {
+        for (int i = 0; i < 10; i++) {
+            if (units.get(i).getUnitKind().equals(UnitKind.CAT)) {
+                return new int[]{numbers.get(i), upgrades.get(i)};
+            }
+        }
+        return new int[]{0, 0};
+    }
 }
 
