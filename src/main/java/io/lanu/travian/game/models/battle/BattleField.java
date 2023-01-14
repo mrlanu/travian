@@ -8,8 +8,10 @@ import lombok.Data;
 public class BattleField {
     private int tribe;
     private int population;
-    private int durBonus;
-    private Wall wall;
+    @Builder.Default
+    private int durBonus = 1;
+    @Builder.Default
+    private Wall wall = new Wall(0, 1);
     private int def;
     private boolean party;
 }

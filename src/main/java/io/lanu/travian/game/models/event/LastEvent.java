@@ -1,6 +1,6 @@
 package io.lanu.travian.game.models.event;
 
-import io.lanu.travian.game.entities.SettlementEntity;
+import io.lanu.travian.game.dto.SettlementStateDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -13,7 +13,7 @@ public class LastEvent implements Event {
     private LocalDateTime executionTime;
 
     @Override
-    public void execute(SettlementEntity entity) {
+    public void execute(SettlementStateDTO state) {
 
     }
 }

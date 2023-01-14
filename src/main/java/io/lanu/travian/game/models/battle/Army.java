@@ -1,6 +1,7 @@
 package io.lanu.travian.game.models.battle;
 
-import lombok.AllArgsConstructor;
+import io.lanu.travian.enums.ECombatGroupMission;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -8,16 +9,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-@AllArgsConstructor
+@Builder
 public class Army {
+    private ESide side;
+    private int population;
     private List<Unit> units;
     private List<Integer> numbers;
-    private List<Integer> upgrades;
+    @Builder.Default
+    private List<Integer> upgrades = new ArrayList<>(List.of(0,0,0,0,0,0,0,0,0,0));
+    @Builder.Default
+    private ECombatGroupMission mission = ECombatGroupMission.ATTACK;
+    @Builder.Default
+    private List<Integer> targets = new ArrayList<>(List.of(0,0,0,0,0,0,0,0,0,0));
+    private boolean party;
+    private boolean brew;
 
-    public Army(Side side) {
-        this.units = side.getUnits();
-        this.numbers = side.getNumbers();
-        this.upgrades = side.getUpgrades();
+    public enum ESide{
+        OFF, DEF
     }
 
     public boolean isScan() {

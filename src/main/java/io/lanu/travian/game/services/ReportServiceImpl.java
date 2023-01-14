@@ -1,6 +1,7 @@
 package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.ECombatGroupMission;
+import io.lanu.travian.enums.ENation;
 import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.entities.ReportEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
@@ -9,12 +10,12 @@ import io.lanu.travian.game.models.responses.ReportBriefResponse;
 import io.lanu.travian.game.models.responses.ReportResponse;
 import io.lanu.travian.game.repositories.ReportRepository;
 import io.lanu.travian.game.repositories.SettlementRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,19 +39,43 @@ public class ReportServiceImpl implements ReportService{
 
     @Override
     public ReportResponse getById(String reportId) {
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String accountId = authentication.getName();
         var entity = reportRepository.findById(reportId).orElseThrow();
+        boolean failed = false;
+        var offSum = Arrays.stream(entity.getFrom().getTroops()).sum();
+        var deadSum = Arrays.stream(entity.getFrom().getDead()).sum();
+        if (accountId.equals(entity.getReportOwner()) && offSum == deadSum){
+            failed = true;
+        }
+
         var fromSettlement = settlementRepository.findById(entity.getFrom().getSettlementId()).orElseThrow();
         var toSettlement = settlementRepository.findById(entity.getTo().getSettlementId()).orElseThrow();
 
         var result = new ReportResponse(entity.getId(), entity.getReportOwner(), entity.getMission(),
-                new ReportPlayer(entity.getFrom().getSettlementId(), fromSettlement.getName(), fromSettlement.getAccountId(),
-                        fromSettlement.getOwnerUserName(), entity.getFrom().getNation(), entity.getFrom().getTroops(), entity.getFrom().getDead(),
-                        entity.getFrom().getBounty(), entity.getFrom().getCarry()),
-                new ReportPlayer(entity.getTo().getSettlementId(), toSettlement.getName(), toSettlement.getAccountId(),
-                        toSettlement.getOwnerUserName(), entity.getTo().getNation(), entity.getTo().getTroops(), entity.getTo().getDead(),
-                        entity.getTo().getBounty(), entity.getTo().getCarry()),
-                entity.getDateTime(), entity.isRead());
+                ReportPlayer.builder()
+                        .settlementId(entity.getFrom().getSettlementId())
+                        .settlementName(fromSettlement.getName())
+                        .accountId(fromSettlement.getAccountId())
+                        .playerName(fromSettlement.getOwnerUserName())
+                        .nation(entity.getFrom().getNation())
+                        .troops(entity.getFrom().getTroops())
+                        .dead(entity.getFrom().getDead())
+                        .bounty(entity.getFrom().getBounty())
+                        .carry(entity.getFrom().getCarry())
+                        .build(),
+                ReportPlayer.builder()
+                        .settlementId(entity.getTo().getSettlementId())
+                        .settlementName(toSettlement.getName())
+                        .accountId(toSettlement.getAccountId())
+                        .playerName(toSettlement.getOwnerUserName())
+                        .nation(entity.getTo().getNation())
+                        .troops(failed ? new int[10] :entity.getTo().getTroops())
+                        .dead(failed ? new int[10] : entity.getTo().getDead())
+                        .bounty(entity.getTo().getBounty())
+                        .carry(entity.getTo().getCarry())
+                        .build(),
+                entity.getDateTime(), entity.isRead(), failed);
         return result;
     }
 

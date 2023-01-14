@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 public class Battle {
     private BattleField battleField;
     private Army offArmy;
-    private Side offSide;
     private List<Army> defArmies;
     private final int BASE_VILLAGE_DEF = 10;
     private BattleState battleState;
@@ -25,15 +24,14 @@ public class Battle {
         this.fns = new Fns();
     }
 
-    public List<BattleResult> perform(BattleField battleField, List<Side> sides){
+    public List<BattleResult> perform(BattleField battleField, List<Army> sides){
         this.battleField = battleField;
         var results = new ArrayList<BattleResult>();
-        for (Side side : sides){
-            if (side.getSide().equals(Side.ESide.DEF)){
-                defArmies.add(new Army(side));
+        for (Army side : sides){
+            if (side.getSide().equals(Army.ESide.DEF)){
+                defArmies.add(side);
             } else {
-                offSide = side;
-                offArmy = new Army(side);
+                offArmy = side;
                 wave();
                 defArmies.forEach(d -> d.applyLosses(battleResult.getDefLosses()));
                 offArmy.applyLosses(battleResult.getOffLoses());
@@ -47,7 +45,7 @@ public class Battle {
         battleState.setWall(battleField.getWall().getLevel());
         if (offArmy.isScan()){
             scan();
-        }else if (offSide.getMission().equals(ECombatGroupMission.RAID)){
+        }else if (offArmy.getMission().equals(ECombatGroupMission.RAID)){
             raid();
         }else {
             normal();
@@ -88,7 +86,7 @@ public class Battle {
     }
 
     private void calcCatapults() {
-        var targets = offSide.getTargets();
+        var targets = offArmy.getTargets();
         if (targets.size() == 0) { return; }
         var morale = this.cataMorale();
         int[] cats = offArmy.cats();
@@ -100,12 +98,12 @@ public class Battle {
                 morale
                 );
         battleResult.setBuildings(
-                offSide.getTargets().stream()
+                offArmy.getTargets().stream()
                         .map(b -> fns.demolish(b, points)).collect(Collectors.toList()));
     }
 
     private double cataMorale() {
-        return fns.cataMorale(offSide.getPopulation(), battleField.getPopulation());
+        return fns.cataMorale(offArmy.getPopulation(), battleField.getPopulation());
     }
 
     private void calcRams() {
@@ -114,17 +112,12 @@ public class Battle {
         var wall = battleField.getWall();
         var earlyPoints = fns
                 .demolishPoints(rams[0], rams[1], battleField.getDurBonus(), battleState.getRatio(), 1);
-        // get in-battle wall level
         var demolishWall = fns.demolishWall(wall.getDurability(), wall.getLevel(), earlyPoints);
         battleState.setWall((int) demolishWall);
-        //battleField.getWall().setLevel((int) demolishWall);
-        // recalculate points with new wall bonus
         calcTotalPoints();
-        // finally demolish wal
         var points = fns
                 .demolishPoints(rams[0], rams[1], battleField.getDurBonus(), battleState.getRatio(), 1);
         battleResult.setWall(fns.demolish(wall.getLevel(), points));
-        //battleResult.setWall((int) demolishWall);
     }
 
     private void loneAttackerDies() {
@@ -153,7 +146,7 @@ public class Battle {
 
     private double morale(boolean remorale) {
         return fns.morale(
-                offSide.getPopulation(),
+                offArmy.getPopulation(),
                 battleField.getPopulation(),
                 remorale ? (battleState.getFinale().getOff() / battleState.getFinale().getDef()) : 1.0);
     }

@@ -1,9 +1,8 @@
 package io.lanu.travian.game.models.event;
 
-import io.lanu.travian.game.entities.SettlementEntity;
+import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.game.repositories.StatisticsRepository;
-import io.lanu.travian.templates.buildings.BuildingsFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -17,7 +16,8 @@ public class ConstructionEvent implements Event {
     private final StatisticsRepository statisticsRepository;
 
     @Override
-    public void execute(SettlementEntity settlementEntity) {
+    public void execute(SettlementStateDTO state) {
+        var settlementEntity = state.getSettlementEntity();
         var build = settlementEntity.getBuildings().get(this.entity.getBuildingPosition());
         build.setLevel(build.getLevel() + 1);
         settlementEntity.getConstructionEventList().remove(entity);

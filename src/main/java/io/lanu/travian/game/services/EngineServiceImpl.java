@@ -99,7 +99,7 @@ public class EngineServiceImpl implements EngineService {
                 .build();
 
         var allEvents = combineAllEvents(state.getSettlementEntity(), untilTime);
-        executeAllEvents(state.getSettlementEntity(), allEvents);
+        executeAllEvents(state, allEvents);
         state.getSettlementEntity().castStorage();
         state.getSettlementEntity().setModifiedTime(untilTime);
         settlementRepository.save(state.getSettlementEntity());
@@ -128,8 +128,8 @@ public class EngineServiceImpl implements EngineService {
         return currentState;
     }
 
-    private void executeAllEvents(SettlementEntity settlementEntity, List<Event> allEvents) {
-        //var executor = new EventExecutor();
+    private void executeAllEvents(SettlementStateDTO state, List<Event> allEvents) {
+        var settlementEntity = state.getSettlementEntity();
         var modified = settlementEntity.getModifiedTime();
         for (Event event : allEvents) {
             var cropPerHour = settlementEntity.calculateProducePerHour().get(EResource.CROP);
@@ -144,7 +144,7 @@ public class EngineServiceImpl implements EngineService {
                 if (deathTime.isBefore(event.getExecutionTime())) {
                     Event deathEvent = new DeathEvent(deathTime);
                     settlementEntity.calculateProducedGoods(modified, deathEvent.getExecutionTime());
-                    deathEvent.execute(settlementEntity);
+                    deathEvent.execute(state);
                     modified = deathEvent.getExecutionTime();
                 } else {
                     break;
@@ -153,7 +153,7 @@ public class EngineServiceImpl implements EngineService {
             }
             // recalculate storage leftovers
             settlementEntity.calculateProducedGoods(modified, event.getExecutionTime());
-            event.execute(settlementEntity);
+            event.execute(state);
             modified = event.getExecutionTime();
         }
     }
@@ -174,7 +174,10 @@ public class EngineServiceImpl implements EngineService {
         var militaryEventList = combatGroupRepository
                 .getCombatGroupByFromSettlementIdOrToSettlementId(currentSettlement.getId(), currentSettlement.getId())
                 .stream()
-                .filter(cG -> cG.isMoved() && cG.getExecutionTime().isBefore(untilTime))
+                .filter(cG -> cG.isMoved() &&
+                        cG.getExecutionTime().isBefore(untilTime) &&
+                        !(currentSettlement.getId().equals(cG.getFromSettlementId()) &&
+                                cG.getMission().equals(ECombatGroupMission.BACK)))
                 .map(cG -> new TroopsArrivedEvent(cG, this))
                 .collect(Collectors.toList());
 
@@ -256,6 +259,8 @@ public class EngineServiceImpl implements EngineService {
         combatGroupRepository.getCombatGroupByFromSettlementIdOrToSettlementId(settlementId, settlementId)
                 .stream()
                 .sorted(Comparator.comparing(CombatGroupEntity::getExecutionTime))
+                .filter(cG -> !(settlementId.equals(cG.getFromSettlementId()) &&
+                        cG.getMission().equals(ECombatGroupMission.BACK)))
                 .forEach(cG -> {
                     if (cG.isMoved()) {
                         TroopMovementsBrief r;
@@ -293,6 +298,8 @@ public class EngineServiceImpl implements EngineService {
                 .getCombatGroupByFromSettlementIdOrToSettlementId(settlement.getId(), settlement.getId())
                 .stream()
                 .sorted(Comparator.comparing(CombatGroupEntity::getExecutionTime))
+                .filter(cG -> !(settlement.getId().equals(cG.getFromSettlementId()) &&
+                        cG.getMission().equals(ECombatGroupMission.BACK)))
                 .map(cG -> {
                     SettlementEntity from;
                     SettlementEntity to;

@@ -57,7 +57,7 @@ public class VillageEntityFactory {
                             Map.entry(38, new BuildModel(EBuilding.EMPTY, 0)),
                             Map.entry(39, new BuildModel(EBuilding.EMPTY, 0))),
                     Arrays.asList(BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000)),
-                    new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                    new int[]{50, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                     new ArrayList<>(),
                     new ArrayList<>(),
                     null);

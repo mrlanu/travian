@@ -1,6 +1,5 @@
 package io.lanu.travian.game.controllers;
 
-import io.lanu.travian.enums.EResource;
 import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.models.requests.NewVillageRequest;
 import io.lanu.travian.game.models.responses.SettlementView;

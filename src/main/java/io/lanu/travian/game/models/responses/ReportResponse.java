@@ -20,4 +20,5 @@ public class ReportResponse {
     private ReportPlayer to;
     private LocalDateTime dateTime;
     private boolean read;
+    private boolean failed;
 }

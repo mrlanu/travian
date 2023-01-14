@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,5 +22,6 @@ public class SettlementStateDTO {
     private SettlementEntity settlementEntity;
     private Map<String, TroopMovementsBrief> movementsBriefMap;
     private Map<ECombatGroupLocation, List<CombatGroupView>> combatGroupByLocationMap;
-    private List<CombatGroupEntity> combatGroupsInSettlement;
+    @Builder.Default
+    private List<CombatGroupEntity> combatGroupsInSettlement = new ArrayList<>();
 }
