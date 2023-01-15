@@ -100,7 +100,6 @@ public class EngineServiceImpl implements EngineService {
 
         var allEvents = combineAllEvents(state.getSettlementEntity(), untilTime);
         executeAllEvents(state, allEvents);
-        state.getSettlementEntity().castStorage();
         state.getSettlementEntity().setModifiedTime(untilTime);
         settlementRepository.save(state.getSettlementEntity());
 
@@ -153,6 +152,7 @@ public class EngineServiceImpl implements EngineService {
             }
             // recalculate storage leftovers
             settlementEntity.calculateProducedGoods(modified, event.getExecutionTime());
+            state.getSettlementEntity().castStorage();
             event.execute(state);
             modified = event.getExecutionTime();
         }

@@ -12,10 +12,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -118,16 +121,10 @@ public class AttackMissionStrategy extends MissionStrategy {
     }
 
     private void returnOff(SettlementEntity attackingSettlement, List<int[]> unitsBefore, List<int[]> casualtiesUnits) {
-        var storage = state.getSettlementEntity().getStorage();
-
-        var clay = storage.get(1);
-        clay = clay.subtract(BigDecimal.valueOf(100));
-        storage.set(1, clay);
-        var plunder = Arrays
-                .asList(BigDecimal.ZERO, BigDecimal.valueOf(100), BigDecimal.ZERO, BigDecimal.ZERO);
+        List<BigDecimal> plunder = calculatePlunder();
         createReports(attackingSettlement, unitsBefore, casualtiesUnits, plunder);
+        subtractStolenResources(plunder);
         combatGroup.setPlunder(plunder);
-        //----------
         combatGroup.setMission(ECombatGroupMission.BACK);
         //swap
         String temp = combatGroup.getFromSettlementId();
@@ -136,10 +133,40 @@ public class AttackMissionStrategy extends MissionStrategy {
         String tempAcc = combatGroup.getFromAccountId();
         combatGroup.setFromAccountId(combatGroup.getToAccountId());
         combatGroup.setToAccountId(tempAcc);
-
         combatGroup.setExecutionTime(combatGroup.getExecutionTime().plusSeconds(combatGroup.getDuration()));
 
         engineService.getCombatGroupRepository().save(combatGroup);
+    }
+
+    private void subtractStolenResources(List<BigDecimal> plunder) {
+        var storage = state.getSettlementEntity().getStorage();
+        IntStream.range(0,4).forEach(i -> {
+            var res = storage.get(i);
+            res = res.subtract(plunder.get(i));
+            storage.set(i, res);
+        });
+    }
+
+    private List<BigDecimal> calculatePlunder() {
+        var storage = state.getSettlementEntity().getStorage();
+        var availableResources = storage.stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        var resPercents = storage.stream()
+                .map(res -> BigDecimal
+                        .valueOf(100).multiply(res).divide(availableResources, MathContext.DECIMAL32))
+                .collect(Collectors.toList());
+        var carry = Math.min(calculateCarry(), availableResources.intValue());
+
+        var wood = resPercents.get(0).divide(BigDecimal.valueOf(100), MathContext.DECIMAL32)
+                .multiply(BigDecimal.valueOf(carry)).setScale(0, RoundingMode.HALF_DOWN);
+        var clay = resPercents.get(1).divide(BigDecimal.valueOf(100), MathContext.DECIMAL32)
+                .multiply(BigDecimal.valueOf(carry)).setScale(0, RoundingMode.HALF_DOWN);
+        var iron = resPercents.get(2).divide(BigDecimal.valueOf(100), MathContext.DECIMAL32)
+                .multiply(BigDecimal.valueOf(carry)).setScale(0, RoundingMode.HALF_DOWN);
+        var crop = resPercents.get(3).divide(BigDecimal.valueOf(100), MathContext.DECIMAL32)
+                .multiply(BigDecimal.valueOf(carry)).setScale(0, RoundingMode.HALF_DOWN);
+
+        return Arrays.asList(wood, clay, iron, crop);
     }
 
     private void applyLosses(List<CombatGroupEntity> combatGroups, BattleResult battleResult) {
@@ -160,11 +187,7 @@ public class AttackMissionStrategy extends MissionStrategy {
                                List<int[]> casualtiesUnits,
                                List<BigDecimal> plunder) {
         var currentSettlement = state.getSettlementEntity();
-        var units = UnitsConst.UNITS.get(combatGroup.getOwnerNation().ordinal());
-        var carry = 0;
-        for (int i = 0; i < combatGroup.getUnits().length; i++){
-            carry += combatGroup.getUnits()[i] * units.get(i).getCapacity();
-        }
+        int carry = calculateCarry();
         var report = new ReportEntity(
                 attacker.getAccountId(),
                 combatGroup.getMission(),
@@ -187,5 +210,14 @@ public class AttackMissionStrategy extends MissionStrategy {
         report.setReportOwner(currentSettlement.getAccountId());
         report.setId(null);
         repo.save(report);
+    }
+
+    private int calculateCarry() {
+        var units = UnitsConst.UNITS.get(combatGroup.getOwnerNation().ordinal());
+        var carry = 0;
+        for (int i = 0; i < combatGroup.getUnits().length; i++){
+            carry += combatGroup.getUnits()[i] * units.get(i).getCapacity();
+        }
+        return carry;
     }
 }
