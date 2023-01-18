@@ -1,28 +1,12 @@
 package io.lanu.travian.game.entities;
 
-import io.lanu.travian.enums.EBuilding;
-import lombok.*;
+import io.lanu.travian.game.models.buildings.BuildingsID;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-import java.util.Objects;
-
-@NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
+@Data
 public class BuildModel {
-    private EBuilding kind;
+    private BuildingsID id;
     private int level;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BuildModel that = (BuildModel) o;
-        return kind == that.kind;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(kind);
-    }
 }

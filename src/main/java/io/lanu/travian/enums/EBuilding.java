@@ -1,3 +1,4 @@
+/*
 package io.lanu.travian.enums;
 
 import io.lanu.travian.templates.Time;
@@ -157,3 +158,4 @@ public enum EBuilding {
     }
 
 }
+*/

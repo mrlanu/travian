@@ -131,7 +131,7 @@ public class EngineServiceImpl implements EngineService {
         var settlementEntity = state.getSettlementEntity();
         var modified = settlementEntity.getModifiedTime();
         for (Event event : allEvents) {
-            var cropPerHour = settlementEntity.calculateProducePerHour().get(EResource.CROP);
+            var cropPerHour = settlementEntity.calculateProducePerHour().get(3);
 
             // if crop in the village is less than 0 keep create the death event & execute them until the crop will be positive
             while (cropPerHour.longValue() < 0) {
@@ -148,7 +148,7 @@ public class EngineServiceImpl implements EngineService {
                 } else {
                     break;
                 }
-                cropPerHour = settlementEntity.calculateProducePerHour().get(EResource.CROP);
+                cropPerHour = settlementEntity.calculateProducePerHour().get(3);
             }
             // recalculate storage leftovers
             settlementEntity.calculateProducedGoods(modified, event.getExecutionTime());

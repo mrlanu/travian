@@ -1,19 +1,17 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.EBuilding;
 import io.lanu.travian.enums.EBuildingType;
 import io.lanu.travian.enums.EManipulation;
 import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
+import io.lanu.travian.game.models.buildings.BuildingsConst;
+import io.lanu.travian.game.models.buildings.BuildingsID;
 import io.lanu.travian.game.models.responses.NewBuilding;
-import io.lanu.travian.templates.buildings.BuildingBase;
-import io.lanu.travian.templates.buildings.BuildingsFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +26,7 @@ public class ConstructionServiceImpl implements ConstructionService {
     }
 
     @Override
-    public SettlementStateDTO createBuildEvent(String settlementId, Integer buildingPosition, EBuilding kind) {
+    public SettlementStateDTO createBuildEvent(String settlementId, Integer buildingPosition, BuildingsID buildingID) {
         var currentState = engineService.updateParticularSettlementState(settlementId, LocalDateTime.now());
         var events = currentState.getSettlementEntity().getConstructionEventList()
                 .stream()
@@ -41,24 +39,24 @@ public class ConstructionServiceImpl implements ConstructionService {
 
         BuildModel buildModel;
         //the kind of building if requested new building, and null if requested upgrade
-        if (kind != null) {
-            buildModel = new BuildModel(kind, 0);
+        if (buildingID != null) {
+            buildModel = new BuildModel(buildingID, 0);
             currentState.getSettlementEntity().getBuildings().put(buildingPosition, buildModel);
         } else {
             buildModel = currentState.getSettlementEntity().getBuildings().get(buildingPosition);
         }
 
-        BuildingBase building = BuildingsFactory.getBuilding(buildModel.getKind(),
-                alreadyUnderUpgrade ? buildModel.getLevel() + 1 : buildModel.getLevel());
+        var buildingBlueprint = BuildingsConst.BUILDINGS.get(buildModel.getId().ordinal());
+        var toLevel = alreadyUnderUpgrade ? buildModel.getLevel() + 2 : buildModel.getLevel() + 1;
 
         LocalDateTime executionTime = events.size() > 0 ?
-                events.get(events.size() - 1).getExecutionTime().plusSeconds(building.getTimeToNextLevel()) :
-                LocalDateTime.now().plusSeconds(building.getTimeToNextLevel());
+                events.get(events.size() - 1).getExecutionTime().plusSeconds(buildingBlueprint.getTime().valueOf(toLevel)) :
+                LocalDateTime.now().plusSeconds(buildingBlueprint.getTime().valueOf(toLevel));
 
-        currentState.getSettlementEntity().manipulateGoods(EManipulation.SUBTRACT, building.getResourcesToNextLevel());
+        currentState.getSettlementEntity().manipulateGoods(EManipulation.SUBTRACT, buildingBlueprint.getResourcesToNextLevel(toLevel));
 
-        ConstructionEventEntity buildEvent = new ConstructionEventEntity(buildingPosition, buildModel.getKind(),
-                building.getLevel() + 1, currentState.getSettlementEntity().getId(), executionTime);
+        ConstructionEventEntity buildEvent = new ConstructionEventEntity(buildingPosition, buildModel.getId(),
+                toLevel, currentState.getSettlementEntity().getId(), executionTime);
 
         currentState.getSettlementEntity().getConstructionEventList().add(buildEvent);
         return engineService.saveSettlementEntity(currentState);
@@ -79,14 +77,14 @@ public class ConstructionServiceImpl implements ConstructionService {
                 .count();
 
         BuildModel buildModel = currentState.getSettlementEntity().getBuildings().get(event.getBuildingPosition());
-        BuildingBase building = BuildingsFactory.getBuilding(buildModel.getKind(),
-                numberOfEvents == 1 ? buildModel.getLevel() : buildModel.getLevel() + 1);
+        var buildingBlueprint = BuildingsConst.BUILDINGS.get(buildModel.getId().ordinal());
+        var toLevel = numberOfEvents == 1 ? buildModel.getLevel() + 1: buildModel.getLevel() + 2;
         //deduct time that was needed for building from following events
         var events = allEvents.stream()
                 .filter(e -> e.getExecutionTime().isAfter(event.getExecutionTime()))
                 .collect(Collectors.toList());
         events.forEach(e -> {
-            e.setExecutionTime(e.getExecutionTime().minusSeconds(building.getTimeToNextLevel()));
+            e.setExecutionTime(e.getExecutionTime().minusSeconds(buildingBlueprint.getTime().valueOf(toLevel)));
             //decrement level by one if we have previous events for this building
             if (numberOfEvents > 1) {
                 e.setToLevel(e.getToLevel() - 1);
@@ -94,9 +92,9 @@ public class ConstructionServiceImpl implements ConstructionService {
         });
         // if deleting any building construction to level 1. in this case should return empty spot (except resources fields)
         if (event.getToLevel() == 1 && event.getBuildingPosition() >= 19 && numberOfEvents == 1){
-            currentState.getSettlementEntity().getBuildings().put(event.getBuildingPosition(), new BuildModel(EBuilding.EMPTY, 0));
+            currentState.getSettlementEntity().getBuildings().put(event.getBuildingPosition(), new BuildModel(BuildingsID.EMPTY, 0));
         }
-        currentState.getSettlementEntity().manipulateGoods(EManipulation.ADD, building.getResourcesToNextLevel());
+        currentState.getSettlementEntity().manipulateGoods(EManipulation.ADD, buildingBlueprint.getResourcesToNextLevel(toLevel));
         currentState.getSettlementEntity().getConstructionEventList().remove(event);
         return engineService.saveSettlementEntity(currentState);
     }
@@ -116,11 +114,21 @@ public class ConstructionServiceImpl implements ConstructionService {
 
     private List<NewBuilding> getListOfNewBuildings(){
         var result = new ArrayList<NewBuilding>();
-        Arrays.asList(EBuilding.values()).forEach(b -> {
+        BuildingsConst.BUILDINGS.forEach(b -> {
             if (!b.getType().equals(EBuildingType.RESOURCE) && !b.getType().equals(EBuildingType.EMPTY)){
-                var temp = BuildingsFactory.getBuilding(b, 0);
-                result.add(new NewBuilding(b.getName(), b, b.getType(), b.getDescription(), temp.getResourcesToNextLevel(),
-                        temp.getTimeToNextLevel(), b.getRequirementBuildings(), b.getMaxLevel(), false, b.isMulti()));
+                result.add(
+                        NewBuilding.builder()
+                                .name(b.getName())
+                                .buildingID(b.getId())
+                                .type(b.getType())
+                                .description(b.getDescription())
+                                .cost(b.getResourcesToNextLevel(1))
+                                .time(b.getTime().valueOf(1))
+                                .requirements(b.getRequirementBuildings())
+                                .maxLevel(b.getMaxLevel())
+                                .multi(b.isMulti())
+                                .available(false)
+                                .build());
             }
         });
         return result;

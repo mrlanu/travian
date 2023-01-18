@@ -1,12 +1,13 @@
 package io.lanu.travian.game.entities;
 
-import io.lanu.travian.enums.*;
+import io.lanu.travian.enums.EManipulation;
+import io.lanu.travian.enums.ENation;
+import io.lanu.travian.enums.SettlementSubType;
+import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
 import io.lanu.travian.game.models.battle.UnitsConst;
-import io.lanu.travian.templates.buildings.BuildingBase;
-import io.lanu.travian.templates.buildings.BuildingsFactory;
-import io.lanu.travian.templates.buildings.GranaryBuilding;
-import io.lanu.travian.templates.buildings.WarehouseBuilding;
+import io.lanu.travian.game.models.buildings.BuildingsConst;
+import io.lanu.travian.game.models.buildings.BuildingsID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -51,12 +53,14 @@ public class SettlementEntity {
     //@LastModifiedDate
     private LocalDateTime modifiedTime;
 
-    public Map<EResource, BigDecimal> calculateProducePerHour(){
-        var result = IntStream.range(1, 19)
-                .mapToObj(i -> BuildingsFactory.getBuilding(buildings.get(i).getKind(), buildings.get(i).getLevel()))
-                .collect(Collectors.groupingBy(BuildingBase::getResource,
-                        Collectors.reducing(BigDecimal.ZERO, BuildingBase::getProduction, BigDecimal::add)));
-        result.put(EResource.CROP, result.get(EResource.CROP).subtract(calculateEatPerHour()));
+    public List<BigDecimal> calculateProducePerHour(){
+        var res = buildings.values().stream()
+                .filter(b -> b.getId().equals(BuildingsID.WOODCUTTER) || b.getId().equals(BuildingsID.CLAY_PIT) ||
+                        b.getId().equals(BuildingsID.IRON_MINE) || b.getId().equals(BuildingsID.CROPLAND))
+                .collect(Collectors.groupingBy(BuildModel::getId,
+                                Collectors.reducing(BigDecimal.ZERO, b -> BigDecimal.valueOf(BuildingsConst.BUILDINGS.get(b.getId().ordinal()).getBenefit(b.getLevel())), BigDecimal::add)));
+        List<BigDecimal> result = Arrays.asList(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        res.forEach((k, v) -> result.set(k.ordinal(), v));
         return result;
     }
 
@@ -69,7 +73,7 @@ public class SettlementEntity {
 
     public void calculateProducedGoods(LocalDateTime lastModified, LocalDateTime untilTime){
         final MathContext mc = new MathContext(3);
-        Map<EResource, BigDecimal> producePerHour = calculateProducePerHour();
+        List<BigDecimal> producePerHour = calculateProducePerHour();
 
         long durationFromLastModified = ChronoUnit.MILLIS.between(lastModified, untilTime);
 
@@ -79,16 +83,16 @@ public class SettlementEntity {
                 .divide(BigDecimal.valueOf(3_600_000L), mc);
 
         BigDecimal woodProduced =
-                producePerHour.get(EResource.WOOD)
+                producePerHour.get(0)
                         .multiply(divide);
         BigDecimal clayProduced =
-                producePerHour.get(EResource.CLAY)
+                producePerHour.get(1)
                         .multiply(divide);
         BigDecimal ironProduced =
-                producePerHour.get(EResource.IRON)
+                producePerHour.get(2)
                         .multiply(divide);
         BigDecimal cropProduced =
-                producePerHour.get(EResource.CROP)
+                producePerHour.get(3)
                         .multiply(divide);
 
         manipulateGoods(EManipulation.ADD, Arrays.asList(woodProduced, clayProduced, ironProduced, cropProduced));
@@ -116,26 +120,19 @@ public class SettlementEntity {
     }
 
     public BigDecimal getWarehouseCapacity() {
-        // in BuildModel overridden equals method so level doesnt matter in containsValue
-        return buildings.containsValue(new BuildModel(EBuilding.WAREHOUSE, 0)) ?
-                buildings.values()
-                    .stream()
-                    .filter(buildModel -> buildModel.getKind().equals(EBuilding.WAREHOUSE))
-                    .map(buildModel -> (WarehouseBuilding) BuildingsFactory.getBuilding(buildModel.getKind(), buildModel.getLevel()))
-                    .map(WarehouseBuilding::getCapacity)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add)
-                : BigDecimal.valueOf(800);
+        double warehouse = buildings.values().stream()
+                .filter(b -> b.getId().equals(BuildingsID.WAREHOUSE))
+                .map(b -> BuildingsConst.BUILDINGS.get(b.getId().ordinal()).getBenefit(b.getLevel()))
+                .reduce(0.0, Double::sum);
+        return warehouse > 0.0 ? BigDecimal.valueOf(warehouse) : BigDecimal.valueOf(800);
     }
 
     public BigDecimal getGranaryCapacity() {
-        return buildings.containsValue(new BuildModel(EBuilding.GRANARY, 0)) ?
-                buildings.values()
-                    .stream()
-                    .filter(buildModel -> buildModel.getKind().equals(EBuilding.GRANARY))
-                    .map(buildModel -> (GranaryBuilding) BuildingsFactory.getBuilding(buildModel.getKind(), buildModel.getLevel()))
-                    .map(GranaryBuilding::getCapacity)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add)
-                : BigDecimal.valueOf(800);
+        double granary = buildings.values().stream()
+                .filter(b -> b.getId().equals(BuildingsID.GRANARY))
+                .map(b -> BuildingsConst.BUILDINGS.get(b.getId().ordinal()).getBenefit(b.getLevel()))
+                .reduce(0.0, Double::sum);
+        return granary > 0.0 ? BigDecimal.valueOf(granary) : BigDecimal.valueOf(800);
     }
 
     public void castStorage() {

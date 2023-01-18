@@ -1,18 +1,16 @@
-package io.lanu.travian.templates.buildings;
+package io.lanu.travian.game.models.buildings;
 
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.IntStream;
 
-@NoArgsConstructor
 @Data
-@Document("buildings")
-public class BuildingBase implements IResourceProd{
+@Builder
+public class BuildingView {
 
     protected String name;
     protected int level;
