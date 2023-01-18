@@ -1,15 +1,17 @@
 package io.lanu.travian.game.models.responses;
 
-import io.lanu.travian.enums.*;
+import io.lanu.travian.enums.ECombatGroupLocation;
+import io.lanu.travian.enums.ENation;
+import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.entities.BuildModel;
 import io.lanu.travian.game.entities.CombatGroupEntity;
 import io.lanu.travian.game.entities.OrderCombatUnitEntity;
-import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.entities.events.ConstructionEventEntity;
-import io.lanu.travian.templates.buildings.BuildingBase;
-import io.lanu.travian.templates.buildings.BuildingsFactory;
-import io.lanu.travian.templates.military.CombatUnitFactory;
+import io.lanu.travian.game.models.battle.UnitsConst;
+import io.lanu.travian.game.models.buildings.BuildingView;
+import io.lanu.travian.game.models.buildings.BuildingsConst;
+import io.lanu.travian.game.models.buildings.BuildingsID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +20,10 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -37,13 +42,13 @@ public class SettlementView {
     private int population;
     private int culture;
     private int approval;
-    private List<BuildingBase> buildings;
-    private Map<EResource, BigDecimal> storage;
+    private List<BuildingView> buildings;
+    private List<BigDecimal> storage;
     private BigDecimal warehouseCapacity;
     private BigDecimal granaryCapacity;
     private Map<String, Integer> homeLegion;
     private int[] homeUnits;
-    private Map<EResource, BigDecimal> producePerHour;
+    private List<BigDecimal> producePerHour;
     private List<ConstructionEventView> eventsList;
     private List<CombatUnitOrderView> unitOrders;
     private Map<String, TroopMovementsBrief> movementsBrief;
@@ -74,17 +79,17 @@ public class SettlementView {
         this.homeUnits = settlementEntity.getHomeLegion();
         this.producePerHour = settlementEntity.calculateProducePerHour();
         this.eventsList = this.buildEventsView(settlementEntity.getConstructionEventList());
-        this.unitOrders = this.buildUnitOrdersView(settlementEntity.getCombatUnitOrders());
+        this.unitOrders = this.buildUnitOrdersView(settlementEntity.getCombatUnitOrders(), currentState.getSettlementEntity().getNation());
     }
 
     private Map<String, Integer> mapHomeLegion(int[] homeLegion, ENation nation, List<CombatGroupEntity> militariesInVillage) {
         var result = new HashMap<String, Integer>();
         for (int i = 0; i < homeLegion.length; i++){
-            result.put(CombatUnitFactory.getCombatUnitFromArrayPosition(i, nation).getName(), homeLegion[i]);
+            result.put(UnitsConst.UNITS.get(nation.ordinal()).get(i).getName(), homeLegion[i]);
         }
         militariesInVillage.forEach(unit -> {
             for (int i = 0; i < unit.getUnits().length; i++){
-                var key = CombatUnitFactory.getCombatUnitFromArrayPosition(i, nation).getName();
+                var key = UnitsConst.UNITS.get(unit.getOwnerNation().ordinal()).get(i).getName();
                 result.put(key, result.getOrDefault(key, 0) + unit.getUnits()[i]);
             }
         });
@@ -95,18 +100,19 @@ public class SettlementView {
         /*DurationFormatUtils.formatDuration(Duration.between(LocalDateTime.now(),
                 event.getExecutionTime()).toMillis(), "H:mm:ss", true)*/
         return buildEventList.stream()
-                .map(event -> new ConstructionEventView(event.getEventId(), event.getBuildingPosition(), event.getBuildingName().getName(), event.getToLevel(), event.getExecutionTime(),
+                .map(event -> new ConstructionEventView(event.getEventId(), event.getBuildingPosition(),
+                        BuildingsConst.BUILDINGS.get(event.getBuildingID().ordinal()).getName(), event.getToLevel(), event.getExecutionTime(),
                         ChronoUnit.SECONDS.between(LocalDateTime.now(), event.getExecutionTime()))).collect(Collectors.toList());
     }
 
-    private List<CombatUnitOrderView> buildUnitOrdersView(List<OrderCombatUnitEntity> orders) {
+    private List<CombatUnitOrderView> buildUnitOrdersView(List<OrderCombatUnitEntity> orders, ENation nation) {
         return orders
                 .stream()
                 .sorted(Comparator.comparing(OrderCombatUnitEntity::getCreated))
                 .map(order -> {
                     var duration = Duration.between(LocalDateTime.now(), order.getEndOrderTime()).toSeconds();
                     return new CombatUnitOrderView(
-                            order.getUnitType().getName(),
+                            UnitsConst.UNITS.get(nation.ordinal()).get(order.getUnit()).getName(),
                             order.getLeftTrain(),
                             duration,
                             order.getDurationEach(),
@@ -115,20 +121,35 @@ public class SettlementView {
                 .collect(Collectors.toList());
     }
     
-    private List<BuildingBase> buildBuildingsView(Map<Integer, BuildModel> buildings, List<ConstructionEventEntity> eventList) {
+    private List<BuildingView> buildBuildingsView(Map<Integer, BuildModel> buildings, List<ConstructionEventEntity> eventList) {
         return IntStream.range(1, 40)
                 .mapToObj(i -> {
-                    BuildingBase building = BuildingsFactory.getBuilding(buildings.get(i).getKind(), buildings.get(i).getLevel());
-                    building.setPosition(i);
-                    if (!building.getName().equals(EBuilding.EMPTY.getName())){
-                        building.setAbleToUpgrade(this.storage);
-                        building.setUnderUpgrade(eventList);
+                    if (buildings.get(i).getId().equals(BuildingsID.EMPTY)){
+                        return BuildingView.builder()
+                                .name("empty-spot")
+                                .position(i)
+                                .description("Empty")
+                                .build();
+                    }
+                    var bBlueprint = BuildingsConst.BUILDINGS.get(buildings.get(i).getId().ordinal());
+                    var building = BuildingView.builder()
+                            .name(bBlueprint.getName())
+                            .level(buildings.get(i).getLevel())
+                            .resourcesToNextLevel(bBlueprint.getResourcesToNextLevel(buildings.get(i).getLevel() + 1))
+                            .maxLevel(bBlueprint.getMaxLevel())
+                            .description(bBlueprint.getDescription())
+                            .timeToNextLevel(bBlueprint.getTime().valueOf(buildings.get(i).getLevel() + 1))
+                            .position(i)
+                            .build();
+                    building.setAbleToUpgrade(storage);
+                    building.setUnderUpgrade(eventList);
                         // if current building is already under upgrade resources needed for next level should be overwritten
-                        if (building.isUnderUpgrade()){
-                            var resources = buildings.get(i).getKind().getResourcesToNextLevel(building.getLevel() + 1);
-                            building.setResourcesToNextLevel(resources);
-                            building.setAbleToUpgrade(this.storage);
-                        }
+                    if (building.isUnderUpgrade()){
+                        var resources = bBlueprint.getResourcesToNextLevel(building.getLevel() + 2);
+                        var time = bBlueprint.getTime().valueOf(buildings.get(i).getLevel() + 2);
+                        building.setResourcesToNextLevel(resources);
+                        building.setAbleToUpgrade(this.storage);
+                        building.setTimeToNextLevel(time);
                     }
                     return building;
                 })

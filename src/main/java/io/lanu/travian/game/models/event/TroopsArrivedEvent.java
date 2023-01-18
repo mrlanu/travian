@@ -1,7 +1,7 @@
 package io.lanu.travian.game.models.event;
 
+import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.entities.CombatGroupEntity;
-import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.models.event.missions.AttackMissionStrategy;
 import io.lanu.travian.game.models.event.missions.MissionStrategy;
 import io.lanu.travian.game.models.event.missions.ReinforcementMissionStrategy;
@@ -20,8 +20,8 @@ public class TroopsArrivedEvent implements Event{
     private final EngineService engineService;
 
     @Override
-    public void execute(SettlementEntity entity) {
-        getMissionStrategy(entity).handle();
+    public void execute(SettlementStateDTO state) {
+        getMissionStrategy(state).handle();
     }
 
     @Override
@@ -29,14 +29,15 @@ public class TroopsArrivedEvent implements Event{
         return combatGroup.getExecutionTime();
     }
     
-    private MissionStrategy getMissionStrategy(SettlementEntity settlementEntity) {
+    private MissionStrategy getMissionStrategy(SettlementStateDTO state) {
         switch (combatGroup.getMission()){
             case REINFORCEMENT:
-                return new ReinforcementMissionStrategy(settlementEntity, combatGroup, engineService);
+                return new ReinforcementMissionStrategy(state, combatGroup, engineService);
             case ATTACK:
-                return new AttackMissionStrategy(settlementEntity, combatGroup, engineService);
+            case RAID:
+                return new AttackMissionStrategy(state, combatGroup, engineService);
             case BACK:
-                return new ReturnHomeMissionStrategy(settlementEntity, combatGroup, engineService);
+                return new ReturnHomeMissionStrategy(state, combatGroup, engineService);
             default: throw new IllegalStateException();
         }
     }

@@ -99,8 +99,7 @@ public class EngineServiceImpl implements EngineService {
                 .build();
 
         var allEvents = combineAllEvents(state.getSettlementEntity(), untilTime);
-        executeAllEvents(state.getSettlementEntity(), allEvents);
-        state.getSettlementEntity().castStorage();
+        executeAllEvents(state, allEvents);
         state.getSettlementEntity().setModifiedTime(untilTime);
         settlementRepository.save(state.getSettlementEntity());
 
@@ -128,15 +127,15 @@ public class EngineServiceImpl implements EngineService {
         return currentState;
     }
 
-    private void executeAllEvents(SettlementEntity settlementEntity, List<Event> allEvents) {
-        //var executor = new EventExecutor();
+    private void executeAllEvents(SettlementStateDTO state, List<Event> allEvents) {
+        var settlementEntity = state.getSettlementEntity();
         var modified = settlementEntity.getModifiedTime();
         for (Event event : allEvents) {
-            var cropPerHour = settlementEntity.calculateProducePerHour().get(EResource.CROP);
+            var cropPerHour = settlementEntity.calculateProducePerHour().get(3);
 
             // if crop in the village is less than 0 keep create the death event & execute them until the crop will be positive
             while (cropPerHour.longValue() < 0) {
-                var leftCrop = settlementEntity.getStorage().get(EResource.CROP);
+                var leftCrop = settlementEntity.getStorage().get(3);
                 var durationToDeath = leftCrop.divide(cropPerHour.negate(), mc).multiply(BigDecimal.valueOf(3_600_000), mc);
 
                 LocalDateTime deathTime = modified.plus(durationToDeath.longValue(), ChronoUnit.MILLIS);
@@ -144,16 +143,17 @@ public class EngineServiceImpl implements EngineService {
                 if (deathTime.isBefore(event.getExecutionTime())) {
                     Event deathEvent = new DeathEvent(deathTime);
                     settlementEntity.calculateProducedGoods(modified, deathEvent.getExecutionTime());
-                    deathEvent.execute(settlementEntity);
+                    deathEvent.execute(state);
                     modified = deathEvent.getExecutionTime();
                 } else {
                     break;
                 }
-                cropPerHour = settlementEntity.calculateProducePerHour().get(EResource.CROP);
+                cropPerHour = settlementEntity.calculateProducePerHour().get(3);
             }
             // recalculate storage leftovers
             settlementEntity.calculateProducedGoods(modified, event.getExecutionTime());
-            event.execute(settlementEntity);
+            state.getSettlementEntity().castStorage();
+            event.execute(state);
             modified = event.getExecutionTime();
         }
     }
@@ -174,7 +174,10 @@ public class EngineServiceImpl implements EngineService {
         var militaryEventList = combatGroupRepository
                 .getCombatGroupByFromSettlementIdOrToSettlementId(currentSettlement.getId(), currentSettlement.getId())
                 .stream()
-                .filter(cG -> cG.isMoved() && cG.getExecutionTime().isBefore(untilTime))
+                .filter(cG -> cG.isMoved() &&
+                        cG.getExecutionTime().isBefore(untilTime) &&
+                        !(currentSettlement.getId().equals(cG.getFromSettlementId()) &&
+                                cG.getMission().equals(ECombatGroupMission.BACK)))
                 .map(cG -> new TroopsArrivedEvent(cG, this))
                 .collect(Collectors.toList());
 
@@ -241,7 +244,7 @@ public class EngineServiceImpl implements EngineService {
         LocalDateTime exec = order.getLastTime();
         for (int i = 0; i < amount; i++) {
             exec = exec.plus(order.getDurationEach(), ChronoUnit.SECONDS);
-            result.add(new CombatUnitDoneEvent(new CombatUnitDoneEventEntity(exec, order.getUnitType(), order.getEatHour())));
+            result.add(new CombatUnitDoneEvent(new CombatUnitDoneEventEntity(exec, order.getUnit())));
         }
         return result;
     }
@@ -256,6 +259,8 @@ public class EngineServiceImpl implements EngineService {
         combatGroupRepository.getCombatGroupByFromSettlementIdOrToSettlementId(settlementId, settlementId)
                 .stream()
                 .sorted(Comparator.comparing(CombatGroupEntity::getExecutionTime))
+                .filter(cG -> !(settlementId.equals(cG.getFromSettlementId()) &&
+                        cG.getMission().equals(ECombatGroupMission.BACK)))
                 .forEach(cG -> {
                     if (cG.isMoved()) {
                         TroopMovementsBrief r;
@@ -293,6 +298,8 @@ public class EngineServiceImpl implements EngineService {
                 .getCombatGroupByFromSettlementIdOrToSettlementId(settlement.getId(), settlement.getId())
                 .stream()
                 .sorted(Comparator.comparing(CombatGroupEntity::getExecutionTime))
+                .filter(cG -> !(settlement.getId().equals(cG.getFromSettlementId()) &&
+                        cG.getMission().equals(ECombatGroupMission.BACK)))
                 .map(cG -> {
                     SettlementEntity from;
                     SettlementEntity to;

@@ -40,6 +40,10 @@ public class UsersController {
         usersService.registerUser(new AuthRequest("mama@yahoo.com", "mama", "12345"));
         usersService.registerUser(new AuthRequest("bob@gmail.com", "bob", "12345"));
         usersService.registerUser(new AuthRequest("igor@yahoo.com", "igor", "12345"));
+        usersService.registerUser(new AuthRequest("nata@yahoo.com", "nata", "12345"));
+        usersService.registerUser(new AuthRequest("ira@yahoo.com", "ira", "12345"));
+        usersService.registerUser(new AuthRequest("sasha@yahoo.com", "sasha", "12345"));
+        usersService.registerUser(new AuthRequest("sofka@yahoo.com", "sofka", "12345"));
     }
 
 }

@@ -1,7 +1,7 @@
 package io.lanu.travian.game.controllers;
 
 
-import io.lanu.travian.enums.EBuilding;
+import io.lanu.travian.game.models.buildings.BuildingsID;
 import io.lanu.travian.game.models.responses.NewBuilding;
 import io.lanu.travian.game.models.responses.SettlementView;
 import io.lanu.travian.game.services.ConstructionService;
@@ -25,8 +25,8 @@ public class ConstructionController {
     @PutMapping("/{settlementId}/buildings/{position}/new")
     public SettlementView newBuilding(@PathVariable String settlementId,
                                       @PathVariable Integer position,
-                                      @RequestParam EBuilding kind){
-        var currentState = constructionService.createBuildEvent(settlementId, position, kind);
+                                      @RequestParam BuildingsID buildingID){
+        var currentState = constructionService.createBuildEvent(settlementId, position, buildingID);
         return settlementService.getSettlementById(currentState);
     }
 

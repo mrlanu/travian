@@ -1,6 +1,5 @@
 package io.lanu.travian.game.services;
 
-import io.lanu.travian.enums.ECombatUnit;
 import io.lanu.travian.enums.SettlementSubType;
 import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.dto.SettlementStateDTO;
@@ -97,7 +96,7 @@ public class SettlementServiceImpl implements SettlementService {
     private void createResearchedCombatUnitEntity(String villageId) {
         researchedCombatUnitRepository.save(
                 new ResearchedCombatUnitEntity(villageId,
-                        List.of(new ResearchedCombatUnitShort(ECombatUnit.PHALANX.getName(), 0))));
+                        List.of(new ResearchedCombatUnitShort(0, 0))));
     }
 
     @Override

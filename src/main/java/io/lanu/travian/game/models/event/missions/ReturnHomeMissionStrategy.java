@@ -1,8 +1,8 @@
 package io.lanu.travian.game.models.event.missions;
 
 import io.lanu.travian.enums.EManipulation;
+import io.lanu.travian.game.dto.SettlementStateDTO;
 import io.lanu.travian.game.entities.CombatGroupEntity;
-import io.lanu.travian.game.entities.SettlementEntity;
 import io.lanu.travian.game.services.EngineService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,8 +11,8 @@ import lombok.EqualsAndHashCode;
 @Data
 public class ReturnHomeMissionStrategy extends MissionStrategy{
 
-    public ReturnHomeMissionStrategy(SettlementEntity currentSettlement, CombatGroupEntity combatGroup, EngineService engineService) {
-        super(currentSettlement, combatGroup, engineService);
+    public ReturnHomeMissionStrategy(SettlementStateDTO state, CombatGroupEntity combatGroup, EngineService engineService) {
+        super(state, combatGroup, engineService);
     }
 
     @Override
@@ -20,10 +20,12 @@ public class ReturnHomeMissionStrategy extends MissionStrategy{
         // add all returned units to village army
         // will be updated while recalculating attack or raid
         var combatGroupUpdated = engineService
-                .getCombatGroupRepository().findById(combatGroup.getId()).orElseThrow();
-        currentSettlement.manipulateHomeLegion(combatGroupUpdated.getUnits());
-        //add all plundered resources to storage
-        currentSettlement.manipulateGoods(EManipulation.ADD, combatGroupUpdated.getPlunder());
-        engineService.getCombatGroupRepository().deleteById(combatGroupUpdated.getId());
+                .getCombatGroupRepository().findById(combatGroup.getId());
+        if (combatGroupUpdated.isPresent()){
+            state.getSettlementEntity().manipulateHomeLegion(combatGroupUpdated.get().getUnits());
+            //add all plundered resources to storage
+            state.getSettlementEntity().manipulateGoods(EManipulation.ADD, combatGroupUpdated.get().getPlunder());
+            engineService.getCombatGroupRepository().deleteById(combatGroupUpdated.get().getId());
+        }
     }
 }

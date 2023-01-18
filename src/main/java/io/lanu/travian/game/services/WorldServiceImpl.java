@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,6 +59,7 @@ public class WorldServiceImpl implements WorldService{
                     .collect(Collectors.toList());
             var emptySpot = emptySpots.get(getRandomNumber(0, emptySpots.size()));
             var entity = VillageEntityFactory.getVillageByType(SettlementType.OASIS, subType);
+            entity.setAccountId("nature");
             entity.setX(emptySpot.getCorX());
             entity.setY(emptySpot.getCorY());
             entity.setName(subType.toString());

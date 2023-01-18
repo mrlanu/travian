@@ -1,5 +1,7 @@
 package io.lanu.travian.game.controllers;
 
+import io.lanu.travian.enums.ECombatGroupMission;
+import io.lanu.travian.game.models.battle.*;
 import io.lanu.travian.game.models.requests.CombatGroupSendingRequest;
 import io.lanu.travian.game.models.requests.OrderCombatUnitRequest;
 import io.lanu.travian.game.models.responses.CombatGroupContractResponse;
@@ -30,8 +32,8 @@ public class MilitaryController {
 
     @GetMapping("/{villageId}/military/researched")
     public List<CombatUnitResponse> getAllResearchedUnits(@PathVariable String villageId){
-        state.updateParticularSettlementState(villageId, LocalDateTime.now());
-        return militaryService.getAllResearchedUnits(villageId);
+        var currentState = state.updateParticularSettlementState(villageId, LocalDateTime.now());
+        return militaryService.getAllResearchedUnits(villageId, currentState.getSettlementEntity().getNation());
     }
 
     @PostMapping("/{settlementId}/check-troops-send")
@@ -56,6 +58,49 @@ public class MilitaryController {
                                            @RequestBody OrderCombatUnitRequest orderCombatUnitRequest) {
         var currentState = militaryService.orderCombatUnits(orderCombatUnitRequest, settlementId);
         return settlementService.getSettlementById(currentState);
+    }
+
+    @GetMapping("/battle")
+    public void battle(){
+        var battle = new Battle();
+
+        var battleField = BattleField.builder()
+                .tribe(0)
+                .population(100)
+                .wall(new Wall(0, 1))
+                .build();
+
+        var off = Army.builder()
+                .side(Army.ESide.OFF)
+                .population(100)
+                .units(UnitsConst.UNITS.get(2))
+                .numbers(List.of(11,0,0,0,0,0,0,0,0,0))
+                .mission(ECombatGroupMission.ATTACK)
+                .build();
+
+        var def = Army.builder()
+                .side(Army.ESide.DEF)
+                .population(100)
+                .units(UnitsConst.UNITS.get(0))
+                .numbers(List.of(5,0,0,0,0,0,0,0,0,0))
+                .build();
+
+        var offScan = Army.builder()
+                .side(Army.ESide.OFF)
+                .population(100)
+                .units(UnitsConst.UNITS.get(0))
+                .numbers(List.of(0,0,0,100,0,0,0,0,0,0))
+                .build();
+
+        var defScan = Army.builder()
+                .side(Army.ESide.DEF)
+                .population(100)
+                .units(UnitsConst.UNITS.get(2))
+                .numbers(List.of(0,0,100,0,0,0,0,0,0,0))
+                .build();
+
+        battle.perform(battleField, List.of(def, off));
+        System.out.println("Finale grande");
     }
 
 }
