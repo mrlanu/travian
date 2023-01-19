@@ -65,7 +65,7 @@ public class MilitaryController {
         var battle = new Battle();
 
         var battleField = BattleField.builder()
-                .tribe(0)
+                .tribe(2)
                 .population(100)
                 .wall(new Wall(0, 1))
                 .build();
@@ -74,15 +74,15 @@ public class MilitaryController {
                 .side(Army.ESide.OFF)
                 .population(100)
                 .units(UnitsConst.UNITS.get(2))
-                .numbers(List.of(11,0,0,0,0,0,0,0,0,0))
-                .mission(ECombatGroupMission.ATTACK)
+                .numbers(List.of(110,0,0,0,0,0,0,0,0,0))
+                .mission(ECombatGroupMission.RAID)
                 .build();
 
         var def = Army.builder()
                 .side(Army.ESide.DEF)
                 .population(100)
-                .units(UnitsConst.UNITS.get(0))
-                .numbers(List.of(5,0,0,0,0,0,0,0,0,0))
+                .units(UnitsConst.UNITS.get(2))
+                .numbers(List.of(50,0,0,0,0,0,0,0,0,0))
                 .build();
 
         var offScan = Army.builder()

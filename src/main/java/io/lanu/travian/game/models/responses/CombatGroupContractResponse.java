@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -20,7 +21,7 @@ public class CombatGroupContractResponse {
     private String targetVillageName;
     private String targetPlayerName;
     private int[] targetVillageCoordinates;
-    private int[] units;
+    private List<Integer> units;
     private LocalDateTime arrivalTime;
     private int duration;
 }

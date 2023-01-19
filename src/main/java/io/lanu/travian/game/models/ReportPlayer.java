@@ -17,8 +17,8 @@ public class ReportPlayer {
     private String accountId;
     private String playerName;
     private ENation nation;
-    private int[] troops;
-    private int[] dead;
+    private List<Integer> troops;
+    private List<Integer> dead;
     private List<BigDecimal> bounty;
     private int carry;
 }

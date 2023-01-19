@@ -18,7 +18,7 @@ public class DeathEvent implements Event {
     public void execute(SettlementStateDTO state) {
         // dummy implementation
         var army = state.getSettlementEntity().getHomeLegion();
-        army[0] = army[0] - 1;
+        army.set(0, army.get(0) - 1);
         var storage = state.getSettlementEntity().getStorage();
         var crop = storage.get(3);
         crop = crop.add(BigDecimal.ONE);

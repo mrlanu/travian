@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document("contracts")
 @Data
@@ -20,7 +21,7 @@ public class CombatGroupContractEntity {
     private String toAccountId;
     private ECombatGroupMission mission;
     private String targetVillageId;
-    private int[] units;
+    private List<Integer> units;
     private LocalDateTime arrivalTime;
     private int duration;
 }

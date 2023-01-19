@@ -6,6 +6,8 @@ import io.lanu.travian.enums.ENation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 public class CombatGroupView {
@@ -17,10 +19,10 @@ public class CombatGroupView {
     protected ECombatGroupLocation state;
     protected VillageBrief from;
     protected VillageBrief to;
-    protected int[] units;
+    protected List<Integer> units;
 
     public CombatGroupView(String id, ENation nation, ECombatGroupMission mission, boolean move, ECombatGroupLocation state,
-                           VillageBrief origin, VillageBrief target, int[] units) {
+                           VillageBrief origin, VillageBrief target, List<Integer> units) {
         this.id = id;
         this.nation = nation;
         this.mission = mission;

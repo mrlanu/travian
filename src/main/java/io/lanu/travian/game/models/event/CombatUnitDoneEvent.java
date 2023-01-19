@@ -16,7 +16,7 @@ public class CombatUnitDoneEvent implements Event{
     @Override
     public void execute(SettlementStateDTO state) {
         var homeLeg = state.getSettlementEntity().getHomeLegion();
-        homeLeg[0] = homeLeg[0] + 1;
+        homeLeg.set(0, homeLeg.get(0) + 1);
     }
 
     @Override

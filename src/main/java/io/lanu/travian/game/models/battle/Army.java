@@ -92,10 +92,19 @@ public class Army {
         return result;
     }
 
-    public void applyLosses(double losses) {
+    public void applyLosses(double losses, BattleResult battleResult) {
+        List<Integer> unitsBefore = new ArrayList<>();
+        List<Integer> casualties = new ArrayList<>();
         numbers = numbers.stream()
-                .map(n -> (int) Math.round(n * (1 - losses)))
+                .map(n -> {
+                    unitsBefore.add(n);
+                    var after = (int) Math.round(n * (1 - losses));
+                    casualties.add(n - after);
+                    return after;
+                })
                 .collect(Collectors.toList());
+        battleResult.getUnitsBeforeBattle().add(unitsBefore);
+        battleResult.getCasualties().add(casualties);
     }
 
     public int[] rams() {

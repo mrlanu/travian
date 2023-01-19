@@ -57,7 +57,7 @@ public class MilitaryServiceImpl implements MilitaryService {
         var arrivalTime = LocalDateTime.now().plusSeconds(duration);
         var combatGroupContractEntity = combatGroupContractRepository
                 .save(new CombatGroupContractEntity(null, settlementState.getId(), targetState.getAccountId(), combatGroupSendingRequest.getMission(),
-                targetState.getId(), combatGroupSendingRequest.getWaves().get(0).getTroops(), arrivalTime, duration));
+                targetState.getId(), combatGroupSendingRequest.getWaves().get(0).getUnits(), arrivalTime, duration));
 
         return CombatGroupContractResponse.builder()
                 .savedEntityId(combatGroupContractEntity.getId())
@@ -66,7 +66,7 @@ public class MilitaryServiceImpl implements MilitaryService {
                 .targetVillageName(targetState.getName())
                 .targetPlayerName(targetState.getOwnerUserName())
                 .targetVillageCoordinates(new int[]{targetState.getX(), targetState.getY()})
-                .units(combatGroupSendingRequest.getWaves().get(0).getTroops()) //delete ?
+                .units(combatGroupSendingRequest.getWaves().get(0).getUnits()) //delete ?
                 .arrivalTime(arrivalTime)
                 .duration(duration)
                 .build();
@@ -146,8 +146,8 @@ public class MilitaryServiceImpl implements MilitaryService {
         var homeLegion = settlementState.getSettlementEntity().getHomeLegion();
         var contractEntity = combatGroupContractRepository.findById(contractId).orElseThrow();
         var attackingUnits = contractEntity.getUnits();
-        for (int i = 0; i < homeLegion.length; i++) {
-            homeLegion[i] = homeLegion[i] - attackingUnits[i];
+        for (int i = 0; i < homeLegion.size(); i++) {
+            homeLegion.set(i, homeLegion.get(i) - attackingUnits.get(i));
         }
 
         var combatGroup = CombatGroupEntity.builder()

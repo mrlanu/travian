@@ -47,7 +47,7 @@ public class SettlementEntity {
     private int approval;
     private Map<Integer, BuildModel> buildings;
     private List<BigDecimal> storage;
-    private int[] homeLegion;
+    private List<Integer> homeLegion;
     private List<ConstructionEventEntity> constructionEventList;
     private List<OrderCombatUnitEntity> combatUnitOrders;
     //@LastModifiedDate
@@ -66,7 +66,7 @@ public class SettlementEntity {
 
     public BigDecimal calculateEatPerHour() {
         var eatExpenses = IntStream.range(0, 10)
-                .mapToObj(i -> UnitsConst.UNITS.get(nation.ordinal()).get(i).getUpKeep() * homeLegion[i])
+                .mapToObj(i -> UnitsConst.UNITS.get(nation.ordinal()).get(i).getUpKeep() * homeLegion.get(i))
                 .reduce(0, Integer::sum);
         return BigDecimal.valueOf(eatExpenses);
     }
@@ -113,9 +113,9 @@ public class SettlementEntity {
         }
     }
 
-    public void manipulateHomeLegion(int[] units){
-        for (int i = 0; i < homeLegion.length; i++){
-            homeLegion[i] = homeLegion[i] + units[i];
+    public void manipulateHomeLegion(List<Integer> units){
+        for (int i = 0; i < homeLegion.size(); i++){
+            homeLegion.set(i, homeLegion.get(i) + units.get(i));
         }
     }
 

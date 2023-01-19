@@ -33,15 +33,15 @@ public class Battle {
             } else {
                 offArmy = side;
                 wave();
-                defArmies.forEach(d -> d.applyLosses(battleResult.getDefLosses()));
-                offArmy.applyLosses(battleResult.getOffLoses());
+                defArmies.forEach(d -> d.applyLosses(battleResult.getDefLosses(), battleResult));
+                offArmy.applyLosses(battleResult.getOffLoses(), battleResult);
                 results.add(battleResult);
             }
         }
         return results;
     }
     private void wave() {
-        battleResult = new BattleResult(0, 0, new ArrayList<>(), battleField.getWall().getLevel());
+        battleResult = new BattleResult(0, 0, battleField.getWall().getLevel());
         battleState.setWall(battleField.getWall().getLevel());
         if (offArmy.isScan()){
             scan();

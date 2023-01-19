@@ -20,7 +20,7 @@ public class CombatGroupMovedView extends CombatGroupView {
 
     public CombatGroupMovedView(String id, ENation nation, ECombatGroupMission mission, boolean move, ECombatGroupLocation state,
                                 VillageBrief from, VillageBrief to,
-                                int[] units, List<BigDecimal> plunder, LocalDateTime executionTime, int duration) {
+                                List<Integer> units, List<BigDecimal> plunder, LocalDateTime executionTime, int duration) {
         super(id, nation, mission, move, state, from, to, units);
         this.to = to;
         this.plunder = plunder;

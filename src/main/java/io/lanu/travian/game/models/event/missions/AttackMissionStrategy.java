@@ -42,7 +42,6 @@ public class AttackMissionStrategy extends MissionStrategy {
 
     private void executeBattle() {
         var battle = new Battle();
-        List<CombatGroupEntity> sidesEntity = new ArrayList<>();
         List<Army> sidesArmy = new ArrayList<>();
 
         var attackingSettlement = engineService.getSettlementRepository()
@@ -57,73 +56,50 @@ public class AttackMissionStrategy extends MissionStrategy {
                 .side(Army.ESide.OFF)
                 .population(attackingSettlement.getPopulation())
                 .units(UnitsConst.UNITS.get(attackingSettlement.getNation().ordinal()))
-                .numbers(Arrays.stream(combatGroup.getUnits()).boxed().collect(Collectors.toList()))
+                .numbers(combatGroup.getUnits())
                 .mission(combatGroup.getMission())
                 .build();
 
-        var ownDefEntity = CombatGroupEntity.builder()
-                .ownerNation(state.getSettlementEntity().getNation())
-                .units(state.getSettlementEntity().getHomeLegion())
-                .build();
         var ownDef = Army.builder()
                 .side(Army.ESide.DEF)
                 .population(state.getSettlementEntity().getPopulation())
                 .units(UnitsConst.UNITS.get(state.getSettlementEntity().getNation().ordinal()))
-                .numbers(Arrays.stream(state.getSettlementEntity().getHomeLegion()).boxed().collect(Collectors.toList()))
+                .numbers(state.getSettlementEntity().getHomeLegion())
                 .build();
 
-        var defFromOthers = state.getCombatGroupsInSettlement().stream()
+        var reinforcementEntities = engineService.getCombatGroupRepository()
+                .getAllByToSettlementIdAndMoved(state.getSettlementEntity().getId(), false);
+
+        var reinforcementArmies = reinforcementEntities.stream()
                 .map(g -> Army.builder()
                         .side(Army.ESide.DEF)
                         .population(100)
                         .units(UnitsConst.UNITS.get(g.getOwnerNation().ordinal()))
-                        .numbers(Arrays.stream(g.getUnits()).boxed().collect(Collectors.toList()))
+                        .numbers(g.getUnits())
                         .build()).collect(Collectors.toList());
-
-        //attacker
-        sidesEntity.add(combatGroup);
-        //defenders
-        sidesEntity.add(ownDefEntity);
-        sidesEntity.addAll(state.getCombatGroupsInSettlement());
 
         //defenders
         sidesArmy.add(ownDef);
-        sidesArmy.addAll(defFromOthers);
+        sidesArmy.addAll(reinforcementArmies);
         //attacker
         sidesArmy.add(off);
 
-        var unitsBefore = sidesEntity.stream()
-                .map(cG -> cG.getUnits().clone())
-                .collect(Collectors.toList());
-
-        battle.perform(battleField, sidesArmy);
-        applyLosses(sidesEntity, battle.getBattleResult());
-
-        var casualties = new ArrayList<int[]>();
-        for (int i = 0; i < sidesEntity.size(); i++){
-            int[] cas = new int[10];
-            int[] unitsBf = unitsBefore.get(i);
-            int[] unitsAfter = sidesEntity.get(i).getUnits();
-            for (int j = 0; j < cas.length; j++){
-                cas[j] = unitsBf[j] - unitsAfter[j];
-            }
-            casualties.add(cas);
-        }
-
-        //if attacker hasn't been destroyed completely
-        if (Arrays.stream(combatGroup.getUnits()).sum() > 0){
-            returnOff(attackingSettlement, unitsBefore, casualties);
-        }else {
-            engineService.getCombatGroupRepository().deleteById(combatGroup.getId());
-            createReports(attackingSettlement, unitsBefore, casualties,
-                    Arrays.asList(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
-        }
+        var battleResults = battle.perform(battleField, sidesArmy);
+        var plunder = returnOff(sidesArmy.get(sidesArmy.size() - 1));
+        sidesArmy.remove(sidesArmy.size() - 1);
+        updateDef(sidesArmy, reinforcementEntities);
+        createReports(attackingSettlement, reinforcementEntities, battleResults.get(0), plunder);
     }
 
-    private void returnOff(SettlementEntity attackingSettlement, List<int[]> unitsBefore, List<int[]> casualtiesUnits) {
+    private List<BigDecimal> returnOff(Army offArmy) {
+        //off has been completely destroyed
+        if (offArmy.getNumbers().stream().reduce(0, Integer::sum) == 0){
+            engineService.getCombatGroupRepository().deleteById(combatGroup.getId());
+            return Arrays.asList(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        }
         List<BigDecimal> plunder = calculatePlunder();
-        createReports(attackingSettlement, unitsBefore, casualtiesUnits, plunder);
         subtractStolenResources(plunder);
+        combatGroup.setUnits(offArmy.getNumbers());
         combatGroup.setPlunder(plunder);
         combatGroup.setMission(ECombatGroupMission.BACK);
         //swap
@@ -134,8 +110,23 @@ public class AttackMissionStrategy extends MissionStrategy {
         combatGroup.setFromAccountId(combatGroup.getToAccountId());
         combatGroup.setToAccountId(tempAcc);
         combatGroup.setExecutionTime(combatGroup.getExecutionTime().plusSeconds(combatGroup.getDuration()));
-
         engineService.getCombatGroupRepository().save(combatGroup);
+
+        return plunder;
+    }
+
+    private void updateDef(List<Army> sidesArmy, List<CombatGroupEntity> defEntities) {
+        state.getSettlementEntity().setHomeLegion(sidesArmy.get(0).getNumbers());
+        // start from 1 because there is off army on the front in sidesArmy
+        for (int i = 1; i < sidesArmy.size(); i++){
+            var currentDef = defEntities.get(i - 1);
+            if (sidesArmy.get(i).getNumbers().stream().reduce(0, Integer::sum) == 0){
+                engineService.getCombatGroupRepository().deleteById(currentDef.getId());
+                continue;
+            }
+            currentDef.setUnits(sidesArmy.get(i).getNumbers());
+            engineService.getCombatGroupRepository().save(currentDef);
+        }
     }
 
     private void subtractStolenResources(List<BigDecimal> plunder) {
@@ -169,45 +160,45 @@ public class AttackMissionStrategy extends MissionStrategy {
         return Arrays.asList(wood, clay, iron, crop);
     }
 
-    private void applyLosses(List<CombatGroupEntity> combatGroups, BattleResult battleResult) {
-        var offUnits = combatGroups.get(0).getUnits();
-        for (int i = 0; i < offUnits.length; i++){
-            offUnits[i] = (int) Math.round(offUnits[i] * (1 - battleResult.getOffLoses()));
-        }
-        combatGroups.stream().skip(1).forEachOrdered(cG -> {
-            var defUnits = cG.getUnits();
-            for (int i = 0; i < defUnits.length; i++){
-                defUnits[i] = (int) Math.round(defUnits[i] * (1 - battleResult.getDefLosses()));
-            }
-        });
-    }
-
     private void createReports(SettlementEntity attacker,
-                               List<int[]> unitsBefore,
-                               List<int[]> casualtiesUnits,
+                               List<CombatGroupEntity> reinforcement,
+                               BattleResult battleResult,
                                List<BigDecimal> plunder) {
-        var currentSettlement = state.getSettlementEntity();
+        var battleField = state.getSettlementEntity();
         int carry = calculateCarry();
+        List<ReportPlayerEntity> defenders = new ArrayList<>();
+        //own def
+        defenders.add(ReportPlayerEntity.builder()
+                .settlementId(battleField.getId())
+                .nation(battleField.getNation())
+                .troops(battleResult.getUnitsBeforeBattle().get(0))
+                .dead(battleResult.getCasualties().get(0))
+                .build());
+        for (int i = 0; i < reinforcement.size(); i++){
+            var current = reinforcement.get(i);
+            defenders.add(ReportPlayerEntity.builder()
+                    .settlementId(current.getFromSettlementId())
+                    .nation(current.getOwnerNation())
+                    .troops(battleResult.getUnitsBeforeBattle().get(i + 1))
+                    .dead(battleResult.getCasualties().get(i + 1))
+                    .build());
+        }
         var report = new ReportEntity(
                 attacker.getAccountId(),
                 combatGroup.getMission(),
                 ReportPlayerEntity.builder()
+                        //here is to instead of from because swap was apply in the returnOff method
                         .settlementId(combatGroup.getFromSettlementId())
                         .nation(combatGroup.getOwnerNation())
-                        .troops(unitsBefore.get(0))
-                        .dead(casualtiesUnits.get(0))
+                        .troops(battleResult.getUnitsBeforeBattle().get(battleResult.getUnitsBeforeBattle().size() - 1))
+                        .dead(battleResult.getCasualties().get(battleResult.getCasualties().size() - 1))
                         .bounty(plunder)
                         .carry(carry)
                         .build(),
-                ReportPlayerEntity.builder()
-                        .settlementId(currentSettlement.getId())
-                        .nation(currentSettlement.getNation())
-                        .troops(unitsBefore.get(1))
-                        .dead(casualtiesUnits.get(1))
-                        .build(), combatGroup.getExecutionTime());
+                defenders, combatGroup.getExecutionTime());
         var repo = engineService.getReportRepository();
         repo.save(report);
-        report.setReportOwner(currentSettlement.getAccountId());
+        report.setReportOwner(battleField.getAccountId());
         report.setId(null);
         repo.save(report);
     }
@@ -215,8 +206,8 @@ public class AttackMissionStrategy extends MissionStrategy {
     private int calculateCarry() {
         var units = UnitsConst.UNITS.get(combatGroup.getOwnerNation().ordinal());
         var carry = 0;
-        for (int i = 0; i < combatGroup.getUnits().length; i++){
-            carry += combatGroup.getUnits()[i] * units.get(i).getCapacity();
+        for (int i = 0; i < combatGroup.getUnits().size(); i++){
+            carry += combatGroup.getUnits().get(i) * units.get(i).getCapacity();
         }
         return carry;
     }

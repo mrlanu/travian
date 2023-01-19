@@ -321,7 +321,7 @@ public class EngineServiceImpl implements EngineService {
                         if (cG.getToSettlementId().equals(settlement.getId())) {
                             nation = settlement.getNation();
                         }
-                        return new CombatGroupMovedView(cG.getId(), nation, cG.getMission(), true, null,
+                        return new CombatGroupMovedView(cG.getId(), nation, cG.getMission(),true, null,
                                 new VillageBrief(from.getId(), from.getName(), from.getOwnerUserName(), new int[]{from.getX(), from.getY()}),
                                 new VillageBrief(to.getId(), to.getName(), to.getOwnerUserName(), new int[]{to.getX(), to.getY()}),
                                 cG.getUnits(), cG.getPlunder(), cG.getExecutionTime(),

@@ -15,8 +15,8 @@ import java.util.List;
 public class ReportPlayerEntity {
     private String settlementId;
     private ENation nation;
-    private int[] troops;
-    private int[] dead;
+    private List<Integer> troops;
+    private List<Integer> dead;
     @Builder.Default
     private List<BigDecimal> bounty = Arrays
             .asList(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);

@@ -4,12 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class AttackWaveRequest {
 
-    private int[] troops;
+    private List<Integer> units;
     private int firstTarget;
     private int secondTarget;
     private String firstTargetText;

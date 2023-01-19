@@ -54,4 +54,12 @@ public class VillageController {
         settlementRepository.save(s);
     }
 
+    @GetMapping("/{settlementId}/add-army/{kind}/{amount}")
+    public void cheatArmy(@PathVariable String settlementId, @PathVariable int kind, @PathVariable int amount) {
+        var s = settlementRepository.findById(settlementId).orElseThrow();
+        var homeLegion = s.getHomeLegion();
+        homeLegion.set(kind, amount);
+        settlementRepository.save(s);
+    }
+
 }

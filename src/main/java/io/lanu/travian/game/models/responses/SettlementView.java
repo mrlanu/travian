@@ -47,7 +47,7 @@ public class SettlementView {
     private BigDecimal warehouseCapacity;
     private BigDecimal granaryCapacity;
     private Map<String, Integer> homeLegion;
-    private int[] homeUnits;
+    private List<Integer> homeUnits;
     private List<BigDecimal> producePerHour;
     private List<ConstructionEventView> eventsList;
     private List<CombatUnitOrderView> unitOrders;
@@ -82,15 +82,15 @@ public class SettlementView {
         this.unitOrders = this.buildUnitOrdersView(settlementEntity.getCombatUnitOrders(), currentState.getSettlementEntity().getNation());
     }
 
-    private Map<String, Integer> mapHomeLegion(int[] homeLegion, ENation nation, List<CombatGroupEntity> militariesInVillage) {
+    private Map<String, Integer> mapHomeLegion(List<Integer> homeLegion, ENation nation, List<CombatGroupEntity> militariesInVillage) {
         var result = new HashMap<String, Integer>();
-        for (int i = 0; i < homeLegion.length; i++){
-            result.put(UnitsConst.UNITS.get(nation.ordinal()).get(i).getName(), homeLegion[i]);
+        for (int i = 0; i < homeLegion.size(); i++){
+            result.put(UnitsConst.UNITS.get(nation.ordinal()).get(i).getName(), homeLegion.get(i));
         }
         militariesInVillage.forEach(unit -> {
-            for (int i = 0; i < unit.getUnits().length; i++){
+            for (int i = 0; i < unit.getUnits().size(); i++){
                 var key = UnitsConst.UNITS.get(unit.getOwnerNation().ordinal()).get(i).getName();
-                result.put(key, result.getOrDefault(key, 0) + unit.getUnits()[i]);
+                result.put(key, result.getOrDefault(key, 0) + unit.getUnits().get(i));
             }
         });
         return result;

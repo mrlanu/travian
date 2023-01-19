@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -16,8 +17,8 @@ public class ReportResponse {
     //since we create two reports (one for from, and one for to )
     private String reportOwner;
     private ECombatGroupMission mission;
-    private ReportPlayer from;
-    private ReportPlayer to;
+    private ReportPlayer off;
+    private List<ReportPlayer> def;
     private LocalDateTime dateTime;
     private boolean read;
     private boolean failed;

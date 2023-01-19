@@ -58,7 +58,7 @@ public class VillageEntityFactory {
                             Map.entry(38, new BuildModel(BuildingsID.EMPTY, 0)),
                             Map.entry(39, new BuildModel(BuildingsID.EMPTY, 0))),
                     Arrays.asList(BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000)),
-                    new int[]{50, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                    Arrays.asList(50, 0, 0, 0, 0, 0, 0, 0, 0, 0),
                     new ArrayList<>(),
                     new ArrayList<>(),
                     null);
@@ -106,7 +106,7 @@ public class VillageEntityFactory {
                             Map.entry(38, new BuildModel(BuildingsID.EMPTY, 0)),
                             Map.entry(39, new BuildModel(BuildingsID.EMPTY, 0))),
                     Arrays.asList(BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000), BigDecimal.valueOf(1000)),
-                    new int[]{5, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                    Arrays.asList(5, 0, 0, 0, 0, 0, 0, 0, 0, 0),
                     new ArrayList<>(),
                     new ArrayList<>(),
                     null);

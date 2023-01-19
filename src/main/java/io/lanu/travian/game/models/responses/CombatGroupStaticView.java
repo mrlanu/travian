@@ -6,6 +6,8 @@ import io.lanu.travian.enums.ENation;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class CombatGroupStaticView extends CombatGroupView {
@@ -14,7 +16,7 @@ public class CombatGroupStaticView extends CombatGroupView {
 
     public CombatGroupStaticView(String id, ENation nation, ECombatGroupMission mission, boolean move, ECombatGroupLocation state,
                                  VillageBrief from, VillageBrief to,
-                                 int[] units, String currentLocationVillageId, int eatExpenses) {
+                                 List<Integer> units, String currentLocationVillageId, int eatExpenses) {
         super(id, nation, mission, move, state, from, to, units);
         this.currentLocationVillageId = currentLocationVillageId;
         this.eatExpenses = eatExpenses;

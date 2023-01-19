@@ -26,6 +26,6 @@ public class CombatGroupEntity {
     private LocalDateTime executionTime;
     private int duration;
     private ECombatGroupMission mission;
-    private int[] units;
+    private List<Integer> units;
     private List<BigDecimal> plunder;
 }

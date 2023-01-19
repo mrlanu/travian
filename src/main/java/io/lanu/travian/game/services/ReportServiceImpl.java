@@ -1,7 +1,6 @@
 package io.lanu.travian.game.services;
 
 import io.lanu.travian.enums.ECombatGroupMission;
-import io.lanu.travian.enums.ENation;
 import io.lanu.travian.enums.SettlementType;
 import io.lanu.travian.game.entities.ReportEntity;
 import io.lanu.travian.game.entities.SettlementEntity;
@@ -14,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,39 +40,53 @@ public class ReportServiceImpl implements ReportService{
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String accountId = authentication.getName();
         var entity = reportRepository.findById(reportId).orElseThrow();
+        var offSettlement = settlementRepository
+                .findById(entity.getOff().getSettlementId()).orElseThrow();
         boolean failed = false;
-        var offSum = Arrays.stream(entity.getFrom().getTroops()).sum();
-        var deadSum = Arrays.stream(entity.getFrom().getDead()).sum();
-        if (accountId.equals(entity.getReportOwner()) && offSum == deadSum){
+        var offSum = entity.getOff().getTroops().stream().reduce(0, Integer::sum);
+        var deadSum = entity.getOff().getDead().stream().reduce(0, Integer::sum);
+        if (accountId.equals(offSettlement.getAccountId()) && offSum.equals(deadSum)){
             failed = true;
         }
 
-        var fromSettlement = settlementRepository.findById(entity.getFrom().getSettlementId()).orElseThrow();
-        var toSettlement = settlementRepository.findById(entity.getTo().getSettlementId()).orElseThrow();
-
+        boolean finalFailed = failed;
         var result = new ReportResponse(entity.getId(), entity.getReportOwner(), entity.getMission(),
                 ReportPlayer.builder()
-                        .settlementId(entity.getFrom().getSettlementId())
-                        .settlementName(fromSettlement.getName())
-                        .accountId(fromSettlement.getAccountId())
-                        .playerName(fromSettlement.getOwnerUserName())
-                        .nation(entity.getFrom().getNation())
-                        .troops(entity.getFrom().getTroops())
-                        .dead(entity.getFrom().getDead())
-                        .bounty(entity.getFrom().getBounty())
-                        .carry(entity.getFrom().getCarry())
+                        .settlementId(entity.getOff().getSettlementId())
+                        .settlementName(offSettlement.getName())
+                        .accountId(offSettlement.getAccountId())
+                        .playerName(offSettlement.getOwnerUserName())
+                        .nation(entity.getOff().getNation())
+                        .troops(entity.getOff().getTroops())
+                        .dead(entity.getOff().getDead())
+                        .bounty(entity.getOff().getBounty())
+                        .carry(entity.getOff().getCarry())
                         .build(),
-                ReportPlayer.builder()
-                        .settlementId(entity.getTo().getSettlementId())
+                entity.getDef().stream().map(rE -> {
+                    var settlement = settlementRepository
+                            .findById(rE.getSettlementId()).orElseThrow();
+                    return ReportPlayer.builder()
+                        .settlementId(rE.getSettlementId())
+                        .settlementName(settlement.getName())
+                        .accountId(settlement.getAccountId())
+                        .playerName(settlement.getOwnerUserName())
+                        .nation(rE.getNation())
+                        .troops(finalFailed ? Arrays.asList(0,0,0,0,0,0,0,0,0,0) : rE.getTroops())
+                        .dead(finalFailed ? Arrays.asList(0,0,0,0,0,0,0,0,0,0) : rE.getDead())
+                        .bounty(rE.getBounty())
+                        .carry(rE.getCarry())
+                        .build();}).collect(Collectors.toList()),
+                /*ReportPlayer.builder()
+                        .settlementId(entity.getDef().get(0).getSettlementId())
                         .settlementName(toSettlement.getName())
                         .accountId(toSettlement.getAccountId())
                         .playerName(toSettlement.getOwnerUserName())
-                        .nation(entity.getTo().getNation())
-                        .troops(failed ? new int[10] :entity.getTo().getTroops())
-                        .dead(failed ? new int[10] : entity.getTo().getDead())
-                        .bounty(entity.getTo().getBounty())
-                        .carry(entity.getTo().getCarry())
-                        .build(),
+                        .nation(entity.getDef().get(0).getNation())
+                        .troops(failed ? Arrays.asList(0,0,0,0,0,0,0,0,0,0) :entity.getDef().get(0).getTroops())
+                        .dead(failed ? Arrays.asList(0,0,0,0,0,0,0,0,0,0) : entity.getDef().get(0).getDead())
+                        .bounty(entity.getDef().get(0).getBounty())
+                        .carry(entity.getDef().get(0).getCarry())
+                        .build(),*/
                 entity.getDateTime(), entity.isRead(), failed);
         return result;
     }
@@ -101,16 +113,16 @@ public class ReportServiceImpl implements ReportService{
     private ReportBriefResponse buildBrief(Map<String, SettlementEntity> cache, ReportEntity reportEntity){
         SettlementEntity from;
         SettlementEntity to;
-        if (cache.containsKey(reportEntity.getFrom().getSettlementId())) {
-            from = cache.get(reportEntity.getFrom().getSettlementId());
+        if (cache.containsKey(reportEntity.getOff().getSettlementId())) {
+            from = cache.get(reportEntity.getOff().getSettlementId());
         } else {
-            from = settlementRepository.findById(reportEntity.getFrom().getSettlementId()).orElseThrow();
+            from = settlementRepository.findById(reportEntity.getOff().getSettlementId()).orElseThrow();
             cache.put(from.getId(), from);
         }
-        if (cache.containsKey(reportEntity.getTo().getSettlementId())) {
-            to = cache.get(reportEntity.getTo().getSettlementId());
+        if (cache.containsKey(reportEntity.getDef().get(0).getSettlementId())) {
+            to = cache.get(reportEntity.getDef().get(0).getSettlementId());
         } else {
-            to = settlementRepository.findById(reportEntity.getTo().getSettlementId()).orElseThrow();
+            to = settlementRepository.findById(reportEntity.getDef().get(0).getSettlementId()).orElseThrow();
             cache.put(to.getId(), to);
         }
         var briefSubject = new StringBuilder();
